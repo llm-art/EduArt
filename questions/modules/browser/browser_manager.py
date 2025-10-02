@@ -6,6 +6,7 @@ This module handles browser setup, configuration, and lifecycle management.
 
 from typing import Optional, Dict, Any
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+from pathlib import Path
 
 
 class BrowserManager:
@@ -18,11 +19,12 @@ class BrowserManager:
         self.page: Optional[Page] = None
     
     async def setup_browser(
-        self, 
+        self,
         headless: bool = False,
         viewport: Dict[str, int] = None,
         user_agent: str = None,
-        timeout: int = 10000
+        timeout: int = 10000,
+        state_file: str = None
     ) -> Page:
         """
         Initialize browser and create a new page context.
@@ -32,6 +34,7 @@ class BrowserManager:
             viewport: Browser viewport dimensions
             user_agent: Custom user agent string
             timeout: Default timeout for page operations
+            state_file: Path to browser state file for session persistence
             
         Returns:
             The created page instance
@@ -57,10 +60,17 @@ class BrowserManager:
         )
         
         # Create context with specified settings
-        self.context = await self.browser.new_context(
-            viewport=viewport,
-            user_agent=user_agent
-        )
+        context_options = {
+            'viewport': viewport,
+            'user_agent': user_agent
+        }
+        
+        # Load saved state if available
+        if state_file and Path(state_file).exists():
+            print(f"Loading browser state from: {state_file}")
+            context_options['storage_state'] = state_file
+        
+        self.context = await self.browser.new_context(**context_options)
         
         # Create page
         self.page = await self.context.new_page()
@@ -230,6 +240,28 @@ class BrowserManager:
     def is_initialized(self) -> bool:
         """Check if the browser is initialized and ready."""
         return self.page is not None
+    
+    async def save_state(self, state_file: str) -> None:
+        """
+        Save current browser context state to file.
+        
+        Args:
+            state_file: Path to save the browser state
+        """
+        if not self.context:
+            raise RuntimeError("Browser context not initialized. Call setup_browser() first.")
+        
+        try:
+            # Ensure directory exists
+            state_path = Path(state_file)
+            state_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Save the state
+            await self.context.storage_state(path=state_file)
+            print(f"✓ Browser state saved to: {state_file}")
+        except Exception as e:
+            print(f"Error saving browser state: {e}")
+            raise
     
     async def __aenter__(self):
         """Async context manager entry."""

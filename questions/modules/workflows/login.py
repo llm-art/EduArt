@@ -22,13 +22,85 @@ class LoginWorkflow:
         self.interactions = InteractionHandler(page)
         self.selectors = SelectorStrategies()
     
-    async def perform_complete_login(self) -> bool:
+    async def is_logged_in(self) -> bool:
         """
-        Perform the complete login process.
+        Check if user is already logged in.
         
+        Returns:
+            True if already logged in, False otherwise
+        """
+        try:
+            print("Checking login status...")
+            
+            # Wait a moment for page to load
+            await self.page.wait_for_timeout(500)
+            
+            # Quick check for obvious login indicators first
+            quick_success_indicators = [
+                '.user-menu',
+                '.logout-btn',
+                'button:has-text("Esci")'
+            ]
+            
+            for indicator in quick_success_indicators:
+                try:
+                    element = await self.page.wait_for_selector(indicator, timeout=1000)
+                    if element and await element.is_visible():
+                        print(f"✓ Already logged in - found indicator: {indicator}")
+                        return True
+                except:
+                    continue
+            
+            # Check for login elements (if present, we need to login)
+            login_indicators = [
+                'button:has-text("ENTRA")',
+                'input[type="password"]'
+            ]
+            
+            for indicator in login_indicators:
+                try:
+                    element = await self.page.wait_for_selector(indicator, timeout=1000)
+                    if element and await element.is_visible():
+                        print(f"Login required - found login element: {indicator}")
+                        return False
+                except:
+                    continue
+            
+            # If no clear indicators either way, check page content
+            try:
+                page_content = await self.page.content()
+                if any(text in page_content.lower() for text in ['benvenuto', 'dashboard', 'profilo']):
+                    print("✓ Already logged in - found success text in page content")
+                    return True
+                elif any(text in page_content.lower() for text in ['entra', 'login', 'accedi']):
+                    print("Login required - found login text in page content")
+                    return False
+            except Exception as e:
+                print(f"Error checking page content: {e}")
+            
+            # Default to requiring login if unclear
+            print("Login status unclear - defaulting to login required")
+            return False
+            
+        except Exception as e:
+            print(f"Error checking login status: {e}")
+            return False
+    
+    async def perform_complete_login(self, force_login: bool = False) -> bool:
+        """
+        Perform the complete login process, with optional session check.
+        
+        Args:
+            force_login: Force login even if already logged in
+            
         Returns:
             True if successful, False otherwise
         """
+        # Check if already logged in (unless forced)
+        if not force_login and await self.is_logged_in():
+            print("✅ Already logged in, skipping login process")
+            return True
+        
         print("Starting complete login process...")
         
         try:
@@ -57,28 +129,54 @@ class LoginWorkflow:
     async def accept_cookies(self) -> bool:
         """
         Accept cookies if a cookie banner appears.
+        With session persistence, the banner might not appear.
         
         Returns:
             True if cookies were accepted or no banner found, False on error
         """
         print("Checking for cookie banner...")
         
-        cookie_selectors = self.selectors.get_selectors('COOKIE_ACCEPT')
-        
-        for selector in cookie_selectors:
-            try:
-                # Wait briefly for the element to appear
-                await self.page.wait_for_selector(selector, timeout=3000)
-                await self.page.click(selector)
-                print(f"✓ Clicked cookie acceptance button: {selector}")
-                await self.page.wait_for_timeout(1000)  # Wait for banner to disappear
+        try:
+            cookie_selectors = self.selectors.get_selectors('COOKIE_ACCEPT')
+            
+            # First, do a quick check if any cookie banner is visible
+            banner_found = False
+            for selector in cookie_selectors:
+                try:
+                    # Use a very short timeout for initial check
+                    element = await self.page.wait_for_selector(selector, timeout=1000)
+                    if element and await element.is_visible():
+                        banner_found = True
+                        break
+                except:
+                    continue
+            
+            if not banner_found:
+                print("✓ No cookie banner found - likely already accepted in previous session")
                 return True
-            except Exception as e:
-                print(f"Error with cookie selector {selector}: {e}")
-                continue
-        
-        print("No cookie banner found or already accepted")
-        return True
+            
+            # If banner found, try to accept cookies
+            for selector in cookie_selectors:
+                try:
+                    element = await self.page.wait_for_selector(selector, timeout=2000)
+                    if element and await element.is_visible():
+                        await element.click()
+                        print(f"✓ Clicked cookie acceptance button: {selector}")
+                        await self.page.wait_for_timeout(1000)  # Wait for banner to disappear
+                        return True
+                except Exception as e:
+                    print(f"Could not click cookie selector {selector}: {e}")
+                    continue
+            
+            # If we get here, banner was found but couldn't be clicked
+            print("⚠️ Cookie banner found but could not be clicked - continuing anyway")
+            return True
+            
+        except Exception as e:
+            print(f"Error in cookie acceptance process: {e}")
+            # Don't fail the entire login process due to cookie banner issues
+            print("Continuing without cookie acceptance...")
+            return True
     
     async def click_entra_button(self) -> bool:
         """

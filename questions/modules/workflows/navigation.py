@@ -23,7 +23,7 @@ class NavigationWorkflow:
     
     async def get_exercise_cards(self) -> List[Any]:
         """
-        Get all exercise cards from the page.
+        Get all exercise cards from the page, including hidden ones.
         
         Returns:
             List of exercise card elements
@@ -35,6 +35,9 @@ class NavigationWorkflow:
             await self.page.wait_for_selector('z-card', timeout=10000)
         except PlaywrightTimeoutError:
             print("Warning: z-card elements not found")
+        
+        # First, try to reveal all hidden exercises
+        await self._reveal_all_exercises()
         
         card_selectors = self.selectors.get_selectors('EXERCISE_CARDS')
         
@@ -62,6 +65,89 @@ class NavigationWorkflow:
             print(f"Fallback search failed: {e}")
         
         raise Exception("Could not find any exercise cards or Anteprima buttons")
+    
+    async def _reveal_all_exercises(self) -> None:
+        """
+        Click the 'MOSTRA ALTRE' (Show More) button to reveal all hidden exercises.
+        """
+        print("Checking for hidden exercises...")
+        
+        # Look for "MOSTRA ALTRE" or similar buttons
+        show_more_selectors = [
+            'button:has-text("MOSTRA ALTRE")',
+            'button:has-text("Mostra altre")',
+            'button:has-text("mostra altre")',
+            'button:has-text("SHOW MORE")',
+            'button:has-text("Show more")',
+            'button:has-text("Carica altri")',
+            'button:has-text("CARICA ALTRI")',
+            '[data-testid*="show-more"]',
+            '[data-testid*="load-more"]',
+            'button[class*="show-more"]',
+            'button[class*="load-more"]'
+        ]
+        
+        max_attempts = 5  # Prevent infinite loops
+        attempts = 0
+        
+        while attempts < max_attempts:
+            attempts += 1
+            found_button = False
+            
+            for selector in show_more_selectors:
+                try:
+                    # Look for the show more button
+                    show_more_button = await self.page.query_selector(selector)
+                    if show_more_button:
+                        # Check if button is visible and enabled
+                        is_visible = await show_more_button.is_visible()
+                        is_enabled = await show_more_button.is_enabled()
+                        
+                        if is_visible and is_enabled:
+                            button_text = await show_more_button.text_content()
+                            print(f"Found 'Show More' button: '{button_text}' - clicking to reveal more exercises...")
+                            
+                            # Scroll into view and click
+                            await show_more_button.scroll_into_view_if_needed()
+                            await self.page.wait_for_timeout(500)
+                            await show_more_button.click()
+                            
+                            # Wait for new exercises to load
+                            await self.page.wait_for_timeout(2000)
+                            
+                            # Wait for network to be idle (new content loaded)
+                            try:
+                                await self.page.wait_for_load_state('networkidle', timeout=5000)
+                            except PlaywrightTimeoutError:
+                                pass  # Continue even if network doesn't go idle
+                            
+                            found_button = True
+                            print(f"✓ Successfully clicked 'Show More' button (attempt {attempts})")
+                            break
+                            
+                except Exception as e:
+                    print(f"Error checking selector {selector}: {e}")
+                    continue
+            
+            # If no button was found or clicked, we're done
+            if not found_button:
+                if attempts == 1:
+                    print("No 'Show More' button found - all exercises may already be visible")
+                else:
+                    print(f"No more 'Show More' buttons found after {attempts-1} clicks")
+                break
+        
+        # Final check: look for indicators of total exercises
+        try:
+            # Look for text like "mostrati X di Y" (showing X of Y)
+            total_indicators = await self.page.query_selector_all('text=/mostrati \\d+ di \\d+/')
+            for indicator in total_indicators:
+                text = await indicator.text_content()
+                if text:
+                    print(f"Exercise count indicator: {text}")
+                    break
+        except Exception as e:
+            print(f"Could not check exercise count indicators: {e}")
     
     async def _log_exercise_titles(self, cards: List[Any]) -> None:
         """Log exercise titles for debugging."""

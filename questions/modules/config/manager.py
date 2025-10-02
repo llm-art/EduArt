@@ -93,7 +93,10 @@ class ConfigManager:
             'viewport_height': 1080,
             'user_agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                           'AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/120.0.0.0 Safari/537.36')
+                          'Chrome/120.0.0.0 Safari/537.36'),
+            'use_state_persistence': True,
+            'state_file': 'browser_state.json',
+            'check_login_status': True
         }
         
         for key, default_value in default_settings.items():
@@ -188,6 +191,18 @@ class ConfigManager:
         """Get screenshot delay value."""
         return self.get_setting('screenshot_delay', 2000)
     
+    def use_state_persistence(self) -> bool:
+        """Check if state persistence is enabled."""
+        return self.get_setting('use_state_persistence', True)
+    
+    def get_state_file(self) -> str:
+        """Get state file path."""
+        return self.get_setting('state_file', 'browser_state.json')
+    
+    def should_check_login_status(self) -> bool:
+        """Check if login status checking is enabled."""
+        return self.get_setting('check_login_status', True)
+    
     def create_template_config(self, template_path: str = "config.json.template") -> bool:
         """
         Create a template configuration file.
@@ -211,7 +226,10 @@ class ConfigManager:
                 "viewport_height": 1080,
                 "user_agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                               "AppleWebKit/537.36 (KHTML, like Gecko) "
-                              "Chrome/120.0.0.0 Safari/537.36")
+                              "Chrome/120.0.0.0 Safari/537.36"),
+                "use_state_persistence": True,
+                "state_file": "browser_state.json",
+                "check_login_status": True
             }
         }
         
