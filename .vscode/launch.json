@@ -11,6 +11,14 @@
       "program": "${workspaceFolder}/questions/question_downloader.py",
       "console": "integratedTerminal",
       "args": ["--all"]
+    },
+    {
+      "name": "Python Debugger: Exam Question Processor",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/exam_question_processor.py",
+      "console": "integratedTerminal",
+      "args": []
     }
   ]
 }
