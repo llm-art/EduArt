@@ -9,10 +9,6 @@ __pycache__/
 *.pyd
 .Python
 
-# Screenshots and output files
-*.png
-*.jpg
-*.jpeg
 
 # IDE files
 .vscode/
