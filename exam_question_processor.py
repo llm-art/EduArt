@@ -13,7 +13,7 @@ REQUIREMENTS:
     - torch, torchvision, accelerate: ML dependencies
 
 PIPELINE:
-    Image → PaddleOCR → Qwen2-VL Classification → Qwen2-VL Extraction → JSON
+    Image → PaddleOCR → Qwen2-VL Unified Extraction → JSON
 
 OUTPUT:
     Structured JSON with question data, confidence scoring, and SHA256 provenance
@@ -37,12 +37,64 @@ ocr_model = None
 qwen_model = None
 qwen_processor = None
 
-# Italian prompts
-SYSTEM_PROMPT = "Sei un estrattore meticoloso di domande di Storia dell'Arte. Ricevi uno screenshot e il relativo testo OCR. Devi restituire SOLO JSON valido secondo lo schema richiesto. Non aggiungere commenti. Non inventare. Se mancano dati, usa null e abbassa confidence."
 
-CLASSIFY_PROMPT = "Classifica il tipo di domanda tra: multiple_choice_single, true_false, fill_in_blank, matching, short_answer, open_ended, image_reference. Rispondi SOLO con JSON {{\"type\":\"...\",\"confidence\":0.0}}. Testo OCR (rumoroso):\n{ocr_text}\n"
+def load_prompts() -> tuple[str, str]:
+  """Load prompts from external files"""
+  base_dir = Path(__file__).parent
 
-EXTRACT_PROMPT = "Estrai la domanda in testo in SOLO JSON (nessun commento) con lo schema FINAL OUTPUT. Vincoli: non creare opzioni che non compaiono nello screenshot; se la soluzione non è esplicita, 'answer': null e confidence più bassa. Usa 'language': 'it', metti l'immagine in 'images'. Testo OCR (rumoroso):\n{ocr_text}\n"
+  dir_prompts = base_dir / "prompts"
+
+  def read_prompt(file_path: Path) -> str:
+    with open(file_path, "r", encoding="utf-8") as f:
+      return f.read().strip()
+
+  # Load system prompt
+  system_prompt = read_prompt(dir_prompts / "system_prompt.txt")
+  extract_type = read_prompt(dir_prompts / "extract_type.txt")
+  extract_text = read_prompt(dir_prompts / "extract_text_multiple_choice.txt")
+
+  return system_prompt, extract_type, extract_text
+
+
+# Load prompts from files
+SYSTEM_PROMPT, EXTRACT_TYPE_PROMPT, EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE = load_prompts()
+
+
+def load_qwen_model(model_name: str = "Qwen/Qwen2-VL-2B-Instruct") -> None:
+  """Load Qwen2-VL model and processor.
+
+  Args:
+      model_name (str, optional): Model name to load. Defaults to "Qwen/Qwen2-VL-2B-Instruct".
+  """
+  global qwen_model, qwen_processor
+  print("Loading Qwen2-VL model...")
+  model_name = model_name
+  qwen_model = Qwen2VLForConditionalGeneration.from_pretrained(
+      model_name,
+      dtype="auto",
+      device_map="auto"
+      # attn_implementation="flash_attention_2",
+  )
+
+  qwen_processor = AutoProcessor.from_pretrained(model_name)
+
+
+def load_ocr_model(text_detection_model_name: str = "PP-OCRv5_mobile_det", text_recognition_model_name: str = "PP-OCRv5_mobile_rec") -> None:
+  """Load PaddleOCR model for Italian text recognition.
+
+  Args:
+      text_detection_model_name (str, optional): Model name for text detection. Defaults to "PP-OCRv5_mobile_det".
+      text_recognition_model_name (str, optional): Model name for text recognition. Defaults to "PP-OCRv5_mobile_rec".
+  """
+  global ocr_model
+  print("Loading PaddleOCR model...")
+  ocr_model = PaddleOCR(lang="it",
+                        text_detection_model_name=text_detection_model_name,
+                        text_recognition_model_name=text_recognition_model_name,
+                        use_doc_orientation_classify=False,
+                        use_doc_unwarping=False,
+                        use_textline_orientation=False,
+                        )
 
 
 def calculate_hash(image_path: str) -> str:
@@ -51,53 +103,10 @@ def calculate_hash(image_path: str) -> str:
     return hashlib.sha256(f.read()).hexdigest()
 
 
-def ocr_step(data: Dict[str, Any]) -> Dict[str, Any]:
-  """Extract text using PaddleOCR"""
-  global ocr_model
-
-  print("Loading PaddleOCR")
-  ocr_model = PaddleOCR(lang="it",
-                        text_detection_model_name="PP-OCRv5_mobile_det",
-                        text_recognition_model_name="PP-OCRv5_mobile_rec",
-                        use_doc_orientation_classify=False,
-                        use_doc_unwarping=False,
-                        use_textline_orientation=False,
-                        )
-
-  # Run OCR
-  output = ocr_model.predict(input=str(data["image_path"]))
-
-  # Save results
-  output_path = data["output_path"]
-  output_path.mkdir(parents=True, exist_ok=True)
-
-  # Concatenate all text
-  ocr_text = ""
-  for res in output:
-    res.print()
-    res.save_to_img(save_path=f"{output_path}/1.png")
-    res.save_to_json(save_path=f"{output_path}/1.json")
-    ocr_text += " ".join([txt for txt in res.str['res']['rec_texts']]) + " "
-
-  return {
-      "image_path": data["image_path"],
-      "ocr_text": ocr_text.strip(),
-      "hash": calculate_hash(data["image_path"])
-  }
-
-
 def qwen_chat(image_path: str, system_prompt: str, user_prompt: str) -> str:
   """Call Qwen2-VL with image and text"""
-  
-  print("Loading Qwen2-VL model...")
-  model_name = "Qwen/Qwen2-VL-2B-Instruct"
-  qwen_model = Qwen2VLForConditionalGeneration.from_pretrained(
-      model_name,
-      dtype="auto",
-      #attn_implementation="flash_attention_2",
-      device_map="auto"
-  )
-  qwen_processor = AutoProcessor.from_pretrained(model_name)
+
+  global qwen_model, qwen_processor
 
   # Load image
   image = Image.open(image_path)
@@ -111,7 +120,8 @@ def qwen_chat(image_path: str, system_prompt: str, user_prompt: str) -> str:
       {
           "role": "user",
           "content": [
-              {"type": "image", "image": image, "resized_height": 280, "resized_width": 420},
+              {"type": "image", "image": image,
+               "resized_height": 720, "resized_width": 1280},
               {"type": "text", "text": user_prompt}
           ]
       }
@@ -155,109 +165,126 @@ def parse_json_with_fallback(text: str) -> Dict[str, Any]:
     return {"type": "unknown", "confidence": 0.1}
 
 
-def classify_step(data: Dict[str, Any]) -> Dict[str, Any]:
-  """Classify question type using Qwen2-VL"""
-  user_prompt = CLASSIFY_PROMPT.format(ocr_text=data["ocr_text"])
+def read_html_file(file_path: Path) -> str:
+  """Read HTML content from file"""
+  with open(file_path, "r", encoding="utf-8") as f:
+    return f.read()
+
+def ocr_step(data: Dict[str, Any]) -> Dict[str, Any]:
+  """Extract text using PaddleOCR"""
+
+  # Run OCR
+  global ocr_model
+
+  image_path = data["base_path"] / f"{data['exercise']}/raw/{data['question']}.png"
+
+
+  output = ocr_model.predict(input=str(image_path))
+
+  # Save results
+  ocr_path = data["base_path"] / f"{data['exercise']}/ocr/"
+  ocr_path.mkdir(parents=True, exist_ok=True)
+
+  # Concatenate all text
+  ocr_text = ""
+  for res in output:
+    res.save_to_json(
+      save_path=f"{ocr_path}/{Path(image_path).stem}.json")
+    ocr_text += " ".join([txt for txt in res.str['res']['rec_texts']]) + " "
+
+  return {**data, "ocr_text": ocr_text.strip()}
+
+
+def extract_question_type(data: Dict[str, Any]) -> Dict[str, Any]:
+  """Extract complete question structure using unified prompt"""
+
+  user_prompt = EXTRACT_TYPE_PROMPT.format(
+    ocr_text=data["ocr_text"])
+
+  image_path = data['base_path'] / f"{data['exercise']}/raw/{data['question']}.png"
 
   try:
-    response = qwen_chat(data["image_path"], SYSTEM_PROMPT, user_prompt)
-    classification = parse_json_with_fallback(response)
+    response = qwen_chat(str(image_path), SYSTEM_PROMPT, user_prompt)
+    question_data = parse_json_with_fallback(response)
 
-    data["question_type"] = classification.get("type", "unknown")
-    data["type_confidence"] = classification.get("confidence", 0.5)
+    return {
+      **data,
+      **question_data,
+    }
 
   except Exception as e:
-    print(f"Classification error: {e}")
-    data["question_type"] = "unknown"
-    data["type_confidence"] = 0.1
-
-  return data
+    print(f"Question extraction error: {e}")
 
 
-def extract_step(data: Dict[str, Any]) -> Dict[str, Any]:
-  """Extract structured question data using Qwen2-VL"""
-  user_prompt = EXTRACT_PROMPT.format(ocr_text=data["ocr_text"])
+def extract_question_text(data: Dict[str, Any]) -> Dict[str, Any]:
+  """Extract question text only using Qwen2-VL"""
+
+  html_text = read_html_file(data["base_path"] / f"{data['exercise']}/raw/{data['question']}.html")
+  image_path = data['base_path'] / f"{data['exercise']}/raw/{data['question']}.png"
+
+  if data["type"] == "multiple_choice":
+    user_prompt = EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE.format(
+        ocr_text=data["ocr_text"], html_text=html_text)
 
   try:
-    response = qwen_chat(data["image_path"], SYSTEM_PROMPT, user_prompt)
-    extracted = parse_json_with_fallback(response)
+    response = qwen_chat(image_path, SYSTEM_PROMPT, user_prompt)
+    question_data = parse_json_with_fallback(response)
 
-    # Build final JSON structure
+    # Build result structure
     result = {
-        "id": Path(data["image_path"]).stem,
-        "type": data["question_type"],
-        "language": "it",
-        "stem": extracted.get("stem", ""),
-        "choices": extracted.get("choices", []),
-        "answer": extracted.get("answer"),
-        "explanations": None,
-        "artwork_refs": [],
-        "images": [{"path": data["image_path"], "caption": None}],
-        "confidence": min(data["type_confidence"], extracted.get("confidence", 0.5)),
-        "provenance": {"hash": data["hash"]}
+        **data,
+        **question_data,
     }
 
-    # Adjust confidence if answer is missing for MCQ
-    if result["type"] == "multiple_choice_single" and not result["answer"]:
-      result["confidence"] *= 0.7
+    return result
 
   except Exception as e:
-    print(f"Extraction error: {e}")
-    # Minimal fallback structure
-    result = {
-        "id": Path(data["image_path"]).stem,
-        "type": data["question_type"],
-        "language": "it",
-        "stem": data["ocr_text"][:200] + "..." if len(data["ocr_text"]) > 200 else data["ocr_text"],
-        "choices": [],
-        "answer": None,
-        "explanations": None,
-        "artwork_refs": [],
-        "images": [{"path": data["image_path"], "caption": None}],
-        "confidence": 0.2,
-        "provenance": {"hash": data["hash"]}
-    }
-
-  return result
+    print(f"Question text extraction error: {e}")
 
 
 def main():
-  """Main processing pipeline"""
-  # Create LangChain pipeline
-  ocr_runnable = RunnableLambda(ocr_step)
-  classify_runnable = RunnableLambda(classify_step)
-  extract_runnable = RunnableLambda(extract_step)
+  """Unified processing pipeline with single-pass extraction"""
 
-  # Chain them together
-  pipeline = ocr_runnable | classify_runnable | extract_runnable
+  # Ensure models are loaded
+  load_qwen_model()
+  load_ocr_model()
+
+  # Create unified LangChain pipeline
+  ocr_runnable = RunnableLambda(ocr_step)
+  extract_type_runnable = RunnableLambda(extract_question_type)
+  extract_text_runnable = RunnableLambda(extract_question_text)
+
+  # Chain them together - single pass extraction
+  pipeline = ocr_runnable | extract_type_runnable | extract_text_runnable
 
   exercise = 1
-  question = 1
+  question = 2
 
   # Test with sample image
   BASE_DIR = Path(__file__).parent
-  output_path = BASE_DIR / f"questions/data/{exercise}/ocr/"
-  sample_image = BASE_DIR / f"questions/data/{exercise}/raw/{question}.png"
+  base_path = BASE_DIR / f"questions/data/"
 
   data = {
-    "image_path": sample_image,
-    "output_path": output_path
+    "base_path": base_path,
+    "exercise": exercise,
+    "question": question
   }
-
-  if not Path(sample_image).exists():
-    print(f"Sample image not found: {sample_image}")
-    print("Please provide a valid image path")
-    return
-
-  print(f"Processing: {sample_image}")
 
   try:
     # Run the pipeline
     result = pipeline.invoke(data)
 
+    # add image
+    result.setdefault("image", str(base_path / f"{exercise}/imgs/{question}.jpg") if "has_image" in result else None)
+
     # Print final JSON
-    print("\nFinal JSON:")
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    parsed_path = base_path / f"{exercise}/parsed/{question}.json"
+    parsed_path.parent.mkdir(parents=True, exist_ok=True)
+
+    result["base_path"] = str(base_path)
+
+    with open(parsed_path, "w", encoding="utf-8") as f:
+      json.dump(result, f, indent=2, ensure_ascii=False)
 
   except Exception as e:
     print(f"Pipeline error: {e}")

@@ -1,0 +1,30 @@
+Analyze this image of an Art History exam question and identify ONLY the question type.
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+
+SUPPORTED QUESTION TYPES:
+1. multiple_choice: Question with image and multiple choice options (A, B, C, D, etc.)
+2. highlight_errors: A question where errors are highlighted in a passage of text, contains the string 'ERRORI EVIDENZIATI' or 'TROVA ERRORE'
+3. positioning: Question that requires placing a list of options into blanks in a text passage. Look for:
+   - Instructions like 'Completa il periodo con i x termini mancanti scegliendo tra i x proposti'
+   - Two-column layout: LEFT SIDE with draggable options/terms, RIGHT SIDE with text containing blanks
+   - Multiple small boxes/buttons with individual terms on the left
+   - Text passage with visible gaps or blank spaces on the right
+
+MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+{{
+  "type": "multiple_choice|highlight_errors|positioning",
+  "language": "it",
+  "has_image": true
+}}
+
+STRICT REQUIREMENTS:
+- Return ONLY the JSON object above
+- DO NOT add any other fields
+- DO NOT add comments or explanations
+- DO NOT add choices, question_text, or any other fields
+- The "type" field must be exactly one of: "multiple_choice", "highlight_errors", or "positioning"
+- The "has_image" field must be exactly true or false (boolean)
+
+Noisy OCR text:
+{ocr_text}
