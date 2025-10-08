@@ -30,5 +30,5 @@ STRICT REQUIREMENTS:
 Noisy OCR text:
 {ocr_text}
 
-For positional requirements, please navigate the HTML stucture:
+HTML text:
 {html_text}

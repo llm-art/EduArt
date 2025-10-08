@@ -1,0 +1,33 @@
+Analyze this image of an Art History exam question and extract all structured elements.
+
+This image and OCR text are about a positioning question, a question where the elements need to be placed correctly in the text on the right. The image contains the string 'POSIZIONAMENTO' and blank areas where the elements need to be placed.
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+
+EXTRACTION REQUIREMENTS:
+- Extract question text only
+- The text question that you need to extract is specifically locate in the right part of the image, in the area with a white background
+
+MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+{{
+  "type": "positioning",
+  "question_title": "clean question title",
+  "question_text": "full question text from white background area",
+  "choices": [
+    "list of elements to be placed in the text, extracted as a list of strings"
+  ],
+  "language": "it"
+}}
+
+STRICT REQUIREMENTS:
+- Return ONLY the JSON object above
+- DO NOT add any other fields beyond those specified
+- DO NOT add comments or explanations
+- Use [BLANK] for identifying the areas where the choices need to be placed, not empty strings
+- Question text one of the text to extract. The other is the list of elements to be placed in the text, which should be extracted as a list of strings. Be sure to extract all the texts that should be placed in the text, even if they are wrong or short.
+
+Noisy OCR text:
+{ocr_text}
+
+HTML text:
+{html_text}

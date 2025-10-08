@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
 """
-Minimal LangChain + PaddleOCR + Qwen2-VL pipeline for exam question processing
+Enhanced LangChain + PaddleOCR + Multi-Model (Qwen2-VL/Gemini) pipeline for exam question processing
 
 USAGE:
     python exam_question_processor.py
 
 REQUIREMENTS:
     - paddleocr: Italian OCR text extraction
-    - transformers: Qwen2-VL-Instruct local model
+    - transformers: Qwen2-VL-Instruct local model (optional)
+    - langchain-google-genai: Gemini 2.5 Pro API integration (optional)
     - langchain-core: Pipeline orchestration
     - pillow: Image handling
-    - torch, torchvision, accelerate: ML dependencies
+    - python-dotenv: Environment configuration
+
+CONFIGURATION:
+    Create a .env file based on .env.example to configure:
+    - MODEL_TYPE: "qwen" (local) or "gemini" (API)
+    - GOOGLE_API_KEY: Required for Gemini
+    - Other model-specific settings
 
 PIPELINE:
-    Image → PaddleOCR → Qwen2-VL Unified Extraction → JSON
+    Image → PaddleOCR → Vision Model (Qwen/Gemini) → Type Detection → Text Extraction → JSON
 
 OUTPUT:
     Structured JSON with question data, confidence scoring, and SHA256 provenance
@@ -25,23 +32,24 @@ import re
 from pathlib import Path
 from typing import Dict, Any
 
-from paddleocr import PaddleOCR, TextRecognition, TextDetection
-from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
+import click
+from paddleocr import PaddleOCR
 from langchain_core.runnables import RunnableLambda
 from PIL import Image
-import torch
+
+# Import our new model system
+from models import create_vision_model
+from config import Config
 
 
 # Global model instances (loaded once)
 ocr_model = None
-qwen_model = None
-qwen_processor = None
+vision_model = None
 
 
-def load_prompts() -> tuple[str, str]:
+def load_prompts() -> tuple[str, str, str, str, str]:
   """Load prompts from external files"""
   base_dir = Path(__file__).parent
-
   dir_prompts = base_dir / "prompts"
 
   def read_prompt(file_path: Path) -> str:
@@ -51,50 +59,50 @@ def load_prompts() -> tuple[str, str]:
   # Load system prompt
   system_prompt = read_prompt(dir_prompts / "system_prompt.txt")
   extract_type = read_prompt(dir_prompts / "extract_type.txt")
-  extract_text = read_prompt(dir_prompts / "extract_text_multiple_choice.txt")
+  extract_text_multiple_choice = read_prompt(
+      dir_prompts / "extract_text_multiple_choice.txt")
+  extract_text_select_errors = read_prompt(
+      dir_prompts / "extract_text_select_errors.txt")
+  extract_text_positioning = read_prompt(
+      dir_prompts / "extract_text_positioning.txt")
 
-  return system_prompt, extract_type, extract_text
+  return system_prompt, extract_type, extract_text_multiple_choice, extract_text_select_errors, extract_text_positioning
 
 
 # Load prompts from files
-SYSTEM_PROMPT, EXTRACT_TYPE_PROMPT, EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE = load_prompts()
+SYSTEM_PROMPT, EXTRACT_TYPE_PROMPT, EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE, EXTRACT_TEXT_PROMPT_SELECT_ERRORS, EXTRACT_TEXT_PROMPT_POSITIONING = load_prompts()
 
 
-def load_qwen_model(model_name: str = "Qwen/Qwen2-VL-2B-Instruct") -> None:
-  """Load Qwen2-VL model and processor.
+def load_vision_model() -> None:
+  """Load the configured vision model (Qwen or Gemini)"""
+  global vision_model
 
-  Args:
-      model_name (str, optional): Model name to load. Defaults to "Qwen/Qwen2-VL-2B-Instruct".
-  """
-  global qwen_model, qwen_processor
-  print("Loading Qwen2-VL model...")
-  model_name = model_name
-  qwen_model = Qwen2VLForConditionalGeneration.from_pretrained(
-      model_name,
-      dtype="auto",
-      device_map="auto"
-      # attn_implementation="flash_attention_2",
-  )
+  print(f"Loading vision model: {Config.MODEL_TYPE}")
 
-  qwen_processor = AutoProcessor.from_pretrained(model_name)
+  try:
+    vision_model = create_vision_model()
+    vision_model.load_model()
+
+    model_info = vision_model.get_model_info()
+
+  except Exception as e:
+    print(f"Error loading vision model: {e}")
+    raise
 
 
-def load_ocr_model(text_detection_model_name: str = "PP-OCRv5_mobile_det", text_recognition_model_name: str = "PP-OCRv5_mobile_rec") -> None:
-  """Load PaddleOCR model for Italian text recognition.
-
-  Args:
-      text_detection_model_name (str, optional): Model name for text detection. Defaults to "PP-OCRv5_mobile_det".
-      text_recognition_model_name (str, optional): Model name for text recognition. Defaults to "PP-OCRv5_mobile_rec".
-  """
+def load_ocr_model() -> None:
+  """Load PaddleOCR model for Italian text recognition"""
   global ocr_model
   print("Loading PaddleOCR model...")
-  ocr_model = PaddleOCR(lang="it",
-                        text_detection_model_name=text_detection_model_name,
-                        text_recognition_model_name=text_recognition_model_name,
-                        use_doc_orientation_classify=False,
-                        use_doc_unwarping=False,
-                        use_textline_orientation=False,
-                        )
+
+  ocr_model = PaddleOCR(
+      lang=Config.OCR_LANG,
+      text_detection_model_name=Config.TEXT_DETECTION_MODEL,
+      text_recognition_model_name=Config.TEXT_RECOGNITION_MODEL,
+      use_doc_orientation_classify=False,
+      use_doc_unwarping=False,
+      use_textline_orientation=False,
+  )
 
 
 def calculate_hash(image_path: str) -> str:
@@ -103,66 +111,51 @@ def calculate_hash(image_path: str) -> str:
     return hashlib.sha256(f.read()).hexdigest()
 
 
-def qwen_chat(image_path: str, system_prompt: str, user_prompt: str) -> str:
-  """Call Qwen2-VL with image and text"""
+def vision_chat(image_path: str, system_prompt: str, user_prompt: str) -> str:
+  """
+  Call the configured vision model with image and text prompts
 
-  global qwen_model, qwen_processor
+  Args:
+      image_path: Path to the main image to analyze
+      system_prompt: System prompt for the model
+      user_prompt: User prompt with instructions
 
-  # Load image
-  image = Image.open(image_path)
+  Returns:
+      Generated text response
+  """
+  global vision_model
 
-  # Prepare messages
-  messages = [
-      {
-          "role": "system",
-          "content": system_prompt
-      },
-      {
-          "role": "user",
-          "content": [
-              {"type": "image", "image": image,
-               "resized_height": 720, "resized_width": 1280},
-              {"type": "text", "text": user_prompt}
-          ]
-      }
-  ]
+  if not vision_model:
+    load_vision_model()
 
-  # Process with Qwen
-  text = qwen_processor.apply_chat_template(
-    messages, tokenize=False, add_generation_prompt=True)
-  inputs = qwen_processor(
-    text=[text], images=[image], padding=True, return_tensors="pt")
-  inputs = inputs.to(qwen_model.device)
+  try:
+    response = vision_model.chat(image_path, system_prompt, user_prompt)
+    return response
 
-  # Generate response
-  with torch.no_grad():
-    generated_ids = qwen_model.generate(
-      **inputs, max_new_tokens=512, do_sample=False)
-    generated_ids_trimmed = [
-        out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-    ]
-    output_text = qwen_processor.batch_decode(
-        generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-    )[0]
-
-  return output_text.strip()
+  except Exception as e:
+    print(f"Error in vision model chat: {e}")
+    raise
 
 
 def parse_json_with_fallback(text: str) -> Dict[str, Any]:
-  """Parse JSON with fallback to substring extraction"""
-  try:
-    return json.loads(text)
-  except json.JSONDecodeError:
-    # Try to extract JSON from {...} substring
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-      try:
-        return json.loads(match.group())
-      except json.JSONDecodeError:
-        pass
+  """Parse JSON with fallback to substring extraction and completion"""
 
-    # Return minimal fallback
-    return {"type": "unknown", "confidence": 0.1}
+  if isinstance(text, list):
+    text = text[0] if text else ""
+
+  if not text or text.strip() == "":
+    return {"type": "unknown"}
+
+  # Remove Markdown code block if present
+  if text.strip().startswith("```json") and text.strip().endswith("```"):
+    text = text.strip()[7:-3].strip()
+
+  try:
+    result = json.loads(text)
+    return result
+  except json.JSONDecodeError as e:
+    print(f"Direct JSON parsing failed: {e}")
+    return {"type": "unknown", "parsing_error": "failed_all_attempts"}
 
 
 def read_html_file(file_path: Path) -> str:
@@ -170,64 +163,150 @@ def read_html_file(file_path: Path) -> str:
   with open(file_path, "r", encoding="utf-8") as f:
     return f.read()
 
+
+def load_existing_ocr(data: Dict[str, Any]) -> str:
+  """Load OCR text from existing JSON file if it exists"""
+  ocr_path = data["output_path"] / f"{data['exercise']}/ocr/"
+  ocr_file = ocr_path / f"{data['question']}.json"
+
+  if ocr_file.exists():
+    try:
+      with open(ocr_file, 'r', encoding='utf-8') as f:
+        ocr_data = json.load(f)
+
+      # Extract text from OCR JSON structure
+      ocr_text = ""
+      if 'rec_texts' in ocr_data:
+        ocr_text = " ".join(ocr_data['rec_texts']) + " "
+
+      print(
+        f"Loaded existing OCR from {ocr_file} (char length: {len(ocr_text)})")
+      return ocr_text.strip()
+
+    except Exception as e:
+      print(f"Error loading existing OCR file {ocr_file}: {e}")
+      return ""
+
+  return ""
+
+
 def ocr_step(data: Dict[str, Any]) -> Dict[str, Any]:
-  """Extract text using PaddleOCR"""
+  """Extract text using PaddleOCR or load from existing files"""
+  print(f"\nOCR step: question {data.get('question', 'unknown')}")
 
-  # Run OCR
-  global ocr_model
+  if data is None:
+    print("ERROR: data is None in ocr_step!")
+    return {"error": "data_is_none_in_ocr"}
 
-  image_path = data["base_path"] / f"{data['exercise']}/raw/{data['question']}.png"
+  # Check if we should use existing OCR files
+  force_ocr = data.get('force_ocr', False)
 
+  if not force_ocr:
+    # Try to load existing OCR data
+    existing_ocr_text = load_existing_ocr(data)
+    if existing_ocr_text:
+      print("Using existing OCR data")
+      return {**data, "ocr_text": existing_ocr_text}
 
-  output = ocr_model.predict(input=str(image_path))
+  print("Running OCR process...")
 
-  # Save results
-  ocr_path = data["base_path"] / f"{data['exercise']}/ocr/"
-  ocr_path.mkdir(parents=True, exist_ok=True)
+  try:
+    # Run OCR
+    global ocr_model
 
-  # Concatenate all text
-  ocr_text = ""
-  for res in output:
-    res.save_to_json(
-      save_path=f"{ocr_path}/{Path(image_path).stem}.json")
-    ocr_text += " ".join([txt for txt in res.str['res']['rec_texts']]) + " "
+    if ocr_model is None:
+      load_ocr_model()
 
-  return {**data, "ocr_text": ocr_text.strip()}
+    image_path = data["base_path"] / \
+        f"{data['exercise']}/raw/{data['question']}.png"
+
+    output = ocr_model.predict(input=str(image_path))
+
+    # Save results
+    ocr_path = data["output_path"] / f"{data['exercise']}/ocr/"
+    ocr_path.mkdir(parents=True, exist_ok=True)
+
+    # Concatenate all text
+    ocr_text = ""
+    for res in output:
+      res.save_to_json(
+          save_path=f"{ocr_path}/{Path(image_path).stem}.json")
+      ocr_text += " ".join([txt for txt in res.str['res']['rec_texts']]) + " "
+
+    print(f"OCR char length: {len(ocr_text)}")
+    return {**data, "ocr_text": ocr_text.strip()}
+
+  except Exception as e:
+    print(f"OCR error: {e}")
+    # Return original data with error flag and empty OCR text to prevent None propagation
+    return {**data, "ocr_error": str(e), "ocr_text": ""}
 
 
 def extract_question_type(data: Dict[str, Any]) -> Dict[str, Any]:
   """Extract complete question structure using unified prompt"""
 
-  user_prompt = EXTRACT_TYPE_PROMPT.format(
-    ocr_text=data["ocr_text"])
+  print(
+    f"\nQuestion type extraction: question {data.get('question', 'unknown')}")
 
-  image_path = data['base_path'] / f"{data['exercise']}/raw/{data['question']}.png"
+  html_text = read_html_file(
+    data["base_path"] / f"{data['exercise']}/raw/{data['question']}.html")
+
+  user_prompt = EXTRACT_TYPE_PROMPT.format(
+      ocr_text=data["ocr_text"], html_text=html_text)
+
+  image_path = data['base_path'] / \
+      f"{data['exercise']}/raw/{data['question']}.png"
 
   try:
-    response = qwen_chat(str(image_path), SYSTEM_PROMPT, user_prompt)
+    response = vision_chat(str(image_path), SYSTEM_PROMPT, user_prompt)
     question_data = parse_json_with_fallback(response)
 
+    print(f"Question type: {question_data.get('type', 'unknown')}")
+
     return {
-      **data,
-      **question_data,
+        **data,
+        **question_data,
     }
 
   except Exception as e:
-    print(f"Question extraction error: {e}")
+    print(f"Question type extraction error: {e}")
+    # Return original data with error flag to prevent None propagation
+    return {**data, "extraction_error": str(e), "type": "unknown"}
 
 
 def extract_question_text(data: Dict[str, Any]) -> Dict[str, Any]:
-  """Extract question text only using Qwen2-VL"""
+  """Extract question text only using the configured vision model"""
 
-  html_text = read_html_file(data["base_path"] / f"{data['exercise']}/raw/{data['question']}.html")
-  image_path = data['base_path'] / f"{data['exercise']}/raw/{data['question']}.png"
+  print(
+    f"\nQuestion text extraction: question {data.get('question', 'unknown')}")
+
+  html_text = read_html_file(
+    data["base_path"] / f"{data['exercise']}/raw/{data['question']}.html")
+
+  image_path = data["base_path"] / \
+      f"{data['exercise']}/raw/{data['question']}.png"
 
   if data["type"] == "multiple_choice":
     user_prompt = EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE.format(
         ocr_text=data["ocr_text"], html_text=html_text)
 
+  elif data["type"] in ["select_errors", "highlight_errors"]:
+    user_prompt = EXTRACT_TEXT_PROMPT_SELECT_ERRORS.format(
+        ocr_text=data["ocr_text"], html_text=html_text)
+
+  elif data["type"] == "positioning":
+    # Use dedicated positioning prompt
+    user_prompt = EXTRACT_TEXT_PROMPT_POSITIONING.format(
+        ocr_text=data["ocr_text"], html_text=html_text)
+
+  else:
+    print(
+      f"WARNING: Unknown question type '{data.get('type', 'None')}', using multiple choice prompt as fallback")
+    user_prompt = EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE.format(
+        ocr_text=data["ocr_text"], html_text=html_text)
+
   try:
-    response = qwen_chat(image_path, SYSTEM_PROMPT, user_prompt)
+    response = vision_chat(str(image_path), SYSTEM_PROMPT, user_prompt)
     question_data = parse_json_with_fallback(response)
 
     # Build result structure
@@ -240,54 +319,136 @@ def extract_question_text(data: Dict[str, Any]) -> Dict[str, Any]:
 
   except Exception as e:
     print(f"Question text extraction error: {e}")
+    # Return original data with error flag to prevent None propagation
+    return {**data, "text_extraction_error": str(e)}
 
 
-def main():
-  """Unified processing pipeline with single-pass extraction"""
+@click.command()
+@click.option('--force-ocr', is_flag=True, help='Force OCR processing even if OCR JSON files already exist')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose/debug output')
+@click.option('--exercise', '-e', default=1, help='Exercise number to process', show_default=True)
+@click.option('--min-question', default=1, help='Minimum question number to process', show_default=True)
+@click.option('--max-question', default=20, help='Maximum question number to process', show_default=True)
+def main(force_ocr, verbose, exercise, min_question, max_question):
+  """Process multiple questions using LangChain sequential batch processing with multi-model support"""
 
-  # Ensure models are loaded
-  load_qwen_model()
-  load_ocr_model()
+  print("=== Enhanced Multi-Model Exam Question Processor ===")
+  print(f"Configuration: {Config.get_model_info()}")
+  print(f"Force OCR: {force_ocr}")
+  print(f"Verbose: {verbose}")
+  print(f"Exercise: {exercise}")
+  print(f"Questions: {min_question}-{max_question}")
+
+  # Set global verbose flag for models
+  Config.VERBOSE = verbose
+
+  # Load models once
+  load_vision_model()
 
   # Create unified LangChain pipeline
   ocr_runnable = RunnableLambda(ocr_step)
   extract_type_runnable = RunnableLambda(extract_question_type)
   extract_text_runnable = RunnableLambda(extract_question_text)
 
-  # Chain them together - single pass extraction
+  # Chain them together - this creates a RunnableSequence
   pipeline = ocr_runnable | extract_type_runnable | extract_text_runnable
 
-  exercise = 1
-  question = 2
-
-  # Test with sample image
+  # Batch processing parameters
   BASE_DIR = Path(__file__).parent
-  base_path = BASE_DIR / f"questions/data/"
+  base_path = BASE_DIR / "questions/data/"
+  output_path = BASE_DIR / f"questions/output/"
 
-  data = {
-    "base_path": base_path,
-    "exercise": exercise,
-    "question": question
-  }
+  # Prepare batch input data
+  batch_inputs = [
+      {
+          "base_path": base_path,
+          "output_path": output_path,
+          "exercise": exercise,
+          "question": question,
+          "force_ocr": force_ocr
+      }
+      for question in range(min_question, max_question + 1)
+  ]
+
+  print(
+    f"Starting LangChain sequential batch processing of exercise {exercise}, questions {min_question}-{max_question}...")
+  print(f"Using {Config.MODEL_TYPE.upper()} model")
 
   try:
-    # Run the pipeline
-    result = pipeline.invoke(data)
+    # Use LangChain's batch method for sequential processing
+    # This processes inputs one by one in sequence
+    results = pipeline.batch(
+        batch_inputs,
+        config={
+            "max_concurrency": 1,  # Ensures sequential processing
+            "return_exceptions": True  # Continue processing even if some fail
+        }
+    )
 
-    # add image
-    result.setdefault("image", str(base_path / f"{exercise}/imgs/{question}.jpg") if "has_image" in result else None)
+    # Process and save results
+    successful_count = 0
+    failed_count = 0
 
-    # Print final JSON
-    parsed_path = base_path / f"{exercise}/parsed/{question}.json"
-    parsed_path.parent.mkdir(parents=True, exist_ok=True)
+    for i, result in enumerate(results):
+      question = min_question + i
 
-    result["base_path"] = str(base_path)
+      if isinstance(result, Exception):
+        print(f"Error processing question {question}: {result}")
+        failed_count += 1
+        continue
 
-    with open(parsed_path, "w", encoding="utf-8") as f:
-      json.dump(result, f, indent=2, ensure_ascii=False)
+      try:
+        # Add image path if applicable
+        result.setdefault("image", str(
+          base_path / f"{exercise}/imgs/{question}.jpg") if "has_image" in result else None)
+
+        # Save individual result
+        parsed_path = output_path / f"{exercise}/json/{question}.json"
+        parsed_path.parent.mkdir(parents=True, exist_ok=True)
+
+        result["base_path"] = str(base_path)
+        result["output_path"] = str(output_path)
+
+        with open(parsed_path, "w", encoding="utf-8") as f:
+          json.dump(result, f, indent=2, ensure_ascii=False)
+
+        successful_count += 1
+        question_type = result.get("type", "unknown")
+        print(
+          f"Successfully processed question {question} (type: {question_type})")
+
+      except Exception as e:
+        print(f"Error saving question {question}: {e}")
+        failed_count += 1
+
+    # Print batch summary
+    print(f"\n=== Multi-Model Processing Summary ===")
+    print(f"Model: {Config.MODEL_TYPE.upper()}")
+    print(f"Exercise: {exercise}")
+    print(f"Total questions: {max_question - min_question + 1}")
+    print(f"Successful: {successful_count}")
+    print(f"Failed: {failed_count}")
+    print(f"Results saved to: {output_path}/{exercise}/json/")
+
+    return [r for r in results if not isinstance(r, Exception)]
 
   except Exception as e:
-    print(f"Pipeline error: {e}")
+    print(f"Batch processing error: {e}")
+    return []
+
+
+def any_ocr_files_missing(exercise: int, min_question: int, max_question: int) -> bool:
+  """Check if any OCR files are missing for the given range"""
+  BASE_DIR = Path(__file__).parent
+  output_path = BASE_DIR / f"questions/output/"
+  ocr_path = output_path / f"{exercise}/ocr/"
+
+  for question in range(min_question, max_question + 1):
+    ocr_file = ocr_path / f"{question}.json"
+    if not ocr_file.exists():
+      return True
+
+  return False
 
 
 if __name__ == "__main__":

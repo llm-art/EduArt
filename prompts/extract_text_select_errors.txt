@@ -1,0 +1,32 @@
+Analyze this image of an Art History exam question and extract all structured elements.
+
+This image and OCR text are about a select_errors question, a question where errors needs to be selected and highlighted in a text. The image contains the string 'ERRORI EVIDENZIATI' or 'TROVA ERRORE'
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+
+EXTRACTION REQUIREMENTS:
+- Extract question text only
+- FOCUS ON TEXT IN BLACK BBOX AREAS - these contain the main question content
+- The text you need to extract is specifically located within black rectangular boxes/borders in the image
+
+MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+{{
+  "type": "select_errors",
+  "question_title": "clean question title",
+  "question_text": "full question text from black bbox areas",
+  "language": "it"
+}}
+
+STRICT REQUIREMENTS:
+- Return ONLY the JSON object above
+- DO NOT add any other fields beyond those specified
+- DO NOT add comments or explanations
+- Use null for missing data, not empty strings
+- Question text is the only text to extract, do NOT include any task description or difficulty level
+- Take a look at the example image. The black boxes contain the main question text to extract, this is where the question_text is located.
+
+Noisy OCR text:
+{ocr_text}
+
+HTML text:
+{html_text}
