@@ -10,12 +10,12 @@ EXTRACTION REQUIREMENTS:
 - The text you need to extract is specifically located within black rectangular boxes/borders in the image
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
-{{
+{{{{
   "type": "select_errors",
   "question_title": "clean question title",
   "question_text": "full question text from black bbox areas",
   "language": "it"
-}}
+}}}}
 
 STRICT REQUIREMENTS:
 - Return ONLY the JSON object above

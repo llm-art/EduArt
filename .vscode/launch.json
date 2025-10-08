@@ -18,7 +18,11 @@
       "request": "launch",
       "program": "${workspaceFolder}/exam_question_processor.py",
       "console": "integratedTerminal",
-      "args": []
+      "args": [
+        "--exercise", "4",
+        "--min-question", "1",
+        "--max-question", "2",
+      ]
     }
   ]
 }

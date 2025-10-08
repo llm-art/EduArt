@@ -3,21 +3,31 @@ Analyze this image of an Art History exam question and identify ONLY the questio
 CRITICAL: You MUST return ONLY a valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 SUPPORTED QUESTION TYPES:
-1. multiple_choice: Question with image and multiple choice options (A, B, C, D, etc.)
-2. select_errors: A question where errors are highlighted in a passage of text, contains the string 'ERRORI EVIDENZIATI' or 'TROVA ERRORE'
-3. positioning: Question that requires placing a list of options into blanks in a text passage. Look for:
-   - Instructions like 'Completa il periodo', 'COMPLETAMENTO CHIUSO', 'Ricostruisci il periodo scegliendo i termini corretti'
-   - Text like 'scegli la risposta esatta per ogni gruppo di opzioni proposte'
+* multiple_choice: Question with image and multiple choice options (A, B, C, D, etc.)
+* select_errors: A question where errors are highlighted in a passage of text, contains the string "ERRORI EVIDENZIATI" or "TROVA ERRORE"
+* completion_closed: Question that requires selecting the correct choice in sentence among two choices. Look for:
+    - Instructions like "COMPLETAMENTO CHIUSO" or "Ricostruisci il testo"
+    - BLUE CIRCULAR BORDERS around choice pairs
+    - Paired options (two alternatives per blank) rather than individual draggable items
+    - Choices appear inline or near the text passage, not in a separate column
+* positioning: Question that requires placing a list of options into blanks in a text passage. Look for:
+   - Instructions like "Completa il periodo", "COMPLETAMENTO CHIUSO", "Ricostruisci il periodo scegliendo i termini corretti"
+   - Text like "scegli la risposta esatta per ogni gruppo di opzioni proposte"
    - Two-column layout: LEFT SIDE with draggable options/terms, RIGHT SIDE with text containing blanks
    - Multiple small boxes/buttons with individual terms on the left
    - Text passage with visible gaps or blank spaces on the right
+* completion_open: Question that requires writing the correct part of the sentence in the blank space. Look for:
+    - Instructions like "COMPLETAMENTO APERTO" or "Completa la descrizione"
+
+* true_false: A question with true/false options.
+
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
-{{
-  "type": "multiple_choice|select_errors|positioning",
+{{{{
+  "type": "multiple_choice|select_errors|positioning|completion_open|completion_closed|true_false",
   "language": "it",
   "has_image": true|false
-}}
+}}}}
 
 STRICT REQUIREMENTS:
 - Return ONLY the JSON object above

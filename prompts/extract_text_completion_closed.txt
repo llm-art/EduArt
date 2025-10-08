@@ -1,0 +1,46 @@
+Analyze this image of an Art History exam question and extract all structured elements.
+
+This image and OCR text are about selecting the correct choice in sentence among two choices. The image contains the string "COMPLETAMENTO CHIUSO" and spaces where two highlighted strings are close each other. The question should be to select the correct choice among the two choices.
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+
+EXTRACTION REQUIREMENTS:
+- Extract question text only
+
+MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+{{
+  "type": "completion_closed",
+  "question_title": "clean question title",
+  "question_text": "full question text from white background area",
+  "choices": [
+    {{"id": "BLANK_1", "options": ["first choice text", "second choice text"]}},
+    {{"id": "BLANK_2", "options": ["first choice text", "second choice text"]}}
+  ],
+  "language": "it"
+}}
+
+STRICT REQUIREMENTS:
+- Return ONLY the JSON object above
+- DO NOT add any other fields beyond those specified
+- DO NOT add comments or explanations
+- Use [BLANK_1], [BLANK_2], [BLANK_n] (where n is the choice number) for identifying the areas where the choices need to be placed, not empty strings
+- Question text is the question text to be extracted, with [BLANK_n] in place of the choices. 
+- The choices array must contain exactly one object with id "BLANK_n" and options being an array of the two choices
+
+VISUAL IDENTIFICATION:
+- Look for choices highlighted with BLUE CIRCULAR BORDERS
+- These choices appear in PAIRS - two options for each blank
+- Each pair represents alternative options for a single [BLANK_n] position
+
+CHOICE EXTRACTION:
+- Group blue-bordered choices into pairs based on their visual proximity
+- Each pair should contain exactly two alternative options
+- Match each pair to its corresponding [BLANK_n] in the question text
+- Maintain the sequential order of blanks as they appear in the text
+
+
+Noisy OCR text:
+{ocr_text}
+
+HTML text:
+{html_text}

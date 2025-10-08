@@ -65,12 +65,18 @@ def load_prompts() -> tuple[str, str, str, str, str]:
       dir_prompts / "extract_text_select_errors.txt")
   extract_text_positioning = read_prompt(
       dir_prompts / "extract_text_positioning.txt")
+  extract_text_completion_open = read_prompt(
+      dir_prompts / "extract_text_completion_open.txt")
+  extract_text_completion_closed = read_prompt(
+      dir_prompts / "extract_text_completion_closed.txt")
+  extract_text_true_false = read_prompt(
+      dir_prompts / "extract_text_true_false.txt")
 
-  return system_prompt, extract_type, extract_text_multiple_choice, extract_text_select_errors, extract_text_positioning
+  return system_prompt, extract_type, extract_text_multiple_choice, extract_text_select_errors, extract_text_positioning, extract_text_completion_open, extract_text_completion_closed, extract_text_true_false
 
 
 # Load prompts from files
-SYSTEM_PROMPT, EXTRACT_TYPE_PROMPT, EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE, EXTRACT_TEXT_PROMPT_SELECT_ERRORS, EXTRACT_TEXT_PROMPT_POSITIONING = load_prompts()
+SYSTEM_PROMPT, EXTRACT_TYPE_PROMPT, EXTRACT_TEXT_PROMPT_MULTIPLE_CHOICE, EXTRACT_TEXT_PROMPT_SELECT_ERRORS, EXTRACT_TEXT_PROMPT_POSITIONING, EXTRACT_TEXT_PROMPT_COMPLETION_OPEN, EXTRACT_TEXT_PROMPT_COMPLETION_CLOSED, EXTRACT_TEXT_PROMPT_TRUE_FALSE = load_prompts()
 
 
 def load_vision_model() -> None:
@@ -146,9 +152,9 @@ def parse_json_with_fallback(text: str) -> Dict[str, Any]:
   if not text or text.strip() == "":
     return {"type": "unknown"}
 
-  # Remove Markdown code block if present
-  if text.strip().startswith("```json") and text.strip().endswith("```"):
-    text = text.strip()[7:-3].strip()
+  # Remove Markdown code block if present using regex
+  text = re.sub(r"^(?:```(?:json)?\s*)", "", text)
+  text = re.sub(r"```\s*$", "", text, flags=re.MULTILINE)
 
   try:
     result = json.loads(text)
@@ -297,6 +303,21 @@ def extract_question_text(data: Dict[str, Any]) -> Dict[str, Any]:
   elif data["type"] == "positioning":
     # Use dedicated positioning prompt
     user_prompt = EXTRACT_TEXT_PROMPT_POSITIONING.format(
+        ocr_text=data["ocr_text"], html_text=html_text)
+  
+  elif data["type"] == "completion_open":
+    # Use dedicated completion open prompt
+    user_prompt = EXTRACT_TEXT_PROMPT_COMPLETION_OPEN.format(
+        ocr_text=data["ocr_text"], html_text=html_text)
+  
+  elif data["type"] == "completion_closed":
+    # Use dedicated completion closed prompt
+    user_prompt = EXTRACT_TEXT_PROMPT_COMPLETION_CLOSED.format(
+        ocr_text=data["ocr_text"], html_text=html_text)
+    
+  elif data["type"] == "true_false":
+    # Use dedicated true/false prompt
+    user_prompt = EXTRACT_TEXT_PROMPT_TRUE_FALSE.format(
         ocr_text=data["ocr_text"], html_text=html_text)
 
   else:

@@ -1,16 +1,16 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about a multiple_choice question, a question with image and multiple choice options (A, B, C, D, etc.)
+This image and OCR text are about a true/false question, a question with true/false options.
 
 CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 EXTRACTION REQUIREMENTS:
-- Extract question + all options with letters (A,B,C,D,E, etc)
+- Extract the options with letters (A,B,C,D,E, etc)
 - choices: array with id and text
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
-  "type": "multiple_choice",
+  "type": "true_false",
   "question_title": "clean question title",
   "question_text": "full question text",
   "choices": [
@@ -24,8 +24,9 @@ STRICT REQUIREMENTS:
 - Return ONLY the JSON object above
 - DO NOT add any other fields beyond those specified
 - DO NOT add comments or explanations
-- Extract ALL multiple choice options with their correct letters
+- Extract ALL options with their correct letters
 - Use null for missing data, not empty strings
+- do not use true or false as choices
 
 Noisy OCR text:
 {ocr_text}
