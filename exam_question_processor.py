@@ -353,12 +353,25 @@ def extract_question_text(data: Dict[str, Any]) -> Dict[str, Any]:
 def main(force_ocr, verbose, exercise, min_question, max_question):
   """Process multiple questions using LangChain sequential batch processing with multi-model support"""
 
+  # Count actual PNG files in the raw folder
+  actual_png_count = count_png_files_in_raw(exercise)
+  
+  # Use the minimum between max_question and actual PNG count
+  effective_max_question = min(max_question, actual_png_count)
+  
   print("=== Enhanced Multi-Model Exam Question Processor ===")
   print(f"Configuration: {Config.get_model_info()}")
   print(f"Force OCR: {force_ocr}")
   print(f"Verbose: {verbose}")
   print(f"Exercise: {exercise}")
-  print(f"Questions: {min_question}-{max_question}")
+  print(f"Requested questions: {min_question}-{max_question}")
+  print(f"Available PNG files: {actual_png_count}")
+  print(f"Effective questions: {min_question}-{effective_max_question}")
+
+  # Check if we have any questions to process
+  if effective_max_question < min_question:
+    print(f"Error: No questions to process. Available PNG files ({actual_png_count}) is less than min_question ({min_question})")
+    return []
 
   # Set global verbose flag for models
   Config.VERBOSE = verbose
@@ -388,11 +401,11 @@ def main(force_ocr, verbose, exercise, min_question, max_question):
           "question": question,
           "force_ocr": force_ocr
       }
-      for question in range(min_question, max_question + 1)
+      for question in range(min_question, effective_max_question + 1)
   ]
 
   print(
-    f"Starting LangChain sequential batch processing of exercise {exercise}, questions {min_question}-{max_question}...")
+    f"Starting LangChain sequential batch processing of exercise {exercise}, questions {min_question}-{effective_max_question}...")
   print(f"Using {Config.MODEL_TYPE.upper()} model")
 
   try:
@@ -427,8 +440,9 @@ def main(force_ocr, verbose, exercise, min_question, max_question):
         parsed_path = output_path / f"{exercise}/json/{question}.json"
         parsed_path.parent.mkdir(parents=True, exist_ok=True)
 
-        result["base_path"] = str(base_path)
-        result["output_path"] = str(output_path)
+        # Remove keys not needed in final output
+        for key in ["base_path", "output_path", "force_ocr", "ocr_text"]:
+          result.pop(key, None)
 
         with open(parsed_path, "w", encoding="utf-8") as f:
           json.dump(result, f, indent=2, ensure_ascii=False)
@@ -446,7 +460,7 @@ def main(force_ocr, verbose, exercise, min_question, max_question):
     print(f"\n=== Multi-Model Processing Summary ===")
     print(f"Model: {Config.MODEL_TYPE.upper()}")
     print(f"Exercise: {exercise}")
-    print(f"Total questions: {max_question - min_question + 1}")
+    print(f"Total questions: {effective_max_question - min_question + 1}")
     print(f"Successful: {successful_count}")
     print(f"Failed: {failed_count}")
     print(f"Results saved to: {output_path}/{exercise}/json/")
@@ -456,6 +470,24 @@ def main(force_ocr, verbose, exercise, min_question, max_question):
   except Exception as e:
     print(f"Batch processing error: {e}")
     return []
+
+
+def count_png_files_in_raw(exercise: int) -> int:
+  """Count the number of PNG files in the raw folder for the given exercise"""
+  BASE_DIR = Path(__file__).parent
+  base_path = BASE_DIR / "questions/data/"
+  raw_path = base_path / f"{exercise}/raw/"
+  
+  if not raw_path.exists():
+    print(f"Warning: Raw folder does not exist: {raw_path}")
+    return 0
+  
+  # Count PNG files by looking for files with .png extension
+  png_files = list(raw_path.glob("*.png"))
+  png_count = len(png_files)
+  
+  print(f"Found {png_count} PNG files in {raw_path}")
+  return png_count
 
 
 def any_ocr_files_missing(exercise: int, min_question: int, max_question: int) -> bool:
