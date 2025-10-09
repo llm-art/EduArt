@@ -8,7 +8,7 @@ EXTRACTION REQUIREMENTS:
 - Extract question text only
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
-{{
+{{{{
   "type": "completion_closed",
   "question_title": "clean question title",
   "question_text": "full question text from white background area",
@@ -17,7 +17,7 @@ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
     {{"id": "BLANK_2", "options": ["first choice text", "second choice text"]}}
   ],
   "language": "it"
-}}
+}}}}
 
 STRICT REQUIREMENTS:
 - Return ONLY the JSON object above

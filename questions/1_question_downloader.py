@@ -5,7 +5,7 @@ Zanichelli Exercise Automation Script - Unified Version
 This script automates the process of accessing and starting exercises on the Zanichelli platform.
 It uses a modular architecture for better maintainability and extensibility.
 
-Usage: python question_downloader.py -e 1 -e 2 -e 3
+Usage: python 1_question_downloader.py -e 1 -e 2 -e 3
 
 Requirements:
 - playwright
@@ -156,11 +156,11 @@ def main(exercises, all, url, no_login, headless, validate_content, config):
         if success:
             click.echo(click.style("\n🎉 All done!", fg='green', bold=True))
             click.echo("\nUsage examples:")
-            click.echo("  Single exercise:    python question_downloader.py -e 2")
-            click.echo("  Multiple exercises: python question_downloader.py -e 1 -e 3 -e 5")
-            click.echo("  All exercises:      python question_downloader.py --all")
-            click.echo("  Headless mode:      python question_downloader.py -e 1 --headless")
-            click.echo("  Without login:      python question_downloader.py -e 1 --no-login")
+            click.echo("  Single exercise:    python 1_question_downloader.py -e 2")
+            click.echo("  Multiple exercises: python 1_question_downloader.py -e 1 -e 3 -e 5")
+            click.echo("  All exercises:      python 1_question_downloader.py --all")
+            click.echo("  Headless mode:      python 1_question_downloader.py -e 1 --headless")
+            click.echo("  Without login:      python 1_question_downloader.py -e 1 --no-login")
         else:
             click.echo(click.style("\n❌ Processing failed", fg='red'))
             click.echo("\nTroubleshooting:")

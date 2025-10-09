@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 
 from .browser.browser_manager import BrowserManager
-from .config.manager import ConfigManager
+from .config import ConfigManager
 from .files.manager import FileManager
 from .workflows.login import LoginWorkflow
 from .workflows.navigation import NavigationWorkflow

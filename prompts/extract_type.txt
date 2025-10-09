@@ -3,7 +3,8 @@ Analyze this image of an Art History exam question and identify ONLY the questio
 CRITICAL: You MUST return ONLY a valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 SUPPORTED QUESTION TYPES:
-* multiple_choice: Question with image and multiple choice options (A, B, C, D, etc.)
+* multiple_choice_radio: Question with radio buttons and multiple choice options (A, B, C, D, etc.) where only ONE answer can be selected
+* multiple_choice_check: Question with checkboxes and multiple choice options (A, B, C, D, etc.) where MULTIPLE answers can be selected
 * select_errors: A question where errors are highlighted in a passage of text, contains the string "ERRORI EVIDENZIATI" or "TROVA ERRORE"
 * completion_closed: Question that requires selecting the correct choice in sentence among two choices. Look for:
     - Instructions like "COMPLETAMENTO CHIUSO" or "Ricostruisci il testo"
@@ -24,7 +25,7 @@ SUPPORTED QUESTION TYPES:
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
-  "type": "multiple_choice|select_errors|positioning|completion_open|completion_closed|true_false",
+  "type": "multiple_choice_radio|multiple_choice_check|select_errors|positioning|completion_open|completion_closed|true_false",
   "language": "it",
   "has_image": true|false
 }}}}
@@ -34,7 +35,7 @@ STRICT REQUIREMENTS:
 - DO NOT add any other fields
 - DO NOT add comments or explanations
 - DO NOT add choices, question_text, or any other fields
-- The "type" field must be exactly one of: "multiple_choice", "select_errors", or "positioning"
+- The "type" field must be exactly one of: "multiple_choice_radio", "multiple_choice_check", "select_errors", "positioning", "completion_open", "completion_closed", or "true_false"
 - The "has_image" field must be exactly true or false (boolean)
 
 Noisy OCR text:

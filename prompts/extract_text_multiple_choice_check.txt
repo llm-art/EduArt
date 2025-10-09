@@ -1,6 +1,6 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about a multiple_choice_radio question, a question with radio buttons and multiple choice options (A, B, C, D, etc.) where only ONE answer can be selected
+This image and OCR text are about a multiple_choice_check question, a question with checkboxes and multiple choice options (A, B, C, D, etc.) where MULTIPLE answers can be selected
 
 CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
@@ -10,7 +10,7 @@ EXTRACTION REQUIREMENTS:
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
-  "type": "multiple_choice_radio",
+  "type": "multiple_choice_check",
   "question_title": "clean question title",
   "question_text": "full question text",
   "choices": [

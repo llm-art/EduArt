@@ -12,7 +12,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from PIL import Image
 
 from .base import VisionModel
-from config import Config
+from ..config import Config
 
 
 class GeminiVisionModel(VisionModel):

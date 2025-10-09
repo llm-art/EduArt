@@ -7,7 +7,7 @@ from typing import Optional
 from .base import VisionModel
 from .qwen_model import QwenVisionModel
 from .gemini_model import GeminiVisionModel
-from config import Config
+from ..config import Config
 
 
 def create_vision_model(model_type: Optional[str] = None, **kwargs) -> VisionModel:

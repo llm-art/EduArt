@@ -9,7 +9,7 @@ from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 from qwen_vl_utils import process_vision_info
 
 from .base import VisionModel
-from config import Config
+from ..config import Config
 
 
 class QwenVisionModel(VisionModel):
