@@ -13,15 +13,31 @@
       "args": ["--all"]
     },
     {
-      "name": "Python Debugger: Exam Question Processor",
+      "name": "[2] Question preprocessor",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/exam_question_processor.py",
+      "program": "${workspaceFolder}/questions/2_question_preprocessor.py",
       "console": "integratedTerminal",
       "args": [
-        "--exercise", "4",
+        "--exercise", "1",
         "--min-question", "1",
-        "--max-question", "2",
+        "--max-question", "20",
+        //"--force-ocr",
+        "--verbose"
+      ]
+    },
+    {
+      "name": "[3] Question answerer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/3_question_answerer.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--exercises", "1",
+        "--min-question", "1",
+        "--max-question", "1",
+        "-u", "https://esercizi.zanichelli.it/argomento/Pittura-rinascimentale/x2rnbu-x2rnih-hv05y",
+        //"--headless"
       ]
     }
   ]
