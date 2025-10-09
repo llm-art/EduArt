@@ -66,10 +66,34 @@ class QuestionData:
     def __post_init__(self):
         """Post-initialization processing."""
         if self.choices and isinstance(self.choices, list) and len(self.choices) > 0:
-            # Convert dict choices to Choice objects if needed
-            if isinstance(self.choices[0], dict):
-                self.choices = [Choice(**choice) if isinstance(choice, dict) else choice 
-                              for choice in self.choices]
+            # Handle different choice formats based on question type
+            if self.type == "completion_closed":
+                # completion_closed has format: [{"id": "BLANK_1", "options": ["choice1", "choice2"]}]
+                # Keep as-is, don't convert to Choice objects
+                pass
+            elif self.type == "positioning":
+                # positioning has format: ["choice1", "choice2", "choice3"]
+                # Keep as-is, don't convert to Choice objects
+                pass
+            elif isinstance(self.choices[0], dict):
+                # Standard multiple choice format: [{"id": "A", "text": "option text"}]
+                # Convert to Choice objects, but only if they have the right structure
+                converted_choices = []
+                for choice in self.choices:
+                    if isinstance(choice, dict):
+                        if "text" in choice and "id" in choice:
+                            # Standard Choice format
+                            converted_choices.append(Choice(**choice))
+                        elif "options" in choice:
+                            # completion_closed format - keep as dict
+                            converted_choices.append(choice)
+                        else:
+                            # Unknown dict format - keep as-is
+                            converted_choices.append(choice)
+                    else:
+                        # Not a dict - keep as-is
+                        converted_choices.append(choice)
+                self.choices = converted_choices
     
     @property
     def question_type(self) -> QuestionType:

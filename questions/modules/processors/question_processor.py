@@ -255,10 +255,7 @@ class QuestionProcessor:
             "type": question_data.type,
             "question_title": question_data.question_title,
             "question_text": question_data.question_text,
-            "choices": [
-                {"id": choice.id, "text": choice.text, "is_correct": choice.is_correct}
-                for choice in (question_data.choices or [])
-            ] if question_data.choices else None,
+            "choices": self._serialize_choices(question_data.choices, question_data.type),
             "image": question_data.image_path,
             "language": question_data.language,
             "has_image": question_data.has_image
@@ -281,6 +278,45 @@ class QuestionProcessor:
         
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data_dict, f, indent=2, ensure_ascii=False)
+    
+    def _serialize_choices(self, choices, question_type: str):
+        """
+        Serialize choices based on question type.
+        
+        Args:
+            choices: The choices data
+            question_type: Type of question
+            
+        Returns:
+            Serialized choices for JSON output
+        """
+        if not choices:
+            return None
+        
+        if question_type == "completion_closed":
+            # completion_closed format: [{"id": "BLANK_1", "options": ["choice1", "choice2"]}]
+            return choices  # Keep as-is
+        elif question_type == "positioning":
+            # positioning format: ["choice1", "choice2", "choice3"]
+            return choices  # Keep as-is
+        else:
+            # Standard multiple choice format: convert Choice objects to dicts
+            serialized = []
+            for choice in choices:
+                if hasattr(choice, 'id') and hasattr(choice, 'text'):
+                    # Choice object
+                    serialized.append({
+                        "id": choice.id,
+                        "text": choice.text,
+                        "is_correct": getattr(choice, 'is_correct', None)
+                    })
+                elif isinstance(choice, dict):
+                    # Already a dict
+                    serialized.append(choice)
+                else:
+                    # String or other format
+                    serialized.append(choice)
+            return serialized
     
     # LangChain compatibility methods
     def _ocr_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
