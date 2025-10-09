@@ -233,6 +233,107 @@ class VisionModelService:
             print(f"Question text extraction error: {e}")
             return {"text_extraction_error": str(e)}
     
+    def generate_answer(self, question_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Generate answer for a question using the vision model.
+        
+        Args:
+            question_data: Dictionary containing question information
+            
+        Returns:
+            Dictionary with generated answer and metadata
+        """
+        try:
+
+            
+            # Format choices text
+            choices_text = ""
+            if question_data.get('choices'):
+                choices_text = "OPTIONS:\n"
+                for choice in question_data['choices']:
+                    if isinstance(choice, dict):
+                        choices_text += f"{choice.get('id', '?')}. {choice.get('text', '')}\n"
+                    else:
+                        choices_text += f"{choice}\n"
+            
+            # Load answer prompt template
+            user_prompt = self.prompt_manager.get_answer_prompt(
+                question_type=question_data.get('type', 'unknown'),
+                question_title=question_data.get('question_title', ''),
+                question_text=question_data.get('question_text', ''),
+                language=question_data.get('language', 'it'),
+                choices_text=choices_text
+            )
+            
+            system_prompt = "You are an expert Art History student."
+            
+            # Get image path if available
+            image_path = question_data.get('image')
+            if image_path and not Path(image_path).exists():
+                print(f"⚠️ Warning: Image file not found: {image_path}")
+                image_path = None
+            
+            print(f"Generating answer for question {question_data.get('question', '?')}...")
+            print(f"Question type: {question_data.get('type', 'unknown')}")
+            print(f"Using image: {'Yes' if image_path else 'No'}")
+            
+            # Generate answer using vision model
+            response = self.chat(
+                image_path=image_path or "",
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                description="answer generation"
+            )
+            
+            # Clean and format the response
+            answer = self._clean_response(response, question_data.get('type'))
+            
+            print(f"Raw LLM response: {response}")
+            print(f"Cleaned answer: {answer}")
+            
+            # Get model info
+            model_info = self.vision_model.get_model_info() if self.vision_model else {}
+            model_name = model_info.get('model_name', 'Unknown')
+            provider = model_info.get('provider', '')
+            extended_model_name = f"{provider} {model_name}".strip() if provider else model_name
+            
+            return {
+                'success': True,
+                'generated_answer': answer,
+                'raw_response': response,
+                'model_name': extended_model_name,
+                'used_image': image_path is not None
+            }
+            
+        except Exception as e:
+            print(f"❌ Error generating answer: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'generated_answer': None
+            }
+    
+    def _clean_response(self, response: str, question_type: str) -> str:
+        """Clean and format the LLM response based on question type."""
+        response = response.strip()
+        
+        if question_type in ['multiple_choice', 'true_false']:
+            # Extract just the letter for multiple choice/true-false
+            import re
+            letter_match = re.search(r'\b([A-E])\b', response)
+            if letter_match:
+                return letter_match.group(1)
+            
+            # Fallback: look for the first letter in the response
+            first_letter = re.search(r'([A-E])', response)
+            if first_letter:
+                return first_letter.group(1)
+        
+        return response
+
+            
+        
+    
     def _parse_json_response(self, text: str) -> Dict[str, Any]:
         """
         Parse JSON response with fallback handling.
@@ -292,6 +393,8 @@ class VisionModelService:
             text_data = self.extract_question_text(
                 image_path, question_type, ocr_text, html_text
             )
+
+
             
             # Step 3: Combine data into QuestionData object
             combined_data = {**type_data, **text_data}

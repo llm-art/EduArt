@@ -21,14 +21,17 @@ class NavigationWorkflow:
         self.selectors = SelectorStrategies()
         self.processor = ContentProcessor(page)
     
-    async def get_exercise_cards(self) -> List[Any]:
+    async def get_exercise_cards(self, reveal_all: bool = True) -> List[Any]:
         """
-        Get all exercise cards from the page, including hidden ones.
+        Get exercise cards from the page.
+        
+        Args:
+            reveal_all: If True, reveals all hidden exercises. If False, only gets visible ones.
         
         Returns:
             List of exercise card elements
         """
-        print("Looking for exercise cards...")
+        print(f"Looking for exercise cards (reveal_all={reveal_all})...")
         
         # Wait for z-card elements to load
         try:
@@ -36,8 +39,9 @@ class NavigationWorkflow:
         except PlaywrightTimeoutError:
             print("Warning: z-card elements not found")
         
-        # First, try to reveal all hidden exercises
-        await self._reveal_all_exercises()
+        # Reveal all hidden exercises only if requested
+        if reveal_all:
+            await self._reveal_all_exercises()
         
         card_selectors = self.selectors.get_selectors('EXERCISE_CARDS')
         
@@ -65,6 +69,15 @@ class NavigationWorkflow:
             print(f"Fallback search failed: {e}")
         
         raise Exception("Could not find any exercise cards or Anteprima buttons")
+
+    async def get_visible_exercise_cards(self) -> List[Any]:
+        """
+        Get only the currently visible exercise cards without revealing hidden ones.
+        
+        Returns:
+            List of visible exercise card elements
+        """
+        return await self.get_exercise_cards(reveal_all=False)
     
     async def _reveal_all_exercises(self) -> None:
         """
@@ -164,6 +177,7 @@ class NavigationWorkflow:
     async def click_anteprima_button(self, exercise_index: int = 0) -> bool:
         """
         Locate and click the ANTEPRIMA button for a specific exercise.
+        First tries with visible cards only, then reveals all if needed.
         
         Args:
             exercise_index: Index of the exercise to click (0-based)
@@ -173,14 +187,43 @@ class NavigationWorkflow:
         """
         print(f"Looking for ANTEPRIMA button for exercise {exercise_index + 1}...")
         
-        # Get all exercise cards or ANTEPRIMA buttons
-        cards = await self.get_exercise_cards()
+        # First, try with only visible cards (optimization)
+        try:
+            visible_cards = await self.get_visible_exercise_cards()
+            print(f"Found {len(visible_cards)} visible exercise cards")
+            
+            if exercise_index < len(visible_cards):
+                print(f"Target exercise {exercise_index + 1} is visible, attempting to click...")
+                success = await self._click_exercise_card(visible_cards[exercise_index], exercise_index)
+                if success:
+                    return True
+                print(f"Failed to click visible exercise {exercise_index + 1}, will try revealing all exercises...")
+            else:
+                print(f"Target exercise {exercise_index + 1} is not visible (only {len(visible_cards)} visible), revealing all exercises...")
+        except Exception as e:
+            print(f"Error getting visible cards: {e}, will try revealing all exercises...")
+        
+        # If visible cards didn't work, get all cards (including hidden ones)
+        print("Getting all exercise cards (including hidden ones)...")
+        cards = await self.get_exercise_cards(reveal_all=True)
         
         if exercise_index >= len(cards):
             raise Exception(f"Exercise index {exercise_index} is out of range. Found {len(cards)} exercises.")
         
         target_card = cards[exercise_index]
+        return await self._click_exercise_card(target_card, exercise_index)
+    
+    async def _click_exercise_card(self, target_card: Any, exercise_index: int) -> bool:
+        """
+        Helper method to click on a specific exercise card.
         
+        Args:
+            target_card: The card element to click
+            exercise_index: Index of the exercise (for logging)
+            
+        Returns:
+            True if successful, False otherwise
+        """
         # Try to find Anteprima button within the card
         anteprima_selectors = self.selectors.get_selectors('ANTEPRIMA_BUTTON')
         
@@ -219,7 +262,7 @@ class NavigationWorkflow:
         except Exception as e:
             print(f"Error clicking card directly: {e}")
         
-        raise Exception(f"Could not click ANTEPRIMA button for exercise {exercise_index + 1}")
+        return False
     
     async def _get_exercise_title_from_card(self, card: Any, exercise_index: int) -> str:
         """Get exercise title from a card element."""

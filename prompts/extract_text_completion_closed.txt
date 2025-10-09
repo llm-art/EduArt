@@ -23,6 +23,7 @@ STRICT REQUIREMENTS:
 - Return ONLY the JSON object above
 - DO NOT add any other fields beyond those specified
 - DO NOT add comments or explanations
+- DO NOT return multiple times the same pair of choices. ONLY one [BLANK_n] per pair of choices
 - Use [BLANK_1], [BLANK_2], [BLANK_n] (where n is the choice number) for identifying the areas where the choices need to be placed, not empty strings
 - Question text is the question text to be extracted, with [BLANK_n] in place of the choices. 
 - The choices array must contain exactly one object with id "BLANK_n" and options being an array of the two choices
@@ -31,12 +32,16 @@ VISUAL IDENTIFICATION:
 - Look for choices highlighted with BLUE CIRCULAR BORDERS
 - These choices appear in PAIRS - two options for each blank
 - Each pair represents alternative options for a single [BLANK_n] position
+- Sometimes the choices can be in two different rows, but they are always in pairs.
 
 CHOICE EXTRACTION:
-- Group blue-bordered choices into pairs based on their visual proximity
+- Identify pairs of blue-bordered choices that appear close together
+- Each PAIR of blue-bordered choices represents ONE [BLANK_n] in the question text
+- Do NOT create separate BLANK_n for each individual choice - only for each PAIR
 - Each pair should contain exactly two alternative options
 - Match each pair to its corresponding [BLANK_n] in the question text
 - Maintain the sequential order of blanks as they appear in the text
+- IMPORTANT: If you see 10 individual blue-bordered choices, they form 5 pairs = 5 BLANK_n entries
 
 
 Noisy OCR text:
