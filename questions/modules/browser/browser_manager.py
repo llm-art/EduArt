@@ -110,19 +110,138 @@ class BrowserManager:
         except Exception as e:
             print(f"Warning: Navigation issue ({e}), but continuing...")
     
+    async def hide_footer(self) -> bool:
+        """
+        Hide the footer element on the page.
+        
+        Returns:
+            True if footer was found and hidden, False otherwise
+        """
+        if not self.page:
+            raise RuntimeError("Browser not initialized. Call setup_browser() first.")
+        
+        try:
+            # Method 1: Use the specific DOM structure and add footer class
+            footer_found = await self.page.evaluate('''
+                () => {
+                    // Navigate through the specific DOM structure
+                    const root = document.querySelector('div#root');
+                    if (!root) {
+                        console.log('Root div not found');
+                        return false;
+                    }
+                    
+                    // Find div with display="inline-flex" inside root
+                    const inlineFlexDiv = root.querySelector('div[display="inline-flex"]');
+                    if (!inlineFlexDiv) {
+                        console.log('Inline-flex div not found');
+                        return false;
+                    }
+                    
+                    // Get all first-level div children
+                    const firstLevelDivs = Array.from(inlineFlexDiv.children).filter(child => child.tagName.toLowerCase() === 'div');
+                    if (firstLevelDivs.length === 0) {
+                        console.log('No first-level div children found');
+                        return false;
+                    }
+                    
+                    // Get the last div from first-level children
+                    const lastDiv = firstLevelDivs[firstLevelDivs.length - 1];
+                    
+                    // Find div with display="flex" and width="100%" inside the last div
+                    const footerDiv = lastDiv.querySelector('div[display="flex"][width="100%"]');
+                    if (!footerDiv) {
+                        console.log('Footer div with display="flex" width="100%" not found');
+                        return false;
+                    }
+                    
+                    // Add footer class and hide it
+                    footerDiv.classList.add('footer');
+                    footerDiv.setAttribute('data-hidden-by-automation', 'true');
+                    
+                    console.log('Footer found and marked with footer class');
+                    return true;
+                }
+            ''')
+            
+            if footer_found:
+                # Method 2: Add CSS rule to hide elements with footer class
+                await self.page.add_style_tag(content='''
+                    .footer {
+                        visibility: hidden !important;
+                    }
+                ''')
+                print("✓ Footer container found, marked with 'footer' class, and hidden using CSS rule")
+                return True
+            else:
+                print("Footer container not found using DOM structure path")
+                return False
+            
+        except Exception as e:
+            print(f"Error hiding footer: {e}")
+            return False
+    
+    async def show_footer(self) -> bool:
+        """
+        Show the footer element that was previously hidden.
+        
+        Returns:
+            True if footer was found and shown, False otherwise
+        """
+        if not self.page:
+            raise RuntimeError("Browser not initialized. Call setup_browser() first.")
+        
+        try:
+            # Method 1: Remove the CSS rule that hides footer elements
+            await self.page.add_style_tag(content='''
+                .footer {
+                    visibility: visible !important;
+                }
+            ''')
+            
+            # Method 2: Remove footer class from elements
+            footer_restored = await self.page.evaluate('''
+                () => {
+                    const footerElements = document.querySelectorAll('.footer[data-hidden-by-automation="true"]');
+                    let restored = false;
+                    
+                    footerElements.forEach(footer => {
+                        footer.removeAttribute('data-hidden-by-automation');
+                        footer.classList.remove('footer');
+                        restored = true;
+                        console.log('Footer class removed and visibility restored');
+                    });
+                    
+                    return restored;
+                }
+            ''')
+            
+            if footer_restored:
+                print("✓ Footer container visibility restored by removing CSS rule and footer class")
+            else:
+                print("No hidden footer container found to restore")
+            
+            return footer_restored
+            
+        except Exception as e:
+            print(f"Error showing footer: {e}")
+            return False
+
     async def take_screenshot(
-        self, 
-        path: str, 
+        self,
+        path: str,
         full_page: bool = True,
-        quality: int = 90
+        quality: int = 90,
+        hide_footer: bool = True
     ) -> str:
         """
-        Take a screenshot of the current page.
+        Take a screenshot of the current page with optional footer hiding.
         
         Args:
             path: File path to save the screenshot
             full_page: Whether to capture the full page
             quality: JPEG quality (0-100)
+            hide_footer: Whether to hide footer before taking screenshot
             
         Returns:
             Path to the saved screenshot
@@ -130,14 +249,23 @@ class BrowserManager:
         if not self.page:
             raise RuntimeError("Browser not initialized. Call setup_browser() first.")
         
+        footer_was_hidden = False
+        
         try:
             # Wait for page to be fully loaded
             await self.page.wait_for_load_state('networkidle', timeout=5000)
             await self.page.wait_for_timeout(500)
             
+            # Hide footer if requested
+            if hide_footer:
+                footer_was_hidden = await self.hide_footer()
+                if footer_was_hidden:
+                    # Wait a moment for the layout to adjust
+                    await self.page.wait_for_timeout(200)
+            
             # Take screenshot
             await self.page.screenshot(
-                path=path, 
+                path=path,
                 full_page=full_page,
                 quality=quality if path.endswith('.jpg') or path.endswith('.jpeg') else None
             )
@@ -155,6 +283,13 @@ class BrowserManager:
             except Exception as final_error:
                 print(f"Failed to take any screenshot: {final_error}")
                 raise
+        finally:
+            # Always restore footer if it was hidden
+            if hide_footer and footer_was_hidden:
+                try:
+                    await self.show_footer()
+                except Exception as e:
+                    print(f"Warning: Could not restore footer: {e}")
     
     async def get_current_url(self) -> str:
         """Get the current page URL."""
