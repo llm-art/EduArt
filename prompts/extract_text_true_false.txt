@@ -2,11 +2,11 @@ Analyze this image of an Art History exam question and extract all structured el
 
 This image and OCR text are about a true/false question, a question with true/false options.
 
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
-
 EXTRACTION REQUIREMENTS:
 - Extract the options with letters (A,B,C,D,E, etc)
 - choices: array with id and text
+- answers: array with the correct options. For each statement, there will be one correct answer that can be either True of False.
+  - Add also, in the notes, if the answer is correct or wrong, e.g., "note": "Risposta esatta." or "note": "Risposta sbagliata."
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
@@ -14,8 +14,12 @@ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
   "question_title": "clean question title",
   "question_text": "full question text",
   "choices": [
-    {{"id": "A", "text": "option A text"}},
-    {{"id": "B", "text": "option B text"}}
+    {{"id": "A", "text": "Statement A text"}},
+    {{"id": "B", "text": "Statement B text"}}
+  ],
+  "answers": [
+    {{"id": "A", "text": "True", "note": "Risposta esatta."}},
+    {{"id": "B", "text": "False", "note": "Risposta sbagliata."}}
   ],
   "language": "it"
 }}}}
@@ -27,6 +31,8 @@ STRICT REQUIREMENTS:
 - Extract ALL options with their correct letters
 - Use null for missing data, not empty strings
 - do not use true or false as choices
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 Noisy OCR text:
 {ocr_text}

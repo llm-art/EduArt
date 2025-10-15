@@ -406,6 +406,7 @@ class VisionModelService:
                 exercise=exercise,
                 question=question,
                 type=question_type,
+                answers=combined_data.get('answers'),
                 question_title=combined_data.get('question_title'),
                 question_text=combined_data.get('question_text'),
                 choices=combined_data.get('choices'),

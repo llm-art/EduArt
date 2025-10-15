@@ -93,13 +93,10 @@ class QuestionProcessor:
                 track_metadata=self.config.metadata_ai
             )
 
-            # Step 5: Generate answers
-            print("Step 5: Generating answer...")
-            answer_result = self._generate_answer(question_data)
             
             # Step 6: Save results
             print("Step 6: Saving results...")
-            self._save_question_data(question_data, answer_result)
+            self._save_question_data(question_data)
             
             # Mark as completed
             processing_time = time.time() - start_time
@@ -314,7 +311,7 @@ class QuestionProcessor:
             print(f"❌ Answer generation error: {e}")
             return result
 
-    def _save_question_data(self, question_data: QuestionData, answer_result: AnswerResult = None) -> None:
+    def _save_question_data(self, question_data: QuestionData) -> None:
         """Save question data to JSON file."""
         output_file = self.output_path / f"{question_data.exercise}/json/{question_data.question}.json"
         output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -324,6 +321,7 @@ class QuestionProcessor:
             "exercise": question_data.exercise,
             "question": question_data.question,
             "type": question_data.type,
+            "answers": question_data.answers,
             "question_title": question_data.question_title,
             "question_text": question_data.question_text,
             "choices": self._serialize_choices(question_data.choices, question_data.type),
@@ -331,22 +329,7 @@ class QuestionProcessor:
             "language": question_data.language,
             "has_image": question_data.has_image
         }
-        
-        # Add generated answers if available (as array)
-        if answer_result and answer_result.success:
-            data_dict["answers"] = [{
-                "answer": answer_result.generated_answer,
-                "model_name": answer_result.model_used,
-                "used_image": answer_result.used_image,
-                "processing_time": answer_result.processing_time,
-                "raw_response": answer_result.raw_response
-            }]
-        elif answer_result and not answer_result.success:
-            data_dict["answers"] = [{
-                "error": answer_result.error,
-                "processing_time": answer_result.processing_time
-            }]
-        
+
         # Add AI metadata if tracking is enabled and calls exist
         if self.config.metadata_ai and question_data.ai_calls:
             data_dict["ai_calls"] = [

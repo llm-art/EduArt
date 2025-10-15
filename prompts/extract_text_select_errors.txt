@@ -1,19 +1,21 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about a select_errors question, a question where errors needs to be selected and highlighted in a text. The image contains the string 'ERRORI EVIDENZIATI' or 'TROVA ERRORE'
-
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+This image contains a "TROVA ERRORE" (Find Error) or "ERRORI EVIDENZIATI" (Highlighted Errors) exercise where students must identify errors in a text passage.
 
 EXTRACTION REQUIREMENTS:
-- Extract question text only
-- FOCUS ON TEXT IN BLACK BBOX AREAS - these contain the main question content
-- The text you need to extract is specifically located within black rectangular boxes/borders in the image
+- Extract the main question text (the passage with potential errors)
+- Identify errors and their corrections if shown
+- Extract any feedback or correct answers provided
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
   "type": "select_errors",
   "question_title": "clean question title",
-  "question_text": "full question text from black bbox areas",
+  "question_text": "main text passage where errors need to be identified",
+  "errors": [
+    {{"incorrect": "wrong word/phrase", "correct": "correct word/phrase", "position": "approximate position in text"}},
+    {{"incorrect": "wrong word/phrase", "correct": "correct word/phrase", "position": "approximate position in text"}}
+  ],
   "language": "it"
 }}}}
 
@@ -22,8 +24,32 @@ STRICT REQUIREMENTS:
 - DO NOT add any other fields beyond those specified
 - DO NOT add comments or explanations
 - Use null for missing data, not empty strings
-- Question text is the only text to extract, do NOT include any task description or difficulty level
-- Take a look at the example image. The black boxes contain the main question text to extract, this is where the question_text is located.
+- Extract the main text passage where students need to find errors
+- If errors and corrections are visible (underlined words, feedback sections), include them in the errors array
+- If no specific errors are shown, use empty array for errors field
+
+VISUAL IDENTIFICATION GUIDE:
+- Look for "TROVA ERRORE" or "ERRORI EVIDENZIATI" indicators
+- Main text passage is usually in the upper portion of the exercise
+- Errors may be indicated by:
+  * Underlined words in the text
+  * Highlighted or colored text
+  * Feedback sections showing "La risposta esatta è:" (The correct answer is:)
+- Corrected text may appear in a separate section (often with red border indicating "Esercizio sbagliato")
+- Error counter may show format like "4/4" indicating number of errors found
+
+EXTRACTION PROCESS:
+1. Extract the main question title from the header
+2. Extract the primary text passage where errors need to be identified
+3. If corrections are shown, identify the incorrect words and their correct replacements
+4. Look for feedback sections that reveal the correct answers
+5. Match errors to their positions in the original text
+
+EXAMPLE STRUCTURE:
+If text shows "Giovanni II Bentivoglio" but should be "Giovanni I Bentivoglio", create:
+{{"incorrect": "Giovanni II Bentivoglio", "correct": "Giovanni I Bentivoglio", "position": "beginning of passage"}}
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 Noisy OCR text:
 {ocr_text}

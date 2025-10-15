@@ -1,20 +1,25 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about a positioning question, a question where the elements need to be placed correctly in the text on the right. The image contains the string 'POSIZIONAMENTO' and blank areas where the elements need to be placed.
-
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+This image contains a "POSIZIONAMENTO" (Positioning) exercise where students must drag individual terms from a list to fill blanks in a text passage.
 
 EXTRACTION REQUIREMENTS:
-- Extract question text only
-- The text question that you need to extract is specifically locate in the right part of the image, in the area with a white background
+- Extract the text passage with blanks marked as gaps or empty spaces
+- Extract all individual draggable terms from the left side
+- Identify the correct answers if shown in feedback sections
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
   "type": "positioning",
   "question_title": "clean question title",
-  "question_text": "full question text from white background area",
+  "question_text": "text passage with [BLANK_n] where terms should be placed",
   "choices": [
-    "list of elements to be placed in the text, extracted as a list of strings"
+    "individual term 1",
+    "individual term 2",
+    "individual term 3"
+  ],
+  "answers": [
+    {{"blank_position": 1, "correct_term": "correct term for first blank"}},
+    {{"blank_position": 2, "correct_term": "correct term for second blank"}}
   ],
   "language": "it"
 }}}}
@@ -23,8 +28,37 @@ STRICT REQUIREMENTS:
 - Return ONLY the JSON object above
 - DO NOT add any other fields beyond those specified
 - DO NOT add comments or explanations
-- Use [BLANK] for identifying the areas where the choices need to be placed, not empty strings
-- Question text one of the text to extract. The other is the list of elements to be placed in the text, which should be extracted as a list of strings. Be sure to extract all the texts that should be placed in the text, even if they are wrong or short.
+- Extract the text passage from the right side, preserving blank spaces where terms should be placed
+- Extract ALL individual terms from the left side as separate strings in the choices array
+- If answers are shown in feedback sections, include them in the answers array
+- Use null for answers if no feedback is visible
+
+VISUAL IDENTIFICATION GUIDE:
+- **Left side**: Contains individual draggable terms in circular buttons or boxes
+- **Right side**: Contains text passage with blanks (gaps) where terms need to be placed
+- **Layout**: Clear two-column structure with terms on left, text on right
+- **Terms**: Individual words or phrases that can be dragged (not pairs like in completion_closed)
+- **Feedback**: May show colored indicators (green=correct, red=incorrect) and answer summaries
+
+EXTRACTION PROCESS:
+1. Extract the question title from the header
+2. Extract the text passage from the right side, preserving the structure and blank positions
+3. Extract ALL individual terms from the left side (circular buttons, boxes, or list items)
+4. If feedback is shown, identify which terms are correct for which blank positions
+5. Look for "Esercizio sbagliato" sections that may show correct answers
+
+EXAMPLE STRUCTURE:
+Left side terms: ["Costantino", "Perugino", "Cristo", "tempio"]
+Right side text: "Il capolavoro di [BLANK_n] resta la Consegna delle chiavi a San Pietro..."
+Results in choices array with all terms and question_text with blanks marked
+
+BLANK IDENTIFICATION:
+- Look for gaps, empty spaces, or missing words in the text passage
+- Blanks may appear as visual gaps between words
+- Count the number of blanks to match with available terms
+- Some terms may be distractors (not used in the final answer)
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 Noisy OCR text:
 {ocr_text}

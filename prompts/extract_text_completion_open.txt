@@ -1,17 +1,27 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about writing the correct part of the sentence in the blank space. The image contains the string 'COMPLETAMENTO APERTO' and blank areas where the strings need to be inserted.
-
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+This image contains a "COMPLETAMENTO APERTO" (Open Completion) exercise where students must write the correct terms to fill labeled blanks in a text passage.
 
 EXTRACTION REQUIREMENTS:
-- Extract question text only
+- Extract the text passage with blanks marked with letters (A, B, C, etc.)
+- Replace letter-labeled blanks with [BLANK] placeholders
+- Extract correct answers if shown in feedback sections
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
   "type": "completion_open",
   "question_title": "clean question title",
-  "question_text": "full question text from white background area",
+  "question_text": "text passage with [BLANK] placeholders where students write answers",
+  "choices": [
+    {{"id": "A", "position": 1, "correct_answer": "correct term for blank A"}},
+    {{"id": "B", "position": 2, "correct_answer": "correct term for blank B"}},
+    {{"id": "C", "position": 3, "correct_answer": "correct term for blank C"}}
+  ],
+  answers: [
+    {{"id": "A", "answer": "student's answer for blank A"}},
+    {{"id": "B", "answer": "student's answer for blank B"}},
+    {{"id": "C", "answer": "student's answer for blank C"}}
+  ]
   "language": "it"
 }}}}
 
@@ -19,8 +29,37 @@ STRICT REQUIREMENTS:
 - Return ONLY the JSON object above
 - DO NOT add any other fields beyond those specified
 - DO NOT add comments or explanations
-- Use [BLANK] for identifying the areas where the choices need to be placed, not empty strings
-- Question text is the question text to be extracted.
+- Replace all letter-labeled blanks (A, B, C, D, etc.) with [BLANK] in the question_text
+- Extract correct answers from feedback sections if available
+- Use null for blanks array if no answers are visible
+
+VISUAL IDENTIFICATION GUIDE:
+- **Main text**: Contains passage with labeled blanks (A, B, C, D, E, F, G, etc.)
+- **Blanks**: Appear as letters in boxes or highlighted areas within the text
+- **Instructions**: Usually "Completa la descrizione inserendo i termini che ritieni corretti"
+- **Feedback**: May show "Esercizio sbagliato" sections with correct answers
+- **Answer format**: Individual terms that students must write (not select from choices)
+
+EXTRACTION PROCESS:
+1. Extract the question title from the header
+2. Extract the main text passage, replacing letter labels (A, B, C, etc.) with [BLANK]
+3. Count and identify all blank positions in sequential order
+4. If feedback is shown, extract the correct answers for each labeled blank
+5. Look for "Risposta non data" (not answered) or "Risposta sbagliata" (wrong answer) indicators
+6. Match correct answers to their corresponding blank IDs (A, B, C, etc.)
+
+EXAMPLE STRUCTURE:
+Original text: "Il San Geròlamo è databile attorno al [A]. La [B] tavola mostra..."
+Becomes: "Il San Geròlamo è databile attorno al [BLANK]. La [BLANK] tavola mostra..."
+With blanks: [{"id": "A", "position": 1, "correct_answer": "1475"}, {"id": "B", "position": 2, "correct_answer": "piccola"}]
+
+BLANK IDENTIFICATION:
+- Look for letters in boxes, circles, or highlighted areas: A, B, C, D, E, F, G, etc.
+- These represent positions where students write their answers
+- Each blank corresponds to one specific term that completes the sentence
+- Blanks are typically sequential (A, B, C...) in order of appearance
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 Noisy OCR text:
 {ocr_text}

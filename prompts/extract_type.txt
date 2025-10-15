@@ -6,17 +6,21 @@ SUPPORTED QUESTION TYPES:
 * multiple_choice_radio: Question with radio buttons and multiple choice options (A, B, C, D, etc.) where only ONE answer can be selected
 * multiple_choice_check: Question with checkboxes and multiple choice options (A, B, C, D, etc.) where MULTIPLE answers can be selected
 * select_errors: A question where errors are highlighted in a passage of text, contains the string "ERRORI EVIDENZIATI" or "TROVA ERRORE"
-* completion_closed: Question that requires selecting the correct choice in sentence among two choices. Look for:
+* completion_closed: Question that requires selecting the correct choice from PAIRS of options to fill blanks in text. Look for:
     - Instructions like "COMPLETAMENTO CHIUSO" or "Ricostruisci il testo"
-    - BLUE CIRCULAR BORDERS around choice pairs
-    - Paired options (two alternatives per blank) rather than individual draggable items
-    - Choices appear inline or near the text passage, not in a separate column
-* positioning: Question that requires placing a list of options into blanks in a text passage. Look for:
-   - Instructions like "Completa il periodo", "COMPLETAMENTO CHIUSO", "Ricostruisci il periodo scegliendo i termini corretti"
+    - Text passage with blanks that need to be filled
+    - Each blank has exactly TWO alternative choices (A/B pairs)
+    - Choices appear as labeled options (A, B, C, D, E, F) with colored borders
+    - Choices are embedded within or immediately adjacent to the text passage
+    - Color-coded feedback (green=correct, red=incorrect, grey=not answered)
+    - Answer summary may appear at bottom showing correct choices
+* positioning: Question that requires placing individual terms from a list into blanks in a text passage. Look for:
+   - Instructions like "Completa il periodo" or "Ricostruisci il periodo scegliendo i termini corretti"
    - Text like "scegli la risposta esatta per ogni gruppo di opzioni proposte"
-   - Two-column layout: LEFT SIDE with draggable options/terms, RIGHT SIDE with text containing blanks
-   - Multiple small boxes/buttons with individual terms on the left
+   - Two-column layout: LEFT SIDE with draggable individual terms/options, RIGHT SIDE with text containing blanks
+   - Multiple small boxes/buttons with individual terms (not pairs) on the left
    - Text passage with visible gaps or blank spaces on the right
+   - Each term from the left can be dragged to fill one blank in the text
 * completion_open: Question that requires writing the correct part of the sentence in the blank space. Look for:
     - Instructions like "COMPLETAMENTO APERTO" or "Completa la descrizione"
 

@@ -2,11 +2,12 @@ Analyze this image of an Art History exam question and extract all structured el
 
 This image and OCR text are about a multiple_choice_check question, a question with checkboxes and multiple choice options (A, B, C, D, etc.) where MULTIPLE answers can be selected
 
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 EXTRACTION REQUIREMENTS:
 - Extract question + all options with letters (A,B,C,D,E, etc)
 - choices: array with id and text
+- answers: in the screenshot there are multiple correct answers marked with "Risposta esatta" or "Eisposta non data", and a description below each answer. 
+- Do NOT include wrong answers ("Risposta sbagliata").
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
@@ -16,6 +17,11 @@ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
   "choices": [
     {{"id": "A", "text": "option A text"}},
     {{"id": "B", "text": "option B text"}}
+  ],
+  "answers": [
+    {{"id": "A", "description": "explanation text"}},
+    {{"id": "C", "description": "explanation text"}},
+    {{"id": "D", "description": "explanation text"}}
   ],
   "language": "it"
 }}}}
@@ -27,6 +33,8 @@ STRICT REQUIREMENTS:
 - Extract ALL multiple choice options with their correct letters
 - Use null for missing data, not empty strings
 - You MUST preserve the original order of choices as they appear in the text, including their letters
+
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 Noisy OCR text:
 {ocr_text}

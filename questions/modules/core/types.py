@@ -47,6 +47,12 @@ class Choice:
     text: str
     is_correct: Optional[bool] = None
 
+@dataclass
+class Answer:
+    """Represents the correct answer for a question."""
+    id: str
+    description: Optional[str] = None
+    note: Optional[str] = None
 
 @dataclass
 class QuestionData:
@@ -54,6 +60,7 @@ class QuestionData:
     exercise: int
     question: int
     type: str = "unknown"
+    answers: Optional[Answer] = None
     question_title: Optional[str] = None
     question_text: Optional[str] = None
     choices: Optional[List[Choice]] = None
