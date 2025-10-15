@@ -33,7 +33,7 @@ class JSONManager:
   def update_question(self, data: Dict[str, Any]) -> Dict[str, Any]:
     """Update a question JSON file with new data."""
     exercise = data.get('exercise')
-    question = data.get('question')
+    question = data.get('question')+1
 
     try:
       with open(self.base_path / str(exercise) / "json" / f"{question}.json", 'w', encoding='utf-8') as f:

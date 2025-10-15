@@ -42,8 +42,8 @@ class BrowserManager:
         print("Setting up browser...")
         
         # Default configurations
-        if viewport is None:
-            viewport = {'width': 1920, 'height': 1080}
+        #if viewport is None:
+        #    viewport = {'width': 1920, 'height': 1080}
         
         if user_agent is None:
             user_agent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '

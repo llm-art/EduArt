@@ -104,11 +104,8 @@ class SelectorStrategies:
     # Exercise Card Selectors
     EXERCISE_CARDS = [
         'z-card:has(button:has-text("Anteprima"))',
-        'z-card:has([slot="action"]:has(button:has-text("Anteprima")))',
         'z-card[clickable]',
         'z-card',
-        ':has(button:has-text("Anteprima"))',
-        ':has(button:has-text("ANTEPRIMA"))'
     ]
     
     ANTEPRIMA_BUTTON = [
@@ -291,6 +288,41 @@ class SelectorStrategies:
         'main img',
         'article img',
         '.main-content img'
+    ]
+    
+
+    # Answer Interaction Selectors
+    ANSWER_CLICK_INTERACTION = [
+      # Custom checkbox labels (PRIORITY - most common pattern for multiple choice)
+      'label:has(input[type="checkbox"])',
+      'label:has(input[type="checkbox"][name="answers"])',
+      
+      # Direct label selectors for custom checkboxes
+      'label[class*="sc-"]',  # Matches styled components pattern
+      
+      # Radio button labels and inputs
+      'label:has(input[type="radio"])',
+      'input[type="radio"]',
+      
+      # Completamento chiuso
+      '.choiceChip span[role="button"]',
+      '.choiceChip span[role="button"][tabindex=*]',
+      
+      # Positioning/drag-and-drop elements
+      '[draggable="true"]',
+      '.sc-kQFRQl',  # Drop targets
+      'button.sc-izXThL',  # Clickable positioning buttons
+      '.sc-dNHLo button',  # Alternative positioning buttons
+      '[class*="blank"]',  # Blank spaces
+      '[class*="drop"]',  # Drop zones
+      
+      # Text inputs for completamento aperto
+      'input[type="text"]:not([readonly])',
+      'textarea:not([readonly])',
+      
+      # LAST RESORT: Direct checkbox inputs (often hidden, avoid if possible)
+      'input[type="checkbox"]',
+      'input[type="checkbox"][name="answers"]'
     ]
     
     @classmethod

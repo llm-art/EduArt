@@ -15,6 +15,7 @@ from ..content.validator import ContentValidator
 from ..files.manager import FileManager
 from ..files.downloader import ContentDownloader
 from ..browser.browser_manager import BrowserManager
+from ..interactions.handler import QuestionInteractionHandler
 
 
 class QuestionProcessorWorkflow:
@@ -32,12 +33,14 @@ class QuestionProcessorWorkflow:
         self.extractor = ContentExtractor(page)
         self.processor = ContentProcessor(page)
         self.validator = ContentValidator()
+        self.interaction_handler = QuestionInteractionHandler(page)
     
     async def process_single_question(
-        self, 
-        question_number: int, 
+        self,
+        question_number: int,
         exercise_number: int,
-        validate_content: bool = True
+        validate_content: bool = True,
+        enable_interaction: bool = True
     ) -> Dict[str, Any]:
         """
         Process a single question completely.
@@ -68,18 +71,48 @@ class QuestionProcessorWorkflow:
             await self.page.wait_for_load_state('networkidle')
             await self.page.wait_for_timeout(1000)
             
-            # Step 1: Take screenshot of the current question
+            # Step 1: Extract initial question content (for type detection)
+            print(f"Step 1: Extracting initial content for question {question_number}...")
+            content = await self.extractor.extract_question_content(question_number)
+            results['content'] = content
+            
+            # Step 2: Perform question interaction (NEW) - only if enabled
+            if enable_interaction:
+                print(f"Step 2: Performing question interaction for question {question_number}...")
+                interaction_results = await self.interaction_handler.process_question_interaction(content)
+                results['interaction_results'] = interaction_results
+                
+                # Add interaction errors to main results
+                if interaction_results.get('errors'):
+                    results['errors'].extend([f"Interaction: {error}" for error in interaction_results['errors']])
+            else:
+                print(f"Step 2: Skipping question interaction (disabled) for question {question_number}...")
+                results['interaction_results'] = {
+                    'success': True,
+                    'question_type': 'interaction_disabled',
+                    'interaction_performed': False,
+                    'correggi_clicked': False,
+                    'errors': []
+                }
+            
+            # Step 3: Take screenshot (with or without interaction results)
+            screenshot_description = "with results" if enable_interaction else "without interaction"
+            print(f"Step 3: Taking screenshot {screenshot_description} for question {question_number}...")
             screenshot_path = await self._take_question_screenshot(question_number, exercise_number)
             if screenshot_path:
                 results['files_created'].append(str(screenshot_path))
             
-            # Step 2: Extract question content
-            content = await self.extractor.extract_question_content(question_number)
-            results['content'] = content
+            # Step 4: Extract final content (with answers revealed)
+            print(f"Step 4: Extracting final content with answers for question {question_number}...")
+            final_content = await self.extractor.extract_question_content(question_number)
+            results['final_content'] = final_content
             
-            # Step 3: Validate content if requested
+            # Use final content for validation and saving
+            content_to_use = final_content if final_content.get('html') else content
+            
+            # Step 5: Validate content if requested
             if validate_content:
-                validation = self.validator.validate_question_content(content)
+                validation = self.validator.validate_question_content(content_to_use)
                 results['validation'] = validation
                 
                 if not validation['is_valid']:
@@ -87,12 +120,12 @@ class QuestionProcessorWorkflow:
                     for issue in validation['issues']:
                         results['errors'].append(f"Validation: {issue}")
             
-            # Step 4: Save HTML content
-            html_file = await self._save_question_content(content, question_number, exercise_number)
+            # Step 6: Save HTML content (with answers)
+            html_file = await self._save_question_content(content_to_use, question_number, exercise_number)
             if html_file:
                 results['files_created'].append(str(html_file))
             
-            # Step 5: Process and download images
+            # Step 7: Process and download images
             images_downloaded = await self._process_question_images(question_number, exercise_number)
             results['images_downloaded'] = images_downloaded
             
@@ -101,7 +134,7 @@ class QuestionProcessorWorkflow:
                 results['files_created'].append(str(img_info['path']))
             
             results['success'] = True
-            print(f"✓ Successfully processed question {question_number}")
+            print(f"✓ Successfully processed question {question_number} with interaction")
             
         except Exception as e:
             error_msg = f"Error processing question {question_number}: {e}"
@@ -111,10 +144,11 @@ class QuestionProcessorWorkflow:
         return results
     
     async def process_all_questions_in_exercise(
-        self, 
+        self,
         exercise_number: int,
         max_questions: Optional[int] = None,
-        validate_content: bool = True
+        validate_content: bool = True,
+        enable_interaction: bool = True
     ) -> Dict[str, Any]:
         """
         Process all questions in an exercise.
@@ -159,9 +193,10 @@ class QuestionProcessorWorkflow:
                 
                 # Process the current question
                 question_result = await self.process_single_question(
-                    current_question, 
-                    exercise_number, 
-                    validate_content
+                    current_question,
+                    exercise_number,
+                    validate_content,
+                    enable_interaction
                 )
                 
                 results['question_results'].append(question_result)
@@ -177,7 +212,12 @@ class QuestionProcessorWorkflow:
                 
                 # Check if this is the last question
                 if await self.processor.is_last_question():
-                    print(f"Reached last question ({current_question})")
+                    print(f"Reached last question ({current_question}) - ensuring screenshot is captured")
+                    
+                    # CRITICAL FIX: Ensure the last question screenshot is properly taken
+                    # The screenshot should already be taken in process_single_question, but let's verify
+                    await self.page.wait_for_timeout(2000)  # Give time for any final rendering
+                    
                     break
                 else:
                     # Navigate to next question

@@ -1,15 +1,27 @@
 #!/usr/bin/env python3
 """
-Zanichelli Exercise Automation Script - Unified Version
+Zanichelli Exercise Automation Script - Enhanced with Question Interaction
 
 This script automates the process of accessing and starting exercises on the Zanichelli platform.
-It uses a modular architecture for better maintainability and extensibility.
+It now includes intelligent question interaction that automatically detects question types,
+performs randomized interactions, clicks "CORREGGI ESERCIZIO", and captures screenshots
+with answers revealed.
+
+Features:
+- Automatic question type detection (multiple choice, true/false, drag-drop, etc.)
+- Randomized question interactions before screenshot capture
+- Automatic "CORREGGI ESERCIZIO" button clicking
+- Screenshots and HTML capture with correct answers revealed
+- Comprehensive error handling and fallback mechanisms
 
 Usage: python 1_question_downloader.py -e 1 -e 2 -e 3
 
 Requirements:
 - playwright
 - Install with: pip install playwright && playwright install
+
+For detailed documentation on the question interaction system, see:
+README_QUESTION_INTERACTION.md
 """
 
 import asyncio
@@ -28,63 +40,50 @@ from modules import ZanichelliExerciseAutomator
 @click.option('--no-login', is_flag=True, help='Skip login process')
 @click.option('--headless', is_flag=True, help='Run browser in headless mode')
 @click.option('--validate-content', is_flag=True, default=True, help='Validate extracted content quality (only for questions mode)')
+@click.option('--no-interaction', is_flag=True, help='Disable question interaction system (legacy mode)')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output for detailed logging')
 @click.option('--config', '-c', default='config.json', help='Configuration file path', show_default=True)
-def main(exercises, all, url, no_login, headless, validate_content, config):
+def main(exercises, all, url, no_login, headless, validate_content, no_interaction, verbose, config):
     """Zanichelli Exercise Automation - Unified Processing."""
     
-    click.echo(click.style("Zanichelli Exercise Automation - Unified Processing", fg='cyan', bold=True))
-    click.echo("=" * 70)
-    
-    # Parse exercise list
-    exercise_indices = []
+    # Only show header if verbose or if no exercises specified
+    if verbose or not (exercises or all):
+        click.echo(click.style("Zanichelli Exercise Automation - Unified Processing", fg='cyan', bold=True))
+        click.echo("=" * 70)
     
     if all:
-        # Process all available exercises (assuming 57 total)
         exercise_indices = list(range(57))
-        click.echo("Processing ALL exercises (1-57)")
-        click.echo("This will process ALL QUESTIONS in all exercises.")
-        if not click.confirm("Are you sure you want to process all 57 exercises?"):
-            click.echo("Operation cancelled.")
-            sys.exit(0)
+        if verbose:
+            click.echo("Processing ALL exercises")
     elif exercises:
-        # Validate exercise numbers
-        exercise_numbers = list(exercises)
-        for num in exercise_numbers:
-            if num < 1 or num > 57:
-                click.echo(click.style(f"❌ Error: Exercise number must be between 1 and 57, got {num}", fg='red'))
-                sys.exit(1)
-        exercise_indices = [n - 1 for n in exercise_numbers]  # Convert to 0-based
-        click.echo(f"Processing exercises: {', '.join(map(str, exercise_numbers))}")
-        
-        # Warn for large batches
-        if len(exercise_indices) > 5:
-            click.echo(click.style(f"⚠️ Warning: Processing {len(exercise_indices)} exercises.", fg='yellow'))
-            if not click.confirm("Continue?"):
-                click.echo("Operation cancelled.")
-                sys.exit(0)
-    else:
-        click.echo(click.style("❌ No exercises specified. Use -e option for exercises or --all for all exercises", fg='red'))
-        sys.exit(1)
+        # Convert user-provided exercise numbers (1-based) to internal indices (0-based)
+        exercise_indices = [ex - 1 for ex in exercises]
+        if verbose:
+            click.echo(f"Processing exercises: {list(exercises)} (user numbers)")
+            click.echo(f"Internal indices: {exercise_indices} (0-based)")
+        else:
+            click.echo(f"Processing exercises: {list(exercises)}")
     
-    click.echo("Processing mode: Full question processing (screenshots, HTML, images)")
-    click.echo(f"  → Content validation: {validate_content}")
-    
-    click.echo(f"Login required: {not no_login}")
-    click.echo(f"Headless mode: {headless}")
-    click.echo(f"Configuration file: {config}")
-    click.echo("=" * 70)
+    if verbose:
+        click.echo(f"Login required: {not no_login}")
+        click.echo(f"Headless mode: {headless}")
+        click.echo(f"Verbose mode: {verbose}")
+        click.echo(f"Configuration file: {config}")
+        click.echo("=" * 70)
     
     async def run_automation():
         """Run the unified automation process."""
-        async with ZanichelliExerciseAutomator(config_path=config) as automator:
+        async with ZanichelliExerciseAutomator(config_path=config, verbose=verbose) as automator:
             try:
                 # Initialize browser and components
-                click.echo("Initializing browser and components...")
+                if verbose:
+                    click.echo("Initializing browser and components...")
                 if not await automator.initialize(headless=headless):
                     click.echo(click.style("❌ Failed to initialize automator", fg='red'))
                     return False
                 
-                click.echo(click.style("✅ Initialization successful", fg='green'))
+                if verbose:
+                    click.echo(click.style("✅ Initialization successful", fg='green'))
                 
                 # Process exercises using unified path (works for both single and multiple)
                 results = await automator.process_multiple_exercises(
@@ -92,48 +91,57 @@ def main(exercises, all, url, no_login, headless, validate_content, config):
                     exercise_indices=exercise_indices,
                     login_required=not no_login,
                     process_mode="questions",
-                    validate_content=validate_content
+                    validate_content=validate_content,
+                    enable_interaction=not no_interaction,
+                    verbose=verbose
                 )
                 
                 if results['success']:
-                    click.echo(click.style(f"\n✅ Processing completed successfully", fg='green', bold=True))
+                    click.echo(click.style(f"✅ Processing completed successfully", fg='green', bold=True))
                     
-                    # Display exercise statistics
+                    # Always show basic statistics
                     click.echo(f"Exercises processed: {results['exercises_processed']}")
-                    click.echo(f"Exercises successful: {results['exercises_successful']}")
-                    click.echo(f"Exercises failed: {results['exercises_failed']}")
+                    click.echo(f"Questions processed: {results['total_questions_processed']}")
                     
-                    if results['exercises_processed'] > 0:
-                        success_rate = (results['exercises_successful'] / results['exercises_processed']) * 100
-                        click.echo(f"Exercise success rate: {success_rate:.1f}%")
-                    
-                    # Display question statistics
-                    click.echo(f"\nTotal questions processed: {results['total_questions_processed']}")
-                    click.echo(f"Total questions successful: {results['total_questions_successful']}")
-                    click.echo(f"Total questions failed: {results['total_questions_failed']}")
-                    
-                    if results['total_questions_processed'] > 0:
-                        question_success_rate = (results['total_questions_successful'] / results['total_questions_processed']) * 100
-                        click.echo(f"Question success rate: {question_success_rate:.1f}%")
+                    if verbose:
+                        # Display detailed exercise statistics
+                        click.echo(f"Exercises successful: {results['exercises_successful']}")
+                        click.echo(f"Exercises failed: {results['exercises_failed']}")
                         
-                        if results['exercises_successful'] > 0:
-                            avg_questions_per_exercise = results['total_questions_processed'] / results['exercises_successful']
-                            click.echo(f"Average questions per exercise: {avg_questions_per_exercise:.1f}")
-                    
-                    # Display file locations
-                    base_dir = automator.file_manager.get_base_dir()
-                    click.echo(f"\nFiles saved in:")
-                    click.echo(f"- Screenshots: {base_dir}/data/[exercise_number]/raw/")
-                    click.echo(f"- Images: {base_dir}/data/[exercise_number]/imgs/")
-                    click.echo(f"- HTML content: {base_dir}/data/[exercise_number]/raw/")
-                    
-                    # Display warnings/errors if any
-                    if results['errors']:
-                        click.echo(click.style(f"\nWarnings/Errors ({len(results['errors'])}):", fg='yellow'))
-                        for error in results['errors'][:10]:  # Show first 10 errors
-                            click.echo(f"  • {error}")
-                        if len(results['errors']) > 10:
-                            click.echo(f"  • ... and {len(results['errors']) - 10} more errors")
+                        if results['exercises_processed'] > 0:
+                            success_rate = (results['exercises_successful'] / results['exercises_processed']) * 100
+                            click.echo(f"Exercise success rate: {success_rate:.1f}%")
+                        
+                        # Display detailed question statistics
+                        click.echo(f"Total questions successful: {results['total_questions_successful']}")
+                        click.echo(f"Total questions failed: {results['total_questions_failed']}")
+                        
+                        if results['total_questions_processed'] > 0:
+                            question_success_rate = (results['total_questions_successful'] / results['total_questions_processed']) * 100
+                            click.echo(f"Question success rate: {question_success_rate:.1f}%")
+                            
+                            if results['exercises_successful'] > 0:
+                                avg_questions_per_exercise = results['total_questions_processed'] / results['exercises_successful']
+                                click.echo(f"Average questions per exercise: {avg_questions_per_exercise:.1f}")
+                        
+                        # Display file locations
+                        base_dir = automator.file_manager.get_base_dir()
+                        click.echo(f"\nFiles saved in:")
+                        click.echo(f"- Screenshots (with answers): {base_dir}/data/[exercise_number]/raw/")
+                        click.echo(f"- Images: {base_dir}/data/[exercise_number]/imgs/")
+                        click.echo(f"- HTML content (with answers): {base_dir}/data/[exercise_number]/raw/")
+                        click.echo(f"- Processing logs: {base_dir}/data/[exercise_number]/logs/")
+                        
+                        # Display warnings/errors if any
+                        if results['errors']:
+                            click.echo(click.style(f"\nWarnings/Errors ({len(results['errors'])}):", fg='yellow'))
+                            for error in results['errors'][:10]:  # Show first 10 errors
+                                click.echo(f"  • {error}")
+                            if len(results['errors']) > 10:
+                                click.echo(f"  • ... and {len(results['errors']) - 10} more errors")
+                    elif results['errors']:
+                        # Show errors even in non-verbose mode if they exist
+                        click.echo(click.style(f"Errors: {len(results['errors'])}", fg='yellow'))
                 else:
                     click.echo(click.style(f"\n❌ Processing failed", fg='red'))
                     for error in results['errors']:
@@ -154,21 +162,17 @@ def main(exercises, all, url, no_login, headless, validate_content, config):
         success = asyncio.run(run_automation())
         
         if success:
-            click.echo(click.style("\n🎉 All done!", fg='green', bold=True))
-            click.echo("\nUsage examples:")
-            click.echo("  Single exercise:    python 1_question_downloader.py -e 2")
-            click.echo("  Multiple exercises: python 1_question_downloader.py -e 1 -e 3 -e 5")
-            click.echo("  All exercises:      python 1_question_downloader.py --all")
-            click.echo("  Headless mode:      python 1_question_downloader.py -e 1 --headless")
-            click.echo("  Without login:      python 1_question_downloader.py -e 1 --no-login")
+            if verbose:
+                click.echo(click.style("\n🎉 All done!", fg='green', bold=True))
+                click.echo("\n📋 Enhanced Features Active:")
+                click.echo("  ✅ Automatic question type detection")
+                click.echo("  ✅ Randomized question interactions")
+                click.echo("  ✅ Automatic answer revelation (CORREGGI ESERCIZIO)")
+                click.echo("  ✅ Screenshots and HTML with correct answers")
+            else:
+                click.echo(click.style("🎉 All done!", fg='green', bold=True))
         else:
-            click.echo(click.style("\n❌ Processing failed", fg='red'))
-            click.echo("\nTroubleshooting:")
-            click.echo("  • Make sure config.json exists with your credentials")
-            click.echo("  • Copy config.json.template to config.json and fill in your details")
-            click.echo("  • Check your internet connection")
-            click.echo("  • Verify the exercise page loads correctly")
-            click.echo("  • Try running with --headless flag if display issues occur")
+            click.echo(click.style("❌ Processing failed", fg='red'))
             sys.exit(1)
             
     except KeyboardInterrupt:
