@@ -34,11 +34,16 @@ Rispondi solo con le lettere (es. "A, C, E"):""",
 
 Rispondi solo con le parole/frasi incorrette:""",
         
-        'completion_closed': """Stai completando un testo di storia dell'arte italiana. Per ogni spazio vuoto, scegli l'opzione corretta tra quelle proposte. Fornisci le risposte nel formato "BLANK_1: risposta, BLANK_2: risposta".
+        'completion_closed': """Stai completando un testo di storia dell'arte italiana. DEVI fornire una risposta per OGNI spazio vuoto (BLANK) presente nel testo. Per ogni spazio vuoto, scegli l'opzione corretta tra quelle proposte.
+
+IMPORTANTE:
+- Fornisci le risposte per TUTTI i blank nel formato "BLANK_1: testo della risposta, BLANK_2: testo della risposta, BLANK_3: testo della risposta" (continua per tutti i blank presenti)
+- NON usare i numeri (1, 2), ma scrivi il TESTO COMPLETO della risposta scelta
+- Esempio: se per BLANK_1 scegli l'opzione "1. San Giorgio", rispondi "BLANK_1: San Giorgio"
 
 {question_content}
 
-Rispondi nel formato specificato:""",
+Rispondi nel formato specificato fornendo il TESTO COMPLETO della risposta per OGNI BLANK:""",
         
         'completion_open': """Stai completando un testo di storia dell'arte italiana. Inserisci i termini appropriati per ogni spazio vuoto [BLANK]. Fornisci solo i termini, separati da virgole, nell'ordine in cui appaiono nel testo.
 

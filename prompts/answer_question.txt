@@ -15,7 +15,7 @@ INSTRUCTIONS:
 - If this is a multiple choice check question (multiple selections), respond with all the correct statements, not only the letters (e.g., "Antonello da Messina; Leonardo da Vinci")
 - If this is a true/false question, respond with true or false for each statement. Return the statements as well.
 - If this is an open completion, provide a concise answer
-- If this is a closed completion, provide the specific term or phrase
+- If this is a closed completion, provide answers for ALL blanks in the format "BLANK_1: full text answer, BLANK_2: full text answer" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers
 - If this is a positioning question, provide the correct sequence or position
 - If this is an error selection, identify the errors
 

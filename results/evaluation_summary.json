@@ -1,0 +1,70 @@
+{
+  "total_questions": 26,
+  "total_evaluations": 26,
+  "overall_metrics": {
+    "precision": 0.7692307692307693,
+    "recall": 1.0,
+    "f1": 0.8695652173913044,
+    "accuracy": 0.8235294117647058,
+    "total_samples": 17
+  },
+  "accuracy_by_model": {
+    "google/gemini-2.5-flash-lite": 0.5882352941176471
+  },
+  "accuracy_by_type": {
+    "multiple_choice_radio": 1.0,
+    "select_errors": 0.0,
+    "true_false": 0.3333333333333333,
+    "multiple_choice_check": 0.5,
+    "completion_closed": 1.0
+  },
+  "metrics_by_model": {
+    "google/gemini-2.5-flash-lite": {
+      "precision": 0.7692307692307693,
+      "recall": 1.0,
+      "f1": 0.8695652173913044,
+      "accuracy": 0.8235294117647058,
+      "total_samples": 17
+    }
+  },
+  "metrics_by_type": {
+    "multiple_choice_radio": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "accuracy": 1.0,
+      "total_samples": 4
+    },
+    "select_errors": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "accuracy": 0.5,
+      "total_samples": 2
+    },
+    "true_false": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "accuracy": 1.0,
+      "total_samples": 3
+    },
+    "multiple_choice_check": {
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1": 0.7499999999999999,
+      "accuracy": 0.6666666666666666,
+      "total_samples": 6
+    },
+    "completion_closed": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "accuracy": 1.0,
+      "total_samples": 2
+    }
+  },
+  "average_processing_time": 1.980987127010639,
+  "average_score": 0.7862745098039216,
+  "errors": 0
+}

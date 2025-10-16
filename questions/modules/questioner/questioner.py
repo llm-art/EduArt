@@ -192,7 +192,15 @@ class LLMQuestioner:
                         correct_answer=correct_answer_str,
                         evaluation=evaluation,
                         processing_time=processing_time,
-                        error=error_msg
+                        error=error_msg,
+                        question_data={
+                            'question_text': question_data.get('question', ''),
+                            'question_type': question_type,
+                            'has_image': has_image,
+                            'image_path': image_path,
+                            'correct_answers': correct_answers,
+                            'prompt': prompt
+                        }
                     )
                     
                     # Small delay to avoid rate limiting
@@ -208,8 +216,10 @@ class LLMQuestioner:
         self.results_manager.export_to_csv(str(output_path))
         self.results_manager.print_summary()
         
-        # Save summary as JSON
+        # Save summary in multiple formats
         self.results_manager.save_summary_json()
+        self.results_manager.save_summary_txt()
+        self.results_manager.save_summary_md()
         
         return {
             'total_operations': total_operations,

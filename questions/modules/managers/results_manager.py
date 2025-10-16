@@ -21,17 +21,21 @@ class ResultsManager:
         """
         if results_dir is None:
             # Default to questions/results relative to this module
-            dataset_dir = Path(__file__).parent.parent.parent / 'dataset'
-            self.results_dir = dataset_dir / 'results'
+            questions_dir = Path(__file__).parent.parent.parent
+            self.results_dir = questions_dir / 'results'
         else:
             self.results_dir = Path(results_dir)
         
         self.results: List[Dict[str, Any]] = []
         self.results_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create answers subdirectory for individual question results
+        self.answers_dir = self.results_dir / 'answers'
+        self.answers_dir.mkdir(parents=True, exist_ok=True)
     
-    def add_result(self, question_id: str, model_name: str, question_type: str, 
-                   llm_answer: str, correct_answer: str, evaluation: Dict[str, Any], 
-                   processing_time: float, error: str = ""):
+    def add_result(self, question_id: str, model_name: str, question_type: str,
+                   llm_answer: str, correct_answer: str, evaluation: Dict[str, Any],
+                   processing_time: float, error: str = "", question_data: Optional[Dict[str, Any]] = None):
         """
         Add evaluation result.
         
@@ -44,8 +48,9 @@ class ResultsManager:
             evaluation: Evaluation results
             processing_time: Time taken to process
             error: Error message if any
+            question_data: Additional question data for individual JSON files
         """
-        self.results.append({
+        result = {
             'question_id': question_id,
             'model_name': model_name,
             'question_type': question_type,
@@ -57,7 +62,53 @@ class ResultsManager:
             'processing_time': processing_time,
             'error': error,
             'timestamp': datetime.now().isoformat()
-        })
+        }
+        
+        self.results.append(result)
+        
+        # Save individual question result as JSON
+        self._save_individual_result(question_id, result, question_data)
+    
+    def _save_individual_result(self, question_id: str, result: Dict[str, Any], question_data: Optional[Dict[str, Any]] = None):
+        """
+        Save individual question result as JSON file.
+        
+        Args:
+            question_id: Question identifier
+            result: Result data
+            question_data: Additional question data
+        """
+        try:
+            # Create comprehensive result data
+            individual_result = {
+                'question_id': question_id,
+                'evaluation': {
+                    'model_name': result['model_name'],
+                    'question_type': result['question_type'],
+                    'llm_answer': result['llm_answer'],
+                    'correct_answer': result['correct_answer'],
+                    'is_correct': result['is_correct'],
+                    'score': result['score'],
+                    'details': result['details'],
+                    'processing_time': result['processing_time'],
+                    'error': result['error'],
+                    'timestamp': result['timestamp']
+                }
+            }
+            
+            # Add question data if provided
+            if question_data:
+                individual_result['question_data'] = question_data
+            
+            # Save to individual JSON file
+            json_filepath = self.answers_dir / f"{question_id}.json"
+            with open(json_filepath, 'w', encoding='utf-8') as f:
+                json.dump(individual_result, f, indent=2, ensure_ascii=False)
+            
+            print(f"Individual result saved to {json_filepath}")
+            
+        except Exception as e:
+            print(f"Warning: Failed to save individual result for question {question_id}: {e}")
     
     def export_to_csv(self, filepath: str):
         """
@@ -242,6 +293,110 @@ class ResultsManager:
             print(f"Summary saved to {filepath}")
         except Exception as e:
             raise ProcessingError(f"Failed to save summary: {e}")
+    
+    def save_summary_txt(self, filepath: Optional[str] = None):
+        """
+        Save summary as TXT file.
+        
+        Args:
+            filepath: Path to TXT file (defaults to results_dir/evaluation_summary.txt)
+        """
+        if filepath is None:
+            filepath = self.results_dir / 'evaluation_summary.txt'
+        
+        try:
+            summary = self.generate_summary()
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write("="*70 + "\n")
+                f.write("EVALUATION SUMMARY\n")
+                f.write("="*70 + "\n")
+                f.write(f"Total Questions: {summary.get('total_questions', 0)}\n")
+                f.write(f"Total Evaluations: {summary.get('total_evaluations', 0)}\n")
+                f.write(f"Errors: {summary.get('errors', 0)}\n")
+                f.write(f"Average Processing Time: {summary.get('average_processing_time', 0):.2f}s\n")
+                f.write(f"Average Score: {summary.get('average_score', 0):.3f}\n")
+                
+                # Overall metrics
+                overall = summary.get('overall_metrics', {})
+                f.write(f"\nOVERALL PERFORMANCE:\n")
+                f.write(f"  Accuracy:  {overall.get('accuracy', 0):.3f}\n")
+                f.write(f"  Precision: {overall.get('precision', 0):.3f}\n")
+                f.write(f"  Recall:    {overall.get('recall', 0):.3f}\n")
+                f.write(f"  F1 Score:  {overall.get('f1', 0):.3f}\n")
+                f.write(f"  Samples:   {overall.get('total_samples', 0)}\n")
+                
+                # Metrics by model
+                f.write(f"\nPERFORMANCE BY MODEL:\n")
+                f.write(f"{'Model':<35} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Samples':<8}\n")
+                f.write("-" * 70 + "\n")
+                for model, metrics in summary.get('metrics_by_model', {}).items():
+                    f.write(f"{model:<35} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
+                           f"{metrics.get('recall', 0):.3f}  {metrics.get('f1', 0):.3f}  {metrics.get('total_samples', 0):<8}\n")
+                
+                # Metrics by question type
+                f.write(f"\nPERFORMANCE BY QUESTION TYPE:\n")
+                f.write(f"{'Question Type':<25} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Samples':<8}\n")
+                f.write("-" * 70 + "\n")
+                for qtype, metrics in summary.get('metrics_by_type', {}).items():
+                    f.write(f"{qtype:<25} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
+                           f"{metrics.get('recall', 0):.3f}  {metrics.get('f1', 0):.3f}  {metrics.get('total_samples', 0):<8}\n")
+            
+            print(f"Summary saved to {filepath}")
+        except Exception as e:
+            raise ProcessingError(f"Failed to save summary as TXT: {e}")
+    
+    def save_summary_md(self, filepath: Optional[str] = None):
+        """
+        Save summary as Markdown file.
+        
+        Args:
+            filepath: Path to MD file (defaults to results_dir/evaluation_summary.md)
+        """
+        if filepath is None:
+            filepath = self.results_dir / 'evaluation_summary.md'
+        
+        try:
+            summary = self.generate_summary()
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write("# Evaluation Summary\n\n")
+                
+                f.write("## Overview\n\n")
+                f.write(f"- **Total Questions**: {summary.get('total_questions', 0)}\n")
+                f.write(f"- **Total Evaluations**: {summary.get('total_evaluations', 0)}\n")
+                f.write(f"- **Errors**: {summary.get('errors', 0)}\n")
+                f.write(f"- **Average Processing Time**: {summary.get('average_processing_time', 0):.2f}s\n")
+                f.write(f"- **Average Score**: {summary.get('average_score', 0):.3f}\n\n")
+                
+                # Overall metrics
+                overall = summary.get('overall_metrics', {})
+                f.write("## Overall Performance\n\n")
+                f.write(f"- **Accuracy**: {overall.get('accuracy', 0):.3f}\n")
+                f.write(f"- **Precision**: {overall.get('precision', 0):.3f}\n")
+                f.write(f"- **Recall**: {overall.get('recall', 0):.3f}\n")
+                f.write(f"- **F1 Score**: {overall.get('f1', 0):.3f}\n")
+                f.write(f"- **Samples**: {overall.get('total_samples', 0)}\n\n")
+                
+                # Metrics by model
+                f.write("## Performance by Model\n\n")
+                f.write("| Model | Accuracy | Precision | Recall | F1 Score | Samples |\n")
+                f.write("|-------|----------|-----------|--------|----------|----------|\n")
+                for model, metrics in summary.get('metrics_by_model', {}).items():
+                    f.write(f"| {model} | {metrics.get('accuracy', 0):.3f} | {metrics.get('precision', 0):.3f} | "
+                           f"{metrics.get('recall', 0):.3f} | {metrics.get('f1', 0):.3f} | {metrics.get('total_samples', 0)} |\n")
+                
+                # Metrics by question type
+                f.write("\n## Performance by Question Type\n\n")
+                f.write("| Question Type | Accuracy | Precision | Recall | F1 Score | Samples |\n")
+                f.write("|---------------|----------|-----------|--------|----------|----------|\n")
+                for qtype, metrics in summary.get('metrics_by_type', {}).items():
+                    f.write(f"| {qtype} | {metrics.get('accuracy', 0):.3f} | {metrics.get('precision', 0):.3f} | "
+                           f"{metrics.get('recall', 0):.3f} | {metrics.get('f1', 0):.3f} | {metrics.get('total_samples', 0)} |\n")
+            
+            print(f"Summary saved to {filepath}")
+        except Exception as e:
+            raise ProcessingError(f"Failed to save summary as MD: {e}")
     
     def clear_results(self):
         """Clear all stored results."""
