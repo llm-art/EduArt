@@ -45,6 +45,69 @@ def find_json_files(base_path="output"):
     return sorted(json_files, key=sort_key)
 
 
+def should_skip_question(json_data):
+    """Check if a question should be skipped based on certain criteria."""
+    # Currently not skipping any questions - we post-process them instead
+    return False
+
+
+def post_process_questions(json_data):
+    """Post-process questions to fix wrong answers."""
+    question_type = json_data.get("type")
+    
+    if question_type == "true_false":
+        return post_process_true_false(json_data)
+    elif question_type == "multiple_choice_check":
+        return post_process_multiple_choice_check(json_data)
+    
+    return json_data
+
+
+def post_process_true_false(json_data):
+    """Post-process true_false questions to fix wrong answers."""
+    answers = json_data.get("answers", [])
+    modified = False
+    
+    for answer in answers:
+        if isinstance(answer, dict):
+            note = answer.get("note", "")
+            if "risposta sbagliata" in note.lower():
+                # Flip the True/False value
+                current_text = answer.get("text", "")
+                if current_text.lower() == "true":
+                    answer["text"] = "False"
+                elif current_text.lower() == "false":
+                    answer["text"] = "True"
+                
+                # Change note to correct answer
+                answer["note"] = "Risposta esatta."
+                modified = True
+    
+    if modified:
+        print(f"  Post-processed true_false question: flipped wrong answers")
+    
+    return json_data
+
+
+def post_process_multiple_choice_check(json_data):
+    """Post-process multiple_choice_check questions to fix wrong answers."""
+    answers = json_data.get("answers", [])
+    modified = False
+    
+    for answer in answers:
+        if isinstance(answer, dict):
+            description = answer.get("description", "")
+            if "risposta sbagliata" in description.lower():
+                # Change description to correct answer
+                answer["description"] = "Risposta esatta."
+                modified = True
+    
+    if modified:
+        print(f"  Post-processed multiple_choice_check question: fixed wrong answers")
+    
+    return json_data
+
+
 def find_associated_image(json_file):
     """Find associated image file for a JSON file."""
     # Extract exercise number and question number from JSON file path
@@ -227,8 +290,13 @@ def main():
     """Main function to process all JSON files and create dataset."""
     start_time = datetime.now()
     
-    # Create dataset directory structure
+    # Remove existing dataset directory for fresh start
     dataset_dir = "dataset"
+    if os.path.exists(dataset_dir):
+        shutil.rmtree(dataset_dir)
+        print(f"Removed existing dataset directory: {dataset_dir}")
+    
+    # Create dataset directory structure
     data_dir = os.path.join(dataset_dir, "data")
     metadata_dir = os.path.join(dataset_dir, "metadata")
     imgs_dir = os.path.join(dataset_dir, "imgs")
@@ -247,12 +315,22 @@ def main():
     print(f"Found {len(json_files)} JSON files to process")
     
     processed_files = []
+    skipped_files = []
     
     for json_file in json_files:
         try:
             # Read JSON file
             with open(json_file, 'r', encoding='utf-8') as f:
                 json_data = json.load(f)
+            
+            # Check if question should be skipped
+            if should_skip_question(json_data):
+                skipped_files.append(json_file)
+                print(f"Skipped: {json_file} (contains wrong answers)")
+                continue
+            
+            # Post-process questions to fix wrong answers
+            json_data = post_process_questions(json_data)
             
             # Get next file identifier
             file_id = get_next_file_id(data_dir)
@@ -269,10 +347,11 @@ def main():
             with open(txt_path, 'w', encoding='utf-8') as f:
                 f.write(txt_content)
             
-            # Copy JSON file to metadata/ folder
+            # Save post-processed JSON file to metadata/ folder
             json_filename = f"{file_id}.json"
             json_path = os.path.join(metadata_dir, json_filename)
-            shutil.copy2(json_file, json_path)
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f, indent=2, ensure_ascii=False)
             
             # Look for and copy associated image
             image_file = find_associated_image(json_file)
@@ -300,6 +379,7 @@ def main():
     
     print(f"\nProcessing complete!")
     print(f"Processed {len(processed_files)} files")
+    print(f"Skipped {len(skipped_files)} files")
     print(f"Output directories:")
     print(f"  - Text files: {data_dir}")
     print(f"  - JSON metadata: {metadata_dir}")
