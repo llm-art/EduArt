@@ -3,13 +3,15 @@
 Dataset Bundler Script
 
 This script reads JSON files from output/{exercise_number}/json/ directories,
-extracts question data to create TXT files, copies JSON files, and maintains metadata.
+extracts question data to create TXT files, copies JSON files to metadata/, 
+and copies associated images to imgs/ folder with consistent naming.
 """
 
 import os
 import json
 import glob
 import shutil
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -17,12 +19,65 @@ from pathlib import Path
 def find_json_files(base_path="output"):
     """Find all JSON files in output/{exercise_number}/json/ directories."""
     json_files = []
+    
+    # Check if we're in the questions directory or parent directory
+    if os.path.exists("questions/output"):
+        base_path = "questions/output"
+    elif os.path.exists("output"):
+        base_path = "output"
+    else:
+        print(f"Warning: Neither 'output' nor 'questions/output' directory found")
+        return []
+    
     pattern = os.path.join(base_path, "*/json/*.json")
     
     for json_file in glob.glob(pattern):
         json_files.append(json_file)
     
-    return sorted(json_files)
+    # Sort numerically by exercise number and question number
+    def sort_key(filepath):
+        # Extract exercise and question numbers from path like "output/1/json/5.json"
+        parts = filepath.split(os.sep)
+        exercise_num = int(parts[-3])  # exercise number
+        question_num = int(os.path.splitext(parts[-1])[0])  # question number
+        return (exercise_num, question_num)
+    
+    return sorted(json_files, key=sort_key)
+
+
+def find_associated_image(json_file):
+    """Find associated image file for a JSON file."""
+    # Extract exercise number and question number from JSON file path
+    # e.g., output/1/json/5.json -> exercise 1, question 5
+    path_parts = json_file.split(os.sep)
+    exercise_num = path_parts[-3]  # exercise number
+    question_num = os.path.splitext(path_parts[-1])[0]  # question number without .json
+    
+    # Look for images in data/{exercise_num}/raw/ and data/{exercise_num}/imgs/
+    image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp']
+    
+    # Determine the correct data path
+    data_base = "data"
+    if os.path.exists("questions/data"):
+        data_base = "questions/data"
+    
+    # Check imgs folder first (processed images)
+    imgs_folder = os.path.join(data_base, exercise_num, "imgs")
+    if os.path.exists(imgs_folder):
+        for ext in image_extensions:
+            image_path = os.path.join(imgs_folder, f"{question_num}{ext}")
+            if os.path.exists(image_path):
+                return image_path
+    
+    # Check raw folder as fallback
+    raw_folder = os.path.join(data_base, exercise_num, "raw")
+    if os.path.exists(raw_folder):
+        for ext in image_extensions:
+            image_path = os.path.join(raw_folder, f"{question_num}{ext}")
+            if os.path.exists(image_path):
+                return image_path
+    
+    return None
 
 
 def extract_question_data(json_data):
@@ -107,9 +162,9 @@ def create_txt_content(question_title, question_text, choices, question_type="")
     return "\n".join(content)
 
 
-def get_next_file_id(dataset_dir):
+def get_next_file_id(data_dir):
     """Get the next available 4-digit file identifier."""
-    existing_files = glob.glob(os.path.join(dataset_dir, "*.txt"))
+    existing_files = glob.glob(os.path.join(data_dir, "*.txt"))
     
     if not existing_files:
         return "0001"
@@ -158,7 +213,10 @@ def update_metadata(metadata_file, processed_files, start_time, end_time):
     
     metadata["processing_sessions"].append(session)
     metadata["last_updated"] = end_time.isoformat()
-    metadata["total_files"] = len(glob.glob(os.path.join(os.path.dirname(metadata_file), "*.txt")))
+    
+    # Count total files in data directory
+    data_dir = os.path.join(os.path.dirname(metadata_file), "..", "data")
+    metadata["total_files"] = len(glob.glob(os.path.join(data_dir, "*.txt")))
     
     # Write updated metadata
     with open(metadata_file, 'w', encoding='utf-8') as f:
@@ -169,9 +227,15 @@ def main():
     """Main function to process all JSON files and create dataset."""
     start_time = datetime.now()
     
-    # Create dataset directory
+    # Create dataset directory structure
     dataset_dir = "dataset"
-    os.makedirs(dataset_dir, exist_ok=True)
+    data_dir = os.path.join(dataset_dir, "data")
+    metadata_dir = os.path.join(dataset_dir, "metadata")
+    imgs_dir = os.path.join(dataset_dir, "imgs")
+    
+    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(metadata_dir, exist_ok=True)
+    os.makedirs(imgs_dir, exist_ok=True)
     
     # Find all JSON files
     json_files = find_json_files()
@@ -191,7 +255,7 @@ def main():
                 json_data = json.load(f)
             
             # Get next file identifier
-            file_id = get_next_file_id(dataset_dir)
+            file_id = get_next_file_id(data_dir)
             
             # Extract question data
             question_title, question_text, choices, question_type = extract_question_data(json_data)
@@ -199,19 +263,30 @@ def main():
             # Create TXT file content
             txt_content = create_txt_content(question_title, question_text, choices, question_type)
             
-            # Write TXT file
+            # Write TXT file to data/ folder
             txt_filename = f"{file_id}.txt"
-            txt_path = os.path.join(dataset_dir, txt_filename)
+            txt_path = os.path.join(data_dir, txt_filename)
             with open(txt_path, 'w', encoding='utf-8') as f:
                 f.write(txt_content)
             
-            # Copy JSON file
+            # Copy JSON file to metadata/ folder
             json_filename = f"{file_id}.json"
-            json_path = os.path.join(dataset_dir, json_filename)
+            json_path = os.path.join(metadata_dir, json_filename)
             shutil.copy2(json_file, json_path)
             
+            # Look for and copy associated image
+            image_file = find_associated_image(json_file)
+            if image_file:
+                # Get image extension
+                _, ext = os.path.splitext(image_file)
+                image_filename = f"{file_id}{ext}"
+                image_path = os.path.join(imgs_dir, image_filename)
+                shutil.copy2(image_file, image_path)
+                print(f"Processed: {json_file} -> {file_id}.txt, {file_id}.json, {file_id}{ext}")
+            else:
+                print(f"Processed: {json_file} -> {file_id}.txt, {file_id}.json (no image)")
+            
             processed_files.append(json_file)
-            print(f"Processed: {json_file} -> {file_id}.txt, {file_id}.json")
             
         except Exception as e:
             print(f"Error processing {json_file}: {str(e)}")
@@ -220,12 +295,15 @@ def main():
     end_time = datetime.now()
     
     # Update metadata
-    metadata_file = os.path.join(dataset_dir, "metadata.json")
+    metadata_file = os.path.join(metadata_dir, "processing_metadata.json")
     update_metadata(metadata_file, processed_files, start_time, end_time)
     
     print(f"\nProcessing complete!")
     print(f"Processed {len(processed_files)} files")
-    print(f"Output directory: {dataset_dir}")
+    print(f"Output directories:")
+    print(f"  - Text files: {data_dir}")
+    print(f"  - JSON metadata: {metadata_dir}")
+    print(f"  - Images: {imgs_dir}")
     print(f"Duration: {(end_time - start_time).total_seconds():.2f} seconds")
 
 
