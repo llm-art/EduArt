@@ -48,7 +48,7 @@ def count_png_files_in_raw(exercise: int) -> int:
 @click.command()
 @click.option('--force-ocr', is_flag=True, help='Force OCR processing even if OCR JSON files already exist')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose/debug output')
-@click.option('--exercise', '-e', default=1, help='Exercise number to process', show_default=True)
+@click.option('--exercise', '-e', multiple=True, type=int, help='Exercise number(s) to process (can be used multiple times)')
 @click.option('--min-question', default=1, help='Minimum question number to process', show_default=True)
 @click.option('--max-question', default=20, help='Maximum question number to process', show_default=True)
 @click.option('--use-langchain', is_flag=True, help='Use LangChain pipeline (for backward compatibility)')
@@ -57,62 +57,98 @@ def main(force_ocr, verbose, exercise, min_question, max_question, use_langchain
     """Process multiple questions using the new modular architecture."""
     
     try:
-        # Count actual PNG files in the raw folder
-        actual_png_count = count_png_files_in_raw(exercise)
-        
-        # Use the minimum between max_question and actual PNG count
-        effective_max_question = min(max_question, actual_png_count)
+        # Handle default case when no exercises are specified
+        if not exercise:
+            exercise = (1,)  # Default to exercise 1
         
         print("=== Enhanced Multi-Model Exam Question Processor (Refactored) ===")
         print(f"Configuration: {Config.get_model_info()}")
         print(f"Force OCR: {force_ocr}")
         print(f"Verbose: {verbose}")
-        print(f"Exercise: {exercise}")
+        print(f"Exercises to process: {list(exercise)}")
         print(f"Requested questions: {min_question}-{max_question}")
-        print(f"Available PNG files: {actual_png_count}")
-        print(f"Effective questions: {min_question}-{effective_max_question}")
         print(f"Using LangChain pipeline: {use_langchain}")
         print(f"AI metadata tracking: {metadata_ai}")
-        
-        # Check if we have any questions to process
-        if effective_max_question < min_question:
-            print(f"Error: No questions to process. Available PNG files ({actual_png_count}) is less than min_question ({min_question})")
-            return
-        
-        # Create configuration
-        config = ProcessorConfig(
-            exercise=exercise,
-            min_question=min_question,
-            max_question=effective_max_question,
-            force_ocr=force_ocr,
-            verbose=verbose,
-            metadata_ai=metadata_ai
-        )
         
         # Set global verbose flag for models
         Config.VERBOSE = verbose
         
-        # Create processor
-        processor = QuestionProcessor(config)
+        # Process each exercise
+        total_exercises = len(exercise)
+        successful_exercises = 0
         
-        # Create question range
-        question_range = range(min_question, effective_max_question + 1)
-        
-        print(f"\nStarting processing of exercise {exercise}, questions {min_question}-{effective_max_question}...")
-        print(f"Using {Config.MODEL_TYPE.upper()} model")
+        for i, current_exercise in enumerate(exercise, 1):
+            print(f"\n{'='*60}")
+            print(f"Processing Exercise {current_exercise} ({i}/{total_exercises})")
+            print(f"{'='*60}")
+            
+            # Count actual PNG files in the raw folder
+            actual_png_count = count_png_files_in_raw(current_exercise)
+            
+            # Use the minimum between max_question and actual PNG count
+            effective_max_question = min(max_question, actual_png_count)
+            
+            print(f"Available PNG files: {actual_png_count}")
+            print(f"Effective questions: {min_question}-{effective_max_question}")
+            
+            # Check if we have any questions to process
+            if effective_max_question < min_question:
+                print(f"⚠️  Skipping exercise {current_exercise}: No questions to process. Available PNG files ({actual_png_count}) is less than min_question ({min_question})")
+                continue
+            
+            # Create configuration for this exercise
+            config = ProcessorConfig(
+                exercise=current_exercise,
+                min_question=min_question,
+                max_question=effective_max_question,
+                force_ocr=force_ocr,
+                verbose=verbose,
+                metadata_ai=metadata_ai
+            )
+            
+            # Create processor
+            processor = QuestionProcessor(config)
+            
+            # Create question range
+            question_range = range(min_question, effective_max_question + 1)
+            
+            print(f"\nStarting processing of exercise {current_exercise}, questions {min_question}-{effective_max_question}...")
+            print(f"Using {Config.MODEL_TYPE.upper()} model")
 
-        # Use new batch processing
-        print("Using new batch processing...")
-        batch_result = processor.process_questions_batch(exercise, question_range)
+            try:
+                # Use new batch processing
+                print("Using new batch processing...")
+                batch_result = processor.process_questions_batch(current_exercise, question_range)
+                
+                # Print detailed summary (already printed by processor)
+                if batch_result.success_rate < 100:
+                    print(f"\nFailed questions for exercise {current_exercise}:")
+                    for result in batch_result.results:
+                        if not result.success:
+                            print(f"  Question {result.question}: {'; '.join(result.errors)}")
+                
+                print(f"\n✅ Exercise {current_exercise} completed successfully!")
+                print(f"Results saved to: questions/output/{current_exercise}/json/")
+                successful_exercises += 1
+                
+            except Exception as e:
+                print(f"❌ Error processing exercise {current_exercise}: {e}")
+                continue
         
-        # Print detailed summary (already printed by processor)
-        if batch_result.success_rate < 100:
-            print(f"\nFailed questions:")
-            for result in batch_result.results:
-                if not result.success:
-                    print(f"  Question {result.question}: {'; '.join(result.errors)}")
+        # Final summary
+        print(f"\n{'='*60}")
+        print(f"FINAL SUMMARY")
+        print(f"{'='*60}")
+        print(f"Total exercises requested: {total_exercises}")
+        print(f"Successfully processed: {successful_exercises}")
+        print(f"Failed: {total_exercises - successful_exercises}")
         
-        print(f"\nResults saved to: questions/output/{exercise}/json/")
+        if successful_exercises == total_exercises:
+            print("🎉 All exercises processed successfully!")
+        elif successful_exercises > 0:
+            print(f"⚠️  {successful_exercises} out of {total_exercises} exercises processed successfully")
+        else:
+            print("❌ No exercises were processed successfully")
         
     except ConfigurationError as e:
         print(f"❌ Configuration error: {e}")

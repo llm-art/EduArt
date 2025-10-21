@@ -11,6 +11,7 @@ from ..core.exceptions import ProcessingError, FileOperationError
 from ..core.types import QuestionData, ProcessingResult, BatchResult, ProcessingStatus, AnswerResult
 from ..services.ocr_service import OCRService
 from ..services.vision_service import VisionModelService
+from ..services.html_service import HTMLService
 from ..managers.prompt_manager import PromptManager
 from ..json_manager import JSONManager
 from ..config import Config
@@ -31,6 +32,7 @@ class QuestionProcessor:
         # Initialize services
         self.ocr_service = OCRService()
         self.vision_service = VisionModelService()
+        self.html_service = HTMLService()
         self.prompt_manager = PromptManager()
         self.json_manager = JSONManager()
         
@@ -68,16 +70,22 @@ class QuestionProcessor:
             if not html_path.exists():
                 raise FileOperationError(f"HTML file not found: {html_path}")
             
-            # Step 2: OCR processing
-            print("Step 1: OCR text extraction...")
-            ocr_cache_path = self.output_path / f"{exercise}/ocr/{question}.json"
-            ocr_text = self.ocr_service.process_with_cache(
-                image_path=image_path,
-                ocr_cache_path=ocr_cache_path,
-                force_ocr=self.config.force_ocr
-            )
+            # Step 2: Text extraction (HTML or OCR based on force_ocr setting)
+            if self.config.force_ocr:
+                print("Step 1: OCR text extraction (forced)...")
+                ocr_cache_path = self.output_path / f"{exercise}/ocr/{question}.json"
+                text_content = self.ocr_service.process_with_cache(
+                    image_path=image_path,
+                    ocr_cache_path=ocr_cache_path,
+                    force_ocr=True
+                )
+                ocr_text = text_content
+            else:
+                print("Step 1: HTML text extraction...")
+                text_content = self.html_service.extract_text(html_path)
+                ocr_text = text_content  # Use HTML text as the primary text source
             
-            # Step 3: Read HTML content
+            # Step 3: Read HTML content (always needed for vision model)
             print("Step 2: Reading HTML content...")
             with open(html_path, 'r', encoding='utf-8') as f:
                 html_text = f.read()

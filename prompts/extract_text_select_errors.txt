@@ -11,12 +11,17 @@ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
   "type": "select_errors",
   "question_title": "clean question title",
-  "question_text": "main text passage where errors need to be identified",
+  "question_text": "main text passage with errors (from the top section)",
   "choices": null,
   "answers": [
-    "first underlined wrong word",
-    "second underlined wrong word",
-    "third underlined wrong word"
+    {{
+      "correct": "correct word/phrase",
+      "error": "wrong word/phrase"
+    }},
+    {{
+      "correct": "another correct word/phrase",
+      "error": "another wrong word/phrase"
+    }}
   ],
   "language": "it"
 }}}}
@@ -26,52 +31,77 @@ STRICT REQUIREMENTS:
 - DO NOT add any other fields beyond those specified
 - DO NOT add comments or explanations
 - Use null for missing data, not empty strings
-- Extract the main text passage where students need to find errors
-- **CRITICAL**: The answers array MUST contain ALL words/phrases with grey underlines in the main text
-- You MUST extract EVERY SINGLE underlined word - do not miss any
+- Extract the main text passage with errors from the TOP section
+- **CRITICAL**: The answers array MUST contain objects with "correct" and "error" pairs
+- You MUST identify EVERY error-correction pair by comparing top and bottom sections
 - Set choices to null for this question type
 
 VISUAL IDENTIFICATION GUIDE:
 - Look for "TROVA ERRORE" or "ERRORI EVIDENZIATI" indicators
-- Main text passage is usually in the upper portion of the exercise
-- **CRITICAL**: Look for the "Esercizio sbagliato" (Wrong Exercise) feedback section with red border
-  * This section contains the corrected text with underlined words
-  * The underlined words in this feedback section are the ERRORS to extract
-  * These represent the original wrong words that students should have identified
-- **ERRORS TO EXTRACT**: Look for ALL underlined words in the "Esercizio sbagliato" feedback section
-  * Scan the ENTIRE feedback section systematically from beginning to end
-  * Look carefully at EVERY sentence and EVERY word for underlines
-  * Check for both single words AND phrases that are underlined
-  * **CRITICAL**: Names or phrases may be split across lines but should be treated as single entities
-  * Extract ALL of these underlined words/phrases for the answers array
-  * Do NOT miss any underlined words - extract them all
+- **TOP SECTION**: Contains the original text with errors (this goes in question_text)
+- **BOTTOM SECTION**: Look for the "Esercizio sbagliato" (Wrong Exercise) feedback section with red border
+  * This section contains the corrected text with underlined/highlighted corrections
+  * The underlined words in the bottom section are the CORRECT versions
+- **ERROR-CORRECTION IDENTIFICATION**:
+  * Find underlined/highlighted words in the BOTTOM section (these are corrections)
+  * For each underlined word in the bottom, find the corresponding different word in the TOP section
+  * The TOP section contains the WRONG words (errors)
+  * The BOTTOM section underlined words are the CORRECT words (corrections)
+  * **CRITICAL**: Handle line breaks carefully - names like "Piero della Francesca" may span multiple lines but should be treated as single entities
+  * **CRITICAL**: When comparing, look for positional correspondence, not just word matching
+- **SYSTEMATIC COMPARISON**:
+  * Identify each underlined word/phrase in the bottom correction section
+  * For each underlined correction, find its position in the text flow
+  * Locate the corresponding position in the top text to find what was wrong
+  * Create pairs: {{"correct": "underlined word from bottom", "error": "corresponding word from top"}}
+  * **IMPORTANT**: Names and phrases that span line breaks should be treated as complete units
 
 EXTRACTION PROCESS:
 1. Extract the main question title from the header
-2. Extract the primary text passage where errors need to be identified
-3. **FIND THE FEEDBACK SECTION**: Look for "Esercizio sbagliato" section with red border
-4. **FIND ALL UNDERLINED WORDS IN FEEDBACK**: Scan the feedback section systematically
-   - Read through EVERY sentence in the feedback section word by word
-   - Look for EVERY word or phrase that has underlines (these are the original errors)
-   - **IMPORTANT**: If a name or phrase is underlined but split across lines (like "Piero\ndella Francesca"), treat it as one complete entity
-   - Pay special attention to artist names, place names, and compound phrases
-   - Extract ALL of these underlined words/phrases for the answers array
-   - DO NOT SKIP ANY - you must find every single underlined word in the feedback
-   - Continue scanning until you've covered the entire feedback section
-5. Set choices to null
+2. **EXTRACT TOP TEXT**: Extract the primary text passage with errors (this is the question_text)
+3. **FIND THE CORRECTION SECTION**: Look for "Esercizio sbagliato" section with red border
+4. **IDENTIFY CORRECTIONS FIRST**:
+   - Scan the BOTTOM correction section for ALL underlined/highlighted words
+   - These underlined words are the CORRECT versions
+   - Note their position in the text flow (beginning, middle, end of sentences)
+5. **FIND CORRESPONDING ERRORS**:
+   - For each underlined correction found in step 4:
+     * Locate the same position in the TOP text
+     * The word at that position in the TOP text is the "error"
+     * Create pair: {{"correct": "underlined_bottom_word", "error": "corresponding_top_word"}}
+6. **HANDLE COMPLEX CASES**:
+   - **Line breaks**: Names like "Piero della Francesca" or "Federico da Montepulciano" may be split across lines
+   - **Positional matching**: Use sentence structure and word position, not just word similarity
+   - **Complete phrases**: Treat multi-word names and phrases as single units
+7. **COMPREHENSIVE SCANNING**:
+   - Ensure every underlined word in the correction section has a corresponding error pair
+   - Pay special attention to artist names, place names, dates
+   - **CRITICAL**: Do not miss any underlined corrections
+8. Set choices to null
 
 EXAMPLES FROM IMAGES:
 
-Example 1 - In the "Esercizio sbagliato" feedback section, there are 6 underlined words:
-"1490", "primo piano", "transenna", "cielo", "eroica", "classica"
+Example 1 - Finding underlined corrections:
+Bottom correction text has "Roberti" underlined at position where top text has "Cossa"
+Result: {{"correct": "Roberti", "error": "Cossa"}}
 
-Example 2 - In the "Esercizio sbagliato" feedback section, there are 5 underlined entities:
-"Roberti", "bolognese", "Piero della Francesca", "Montefeltro", "Ginevra"
-(Note: "Piero della Francesca" is one complete artist name, even if split across lines)
+Example 2 - Complex name handling:
+Bottom text has "Piero della Francesca" underlined (may span lines)
+Top text at same position has "Federico da Montepulciano"
+Result: {{"correct": "Piero della Francesca", "error": "Federico da Montepulciano"}}
+
+Example 3 - Multiple corrections:
+Bottom has underlined: "bolognese", "Ginevra", "tendaggio", "Montefeltro"
+Find corresponding positions in top text for each
+Results: Multiple error-correction pairs based on positional correspondence
 
 Result format:
 choices: null
-answers: [all underlined words/phrases from feedback section]  ← ALL underlined entities, treating line-split names as single items
+answers: [
+  {{"correct": "Roberti", "error": "Cossa"}},
+  {{"correct": "Piero della Francesca", "error": "Federico da Montepulciano"}},
+  {{"correct": "bolognese", "error": "romano"}}
+]  ← ALL error-correction pairs from underlined words in bottom section
 
 CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
