@@ -31,7 +31,6 @@ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
   "type": "multiple_choice_radio|multiple_choice_check|select_errors|positioning|completion_open|completion_closed|true_false",
   "language": "it",
-  "has_image": true|false
 }}}}
 
 STRICT REQUIREMENTS:

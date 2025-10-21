@@ -338,6 +338,9 @@ class QuestionProcessor:
             "has_image": question_data.has_image
         }
 
+        if data_dict["has_image"] :
+            data_dict["image"] = data_dict['image'].replace("raw","imgs").replace(".png",".jpg")
+
         # Add AI metadata if tracking is enabled and calls exist
         if self.config.metadata_ai and question_data.ai_calls:
             data_dict["ai_calls"] = [
