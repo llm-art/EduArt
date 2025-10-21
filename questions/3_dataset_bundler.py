@@ -12,8 +12,28 @@ import json
 import glob
 import shutil
 import re
+import click
 from datetime import datetime
 from pathlib import Path
+from collections import defaultdict
+
+
+# Report configuration - single point for modifications
+REPORT_CONFIG = {
+    'readme_filename': 'README.md',
+    'metadata_filename': 'metadata.json',
+    'default_version': 0.1,
+    'version_increment': 0.1,
+    'sections': [
+        'creation_datetime',
+        'processing_time',
+        'version',
+        'exercise_count',
+        'question_count',
+        'questions_with_images',
+        'questions_by_type'
+    ]
+}
 
 
 def find_json_files(base_path="output"):
@@ -108,10 +128,28 @@ def post_process_multiple_choice_check(json_data):
     return json_data
 
 
-def find_associated_image(json_file):
-    """Find associated image file for a JSON file."""
-    # Extract exercise number and question number from JSON file path
-    # e.g., output/1/json/5.json -> exercise 1, question 5
+def find_associated_image(json_file, json_data=None):
+    """Find associated image file for a JSON file by checking has_image field."""
+    # If json_data is not provided, read it from the file
+    if json_data is None:
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+        except Exception as e:
+            print(f"Warning: Could not read JSON file {json_file}: {e}")
+            return None
+    
+    # Check if the question has an image
+    has_image = json_data.get("has_image", False)
+    if not has_image:
+        return None
+    
+    # Get the image path from the JSON data
+    image_path = json_data.get("image", "")
+    if image_path and os.path.exists(image_path):
+        return image_path
+    
+    # Fallback: try to find image using the old method if image path doesn't exist
     path_parts = json_file.split(os.sep)
     exercise_num = path_parts[-3]  # exercise number
     question_num = os.path.splitext(path_parts[-1])[0]  # question number without .json
@@ -128,17 +166,17 @@ def find_associated_image(json_file):
     imgs_folder = os.path.join(data_base, exercise_num, "imgs")
     if os.path.exists(imgs_folder):
         for ext in image_extensions:
-            image_path = os.path.join(imgs_folder, f"{question_num}{ext}")
-            if os.path.exists(image_path):
-                return image_path
+            fallback_path = os.path.join(imgs_folder, f"{question_num}{ext}")
+            if os.path.exists(fallback_path):
+                return fallback_path
     
     # Check raw folder as fallback
     raw_folder = os.path.join(data_base, exercise_num, "raw")
     if os.path.exists(raw_folder):
         for ext in image_extensions:
-            image_path = os.path.join(raw_folder, f"{question_num}{ext}")
-            if os.path.exists(image_path):
-                return image_path
+            fallback_path = os.path.join(raw_folder, f"{question_num}{ext}")
+            if os.path.exists(fallback_path):
+                return fallback_path
     
     return None
 
@@ -286,24 +324,175 @@ def update_metadata(metadata_file, processed_files, start_time, end_time):
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
 
-def main():
+def get_previous_version(dataset_dir):
+    """Get version from previous metadata file, if it exists."""
+    # Convert to absolute path to handle relative paths correctly
+    dataset_path = Path(dataset_dir).resolve()
+    
+    # Check if dataset directory exists
+    if not dataset_path.exists():
+        return None
+    
+    # Try to get version from metadata.json first (more reliable)
+    metadata_file = dataset_path / REPORT_CONFIG['metadata_filename']
+    if metadata_file.exists() and metadata_file.is_file():
+        try:
+            with open(metadata_file, 'r', encoding='utf-8') as f:
+                metadata = json.load(f)
+                return metadata.get('version')
+        except Exception as e:
+            print(f"Warning: Could not read previous version from {metadata_file}: {e}")
+    
+    # Fallback to README.md
+    readme_file = dataset_path / REPORT_CONFIG['readme_filename']
+    if readme_file.exists() and readme_file.is_file():
+        try:
+            with open(readme_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                # Look for version line in format "**Version:** X.X"
+                version_match = re.search(r'\*\*Version:\*\* (\d+\.\d+)', content)
+                if version_match:
+                    return float(version_match.group(1))
+        except Exception as e:
+            print(f"Warning: Could not read previous version from {readme_file}: {e}")
+    
+    return None
+
+
+def collect_statistics_from_metadata(metadata_files, imgs_dir):
+    """Collect statistics about the dataset from processed metadata files."""
+    stats = {
+        'exercises': set(),
+        'total_questions': len(metadata_files),
+        'questions_with_images': 0,
+        'questions_by_type': defaultdict(int)
+    }
+    
+    # Count questions with images
+    if os.path.exists(imgs_dir):
+        image_files = glob.glob(os.path.join(imgs_dir, "*"))
+        stats['questions_with_images'] = len(image_files)
+    
+    # Process each metadata JSON file to get exercise numbers and question types
+    for json_file in metadata_files:
+        try:
+            # Read JSON to get question type and extract exercise info
+            with open(json_file, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+                question_type = json_data.get("type", "unknown")
+                stats['questions_by_type'][question_type] += 1
+                
+                # Try to extract exercise number from source file path if available
+                source_file = json_data.get("source_file", "")
+                if source_file:
+                    path_parts = source_file.split(os.sep)
+                    if len(path_parts) >= 3:
+                        exercise_num = path_parts[-3]  # exercise number
+                        stats['exercises'].add(exercise_num)
+                
+        except Exception as e:
+            print(f"Warning: Could not process statistics for {json_file}: {e}")
+            continue
+    
+    # If we couldn't extract exercise numbers from metadata, try to infer from original structure
+    if not stats['exercises']:
+        # Look for original JSON files to count exercises
+        json_files = find_json_files()
+        for json_file in json_files:
+            try:
+                path_parts = json_file.split(os.sep)
+                exercise_num = path_parts[-3]  # exercise number
+                stats['exercises'].add(exercise_num)
+            except Exception:
+                continue
+    
+    return stats
+
+
+def generate_report(start_time, end_time, stats, dataset_dir, version):
+    """Generate the dataset bundle report in markdown format."""
+    # Calculate processing time
+    processing_time = end_time - start_time
+    
+    # Generate report content
+    report_content = f"""# Dataset Bundle Report
+
+**Creation Date & Time:** {start_time.strftime('%Y-%m-%d %H:%M:%S')}
+
+**Processing Time:** {processing_time.total_seconds():.2f} seconds
+
+**Version:** {version:.1f}
+
+**Number of Exercises:** {len(stats['exercises'])}
+
+**Number of Questions:** {stats['total_questions']}
+
+**Number of Questions with Images:** {stats['questions_with_images']}
+
+## Questions by Type
+
+"""
+    
+    # Add questions by type section
+    for question_type, count in sorted(stats['questions_by_type'].items()):
+        report_content += f"- **{question_type}:** {count}\n"
+    
+    report_content += f"""
+---
+*Report generated automatically by dataset bundler script*
+*Last updated: {end_time.strftime('%Y-%m-%d %H:%M:%S')}*
+"""
+    
+    return report_content
+
+
+def generate_metadata(start_time, end_time, stats, dataset_dir, version):
+    """Generate the dataset bundle metadata in JSON format."""
+    # Calculate processing time
+    processing_time = end_time - start_time
+    
+    # Generate metadata structure
+    metadata = {
+        "creation_datetime": start_time.strftime('%Y-%m-%d %H:%M:%S'),
+        "processing_time_seconds": processing_time.total_seconds(),
+        "version": version,
+        "exercise_count": len(stats['exercises']),
+        "question_count": stats['total_questions'],
+        "questions_with_images": stats['questions_with_images'],
+        "questions_by_type": dict(stats['questions_by_type']),
+        "exercises": sorted(list(stats['exercises'])),
+        "last_updated": end_time.strftime('%Y-%m-%d %H:%M:%S')
+    }
+    
+    return metadata
+
+
+@click.command()
+@click.option('--version', type=float, help='Specify version number for the report')
+def main(version):
     """Main function to process all JSON files and create dataset."""
     start_time = datetime.now()
     
-    # Remove existing dataset directory for fresh start
+    # Read previous version BEFORE removing the dataset directory
     dataset_dir = "dataset"
+    previous_version = None
+    if version is None:
+        previous_version = get_previous_version(dataset_dir)
+    
+    # Remove existing dataset directory for fresh start
     if os.path.exists(dataset_dir):
         shutil.rmtree(dataset_dir)
         print(f"Removed existing dataset directory: {dataset_dir}")
     
     # Create dataset directory structure
-    data_dir = os.path.join(dataset_dir, "data")
-    metadata_dir = os.path.join(dataset_dir, "metadata")
-    imgs_dir = os.path.join(dataset_dir, "imgs")
+    dataset_path = Path(dataset_dir)
+    data_dir = dataset_path / "data"
+    metadata_dir = dataset_path / "metadata"
+    imgs_dir = dataset_path / "imgs"
     
-    os.makedirs(data_dir, exist_ok=True)
-    os.makedirs(metadata_dir, exist_ok=True)
-    os.makedirs(imgs_dir, exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    imgs_dir.mkdir(parents=True, exist_ok=True)
     
     # Find all JSON files
     json_files = find_json_files()
@@ -316,6 +505,7 @@ def main():
     
     processed_files = []
     skipped_files = []
+    processed_metadata_files = []
     
     for json_file in json_files:
         try:
@@ -343,29 +533,31 @@ def main():
             
             # Write TXT file to data/ folder
             txt_filename = f"{file_id}.txt"
-            txt_path = os.path.join(data_dir, txt_filename)
+            txt_path = data_dir / txt_filename
             with open(txt_path, 'w', encoding='utf-8') as f:
                 f.write(txt_content)
             
             # Save post-processed JSON file to metadata/ folder
             json_filename = f"{file_id}.json"
-            json_path = os.path.join(metadata_dir, json_filename)
+            json_path = metadata_dir / json_filename
             with open(json_path, 'w', encoding='utf-8') as f:
                 json.dump(json_data, f, indent=2, ensure_ascii=False)
             
             # Look for and copy associated image
-            image_file = find_associated_image(json_file)
+            image_file = find_associated_image(json_file, json_data)
             if image_file:
                 # Get image extension
-                _, ext = os.path.splitext(image_file)
+                image_path_obj = Path(image_file)
+                ext = image_path_obj.suffix
                 image_filename = f"{file_id}{ext}"
-                image_path = os.path.join(imgs_dir, image_filename)
-                shutil.copy2(image_file, image_path)
+                image_dest_path = imgs_dir / image_filename
+                shutil.copy2(image_file, image_dest_path)
                 print(f"Processed: {json_file} -> {file_id}.txt, {file_id}.json, {file_id}{ext}")
             else:
                 print(f"Processed: {json_file} -> {file_id}.txt, {file_id}.json (no image)")
             
             processed_files.append(json_file)
+            processed_metadata_files.append(str(json_path))
             
         except Exception as e:
             print(f"Error processing {json_file}: {str(e)}")
@@ -374,8 +566,30 @@ def main():
     end_time = datetime.now()
     
     # Update metadata
-    metadata_file = os.path.join(metadata_dir, "processing_metadata.json")
-    update_metadata(metadata_file, processed_files, start_time, end_time)
+    processing_metadata_file = metadata_dir / "processing_metadata.json"
+    update_metadata(str(processing_metadata_file), processed_files, start_time, end_time)
+    
+    # Collect statistics
+    stats = collect_statistics_from_metadata(processed_metadata_files, str(imgs_dir))
+    
+    # Calculate version once for both files
+    if version is None:
+        if previous_version is not None:
+            version = previous_version + REPORT_CONFIG['version_increment']
+        else:
+            version = REPORT_CONFIG['default_version']
+    
+    # Generate and write README.md
+    report_content = generate_report(start_time, end_time, stats, dataset_dir, version)
+    readme_file = dataset_path / REPORT_CONFIG['readme_filename']
+    with open(readme_file, 'w', encoding='utf-8') as f:
+        f.write(report_content)
+    
+    # Generate and write metadata.json
+    metadata = generate_metadata(start_time, end_time, stats, dataset_dir, version)
+    metadata_file = dataset_path / REPORT_CONFIG['metadata_filename']
+    with open(metadata_file, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
     
     print(f"\nProcessing complete!")
     print(f"Processed {len(processed_files)} files")
@@ -385,6 +599,9 @@ def main():
     print(f"  - JSON metadata: {metadata_dir}")
     print(f"  - Images: {imgs_dir}")
     print(f"Duration: {(end_time - start_time).total_seconds():.2f} seconds")
+    print(f"Reports generated:")
+    print(f"  - README: {readme_file}")
+    print(f"  - Metadata: {metadata_file}")
 
 
 if __name__ == "__main__":
