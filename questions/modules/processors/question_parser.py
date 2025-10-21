@@ -9,60 +9,21 @@ from ..core.exceptions import ProcessingError
 class QuestionParser:
     """Parser for extracting question data from TXT files."""
     
-    PROMPT_TEMPLATES = {
-        'multiple_choice_radio': """Stai rispondendo a una domanda di storia dell'arte italiana. Fornisci SOLO la lettera della risposta corretta (A, B, C, D, o E).
-
-{question_content}
-
-Rispondi solo con la lettera:""",
-        
-        'multiple_choice': """Stai rispondendo a una domanda di storia dell'arte italiana. Fornisci SOLO la lettera della risposta corretta (A, B, C, o D).
-
-{question_content}
-
-Rispondi solo con la lettera:""",
-        
-        'multiple_choice_check': """Stai rispondendo a una domanda di storia dell'arte italiana. Più risposte possono essere corrette. Fornisci SOLO le lettere di TUTTE le risposte corrette, separate da virgole.
-
-{question_content}
-
-Rispondi solo con le lettere (es. "A, C, E"):""",
-        
-        'select_errors': """Stai rivedendo un testo di storia dell'arte italiana per trovare errori. Identifica le parole o frasi incorrette nel testo. Fornisci SOLO le parole/frasi incorrette, separate da virgole.
-
-{question_content}
-
-Rispondi solo con le parole/frasi incorrette:""",
-        
-        'completion_closed': """Stai completando un testo di storia dell'arte italiana. DEVI fornire una risposta per OGNI spazio vuoto (BLANK) presente nel testo. Per ogni spazio vuoto, scegli l'opzione corretta tra quelle proposte.
-
-IMPORTANTE:
-- Fornisci le risposte per TUTTI i blank nel formato "BLANK_1: testo della risposta, BLANK_2: testo della risposta, BLANK_3: testo della risposta" (continua per tutti i blank presenti)
-- NON usare i numeri (1, 2), ma scrivi il TESTO COMPLETO della risposta scelta
-- Esempio: se per BLANK_1 scegli l'opzione "1. San Giorgio", rispondi "BLANK_1: San Giorgio"
-
-{question_content}
-
-Rispondi nel formato specificato fornendo il TESTO COMPLETO della risposta per OGNI BLANK:""",
-        
-        'completion_open': """Stai completando un testo di storia dell'arte italiana. Inserisci i termini appropriati per ogni spazio vuoto [BLANK]. Fornisci solo i termini, separati da virgole, nell'ordine in cui appaiono nel testo.
-
-{question_content}
-
-Rispondi solo con i termini:""",
-        
-        'positioning': """Stai completando un testo di storia dell'arte italiana. Scegli i termini corretti dalla lista proposta per riempire gli spazi vuoti. Fornisci solo i termini scelti, separati da virgole, nell'ordine in cui appaiono nel testo.
-
-{question_content}
-
-Rispondi solo con i termini scelti:""",
-        
-        'true_false': """Stai valutando affermazioni sulla storia dell'arte italiana. Per ogni affermazione, determina se è Vera o Falsa. Fornisci le risposte nel formato "A: Vero, B: Falso, C: Vero".
-
-{question_content}
-
-Rispondi nel formato specificato:"""
-    }
+    def __init__(self):
+        """Initialize the parser and load the English prompt template."""
+        self._load_prompt_template()
+    
+    def _load_prompt_template(self):
+        """Load the English prompt template from the prompts directory."""
+        try:
+            # Get the prompts directory relative to the questions directory
+            current_dir = Path(__file__).parent.parent.parent.parent  # Go up to datasets root
+            prompt_file = current_dir / 'prompts' / 'answer_question.txt'
+            
+            with open(prompt_file, 'r', encoding='utf-8') as f:
+                self.prompt_template = f.read().strip()
+        except Exception as e:
+            raise ProcessingError(f"Failed to load prompt template: {e}")
     
     def parse_txt_file(self, filepath: str) -> Dict[str, Any]:
         """
@@ -167,37 +128,50 @@ Rispondi nel formato specificato:"""
         
         return base_type
     
-    def format_question_content(self, question_data: Dict[str, Any]) -> str:
+    def _format_choices_for_english_template(self, choices: List[str]) -> str:
         """
-        Format question for LLM prompt.
+        Format choices for the English template system.
         
         Args:
-            question_data: Question data dictionary
+            choices: List of choice strings
             
         Returns:
-            Formatted question content
+            Formatted choices text
         """
-        content_parts = []
+        if not choices:
+            return ""
         
-        if question_data['title']:
-            content_parts.append(f"Titolo: {question_data['title']}")
+        choices_text = "Options:\n\n"
+        for choice in choices:
+            choices_text += f"{choice}\n\n"
         
-        if question_data['instructions']:
-            content_parts.append(f"{question_data['instructions']}")
+        return choices_text.strip()
+    
+    def _map_question_type_to_english(self, question_type: str) -> str:
+        """
+        Map internal question type to English template format.
         
-        if question_data['question_text']:
-            content_parts.append(f"Domanda: {question_data['question_text']}")
-        
-        if question_data['choices']:
-            content_parts.append("Opzioni:")
-            for choice in question_data['choices']:
-                content_parts.append(choice)
-        
-        return "\n\n".join(content_parts)
+        Args:
+            question_type: Internal question type
+            
+        Returns:
+            English question type for template
+        """
+        mapping = {
+            "multiple_choice_radio": "multiple choice radio",
+            "multiple_choice": "multiple choice radio",
+            "multiple_choice_check": "multiple choice check",
+            "true_false": "true/false",
+            "completion_open": "open completion",
+            "completion_closed": "closed completion",
+            "positioning": "positioning",
+            "select_errors": "error selection"
+        }
+        return mapping.get(question_type, "multiple choice radio")
     
     def create_prompt(self, question_data: Dict[str, Any]) -> str:
         """
-        Create complete prompt for LLM.
+        Create complete prompt for LLM using the English template system.
         
         Args:
             question_data: Question data dictionary
@@ -206,10 +180,21 @@ Rispondi nel formato specificato:"""
             Complete LLM prompt
         """
         question_type = self.refine_question_type(question_data)
-        template = self.PROMPT_TEMPLATES.get(question_type, self.PROMPT_TEMPLATES['multiple_choice'])
-        question_content = self.format_question_content(question_data)
+        english_question_type = self._map_question_type_to_english(question_type)
         
-        return template.format(question_content=question_content)
+        # Format choices for the English template
+        choices_text = self._format_choices_for_english_template(question_data.get('choices', []))
+        
+        # Use the loaded English template and format it
+        prompt = self.prompt_template.format(
+            question_type=english_question_type,
+            question_title=question_data.get('title', ''),
+            question_text=question_data.get('question_text', ''),
+            language="Italian",
+            choices_text=choices_text
+        )
+        
+        return prompt
     
     def get_question_id_from_path(self, txt_file: str) -> str:
         """

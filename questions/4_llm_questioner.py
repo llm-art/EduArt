@@ -15,6 +15,7 @@ Features:
 
 Usage:
     python 4_llm_questioner.py --start 1 --end 10 --models google-gemini-2.5-flash-lite
+    python 4_llm_questioner.py --models model1 --models model2 --models model3
     python 4_llm_questioner.py --types multiple_choice,true_false
     python 4_llm_questioner.py --output my_results.csv
 """
@@ -37,7 +38,7 @@ from modules.core.exceptions import ConfigurationError, ProcessingError
 @click.option('--start', type=int, help='Start question number')
 @click.option('--end', type=int, help='End question number')
 @click.option('--types', help='Comma-separated list of question types to test')
-@click.option('--models', help='Comma-separated list of models to test')
+@click.option('--models', multiple=True, help='Model to test (can be specified multiple times)')
 @click.option('--output', default='llm_evaluation_results.csv', help='Output CSV file')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 def main(start, end, types, models, output, verbose):
@@ -57,7 +58,7 @@ def main(start, end, types, models, output, verbose):
     # Parse models filter
     models_to_test = None
     if models:
-        models_to_test = [m.strip() for m in models.split(',')]
+        models_to_test = list(models)  # models is now a tuple from multiple=True
         if verbose:
             print(f"Models to test: {models_to_test}")
     
@@ -99,7 +100,7 @@ def main(start, end, types, models, output, verbose):
         print(f"Success rate: {results['success_rate']:.1f}%")
         print(f"Questions processed: {results['questions_processed']}")
         print(f"Models tested: {results['models_tested']}")
-        print(f"Results saved to: {results['output_file']}")
+        print(f"Results saved to: {results['answers_folder']}")
         
         if verbose:
             print(f"\nDetailed results summary:")
@@ -110,10 +111,10 @@ def main(start, end, types, models, output, verbose):
                 print(f"  Overall F1 score: {overall.get('f1', 0):.3f}")
                 print(f"  Average processing time: {summary.get('average_processing_time', 0):.2f}s")
         
-        print(f"\n🎉 Evaluation complete!")
+        print(f"\nEvaluation complete!")
         
     except ConfigurationError as e:
-        print(f"❌ Configuration error: {e}")
+        print(f"Configuration error: {e}")
         if verbose:
             print("\nTroubleshooting tips:")
             print("- Check that API keys are set in the .env file")
@@ -122,7 +123,7 @@ def main(start, end, types, models, output, verbose):
         return 1
     
     except ProcessingError as e:
-        print(f"❌ Processing error: {e}")
+        print(f"Processing error: {e}")
         if verbose:
             print("\nThis may be due to:")
             print("- Network connectivity issues")
@@ -131,7 +132,7 @@ def main(start, end, types, models, output, verbose):
         return 1
     
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f"Unexpected error: {e}")
         if verbose:
             import traceback
             print("\nFull traceback:")

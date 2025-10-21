@@ -71,7 +71,11 @@ class AnswerEvaluator:
             matches = re.findall(r'BLANK_\d+:\s*([^,\n]+)', response)
             return [match.strip() for match in matches] if matches else [response]
         
-        elif question_type in ['completion_open', 'positioning']:
+        elif question_type == 'positioning':
+            # For positioning questions, preserve the full response to parse BLANK_X format
+            return [response]
+        
+        elif question_type == 'completion_open':
             # Split by commas
             terms = [item.strip() for item in response.split(',')]
             return [term for term in terms if term]
@@ -114,12 +118,15 @@ class AnswerEvaluator:
             return self._evaluate_multiple_choice(parsed_response, answers)
         
         elif question_type == 'select_errors':
-            return self._evaluate_text_list(parsed_response, answers)
+            return self._evaluate_select_errors(parsed_response, answers)
         
         elif question_type == 'completion_closed':
             return self._evaluate_completion_closed(parsed_response, answers)
         
-        elif question_type in ['completion_open', 'positioning']:
+        elif question_type == 'positioning':
+            return self._evaluate_positioning(parsed_response, answers)
+        
+        elif question_type == 'completion_open':
             return {
                 'is_correct': None,
                 'score': None,
@@ -264,5 +271,137 @@ class AnswerEvaluator:
             'is_correct': is_correct,
             'score': score,
             'details': f'Matched {matched}/{total} statements',
+            'parsed_response': parsed_response
+        }
+    
+    def _evaluate_positioning(self, parsed_response: List[str], answers: List[Dict]) -> Dict[str, Any]:
+        """Evaluate positioning questions by comparing BLANK_X answers with correct terms."""
+        if not parsed_response or not answers:
+            return {'is_correct': False, 'score': 0.0, 'details': 'Empty response or answers', 'parsed_response': parsed_response}
+        
+        # Parse the LLM response to extract BLANK_X: answer pairs
+        blank_answers = {}
+        response_text = ' '.join(parsed_response)
+        
+        # Extract BLANK_X: answer pairs from the response
+        matches = re.findall(r'BLANK_(\d+):\s*([^,\n]+)', response_text)
+        for blank_num, answer in matches:
+            blank_answers[int(blank_num)] = answer.strip()
+        
+        # If no BLANK_X format found, try to parse as comma-separated list
+        if not blank_answers and len(parsed_response) > 0:
+            # Assume the response is a comma-separated list in order
+            terms = [term.strip() for term in parsed_response[0].split(',')]
+            for i, term in enumerate(terms, 1):
+                blank_answers[i] = term
+        
+        # Create mapping of correct answers by blank position
+        correct_answers = {}
+        for answer in answers:
+            if isinstance(answer, dict):
+                blank_pos = answer.get('blank_position')
+                correct_term = answer.get('correct_term', '')
+                if blank_pos:
+                    correct_answers[blank_pos] = correct_term.strip()
+        
+        if not correct_answers:
+            return {'is_correct': False, 'score': 0.0, 'details': 'No correct answers found', 'parsed_response': parsed_response}
+        
+        # Compare answers
+        matched = 0
+        total = len(correct_answers)
+        details = []
+        
+        for blank_pos, correct_term in correct_answers.items():
+            user_answer = blank_answers.get(blank_pos, '').strip()
+            
+            # Use fuzzy matching for comparison
+            similarity = SequenceMatcher(None, user_answer.lower(), correct_term.lower()).ratio()
+            
+            if similarity > 0.8:  # 80% similarity threshold
+                matched += 1
+                details.append(f"BLANK_{blank_pos}: '{user_answer}' ≈ '{correct_term}' ✓")
+            else:
+                details.append(f"BLANK_{blank_pos}: '{user_answer}' ≠ '{correct_term}' ✗")
+        
+        score = matched / total if total > 0 else 0.0
+        is_correct = score >= 0.8  # Consider correct if 80% or more blanks are correct
+        
+        return {
+            'is_correct': is_correct,
+            'score': score,
+            'details': f'Matched {matched}/{total} blanks. ' + '; '.join(details),
+            'parsed_response': parsed_response
+        }
+    
+    def _evaluate_select_errors(self, parsed_response: List[str], answers: List[Dict]) -> Dict[str, Any]:
+        """Evaluate select_errors questions by comparing identified errors with correct error terms."""
+        if not parsed_response or not answers:
+            return {'is_correct': False, 'score': 0.0, 'details': 'Empty response or answers', 'parsed_response': parsed_response}
+        
+        # Extract error terms from the response
+        user_errors = []
+        for response in parsed_response:
+            # Split by semicolon or comma and clean
+            errors = re.split(r'[;,]', response)
+            user_errors.extend([error.strip() for error in errors if error.strip()])
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        user_errors = [x for x in user_errors if not (x in seen or seen.add(x))]
+        
+        # Extract correct error terms from answers
+        correct_errors = []
+        for answer in answers:
+            if isinstance(answer, dict):
+                error_term = answer.get('error', '')
+                if error_term:
+                    correct_errors.append(error_term.strip())
+        
+        if not correct_errors:
+            return {'is_correct': False, 'score': 0.0, 'details': 'No correct errors found', 'parsed_response': parsed_response}
+        
+        # Compare errors using fuzzy matching
+        matched = 0
+        total = len(correct_errors)
+        details = []
+        
+        for correct_error in correct_errors:
+            best_match = 0.0
+            best_user_error = ''
+            
+            for user_error in user_errors:
+                similarity = SequenceMatcher(None, user_error.lower(), correct_error.lower()).ratio()
+                if similarity > best_match:
+                    best_match = similarity
+                    best_user_error = user_error
+            
+            if best_match > 0.8:  # 80% similarity threshold
+                matched += 1
+                details.append(f"'{best_user_error}' ≈ '{correct_error}' ✓")
+            else:
+                details.append(f"'{correct_error}' not found ✗")
+        
+        # Check for extra errors (false positives)
+        extra_errors = []
+        for user_error in user_errors:
+            found = False
+            for correct_error in correct_errors:
+                similarity = SequenceMatcher(None, user_error.lower(), correct_error.lower()).ratio()
+                if similarity > 0.8:
+                    found = True
+                    break
+            if not found:
+                extra_errors.append(user_error)
+        
+        score = matched / total if total > 0 else 0.0
+        is_correct = score >= 0.8 and len(extra_errors) == 0  # Perfect match required
+        
+        extra_details = f" Extra errors: {extra_errors}" if extra_errors else ""
+        
+        return {
+            'is_correct': is_correct,
+            'score': score,
+            'details': f'Matched {matched}/{total} errors. ' + '; '.join(details) + extra_details,
             'parsed_response': parsed_response
         }

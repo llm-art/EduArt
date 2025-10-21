@@ -183,6 +183,18 @@ class LLMQuestioner:
                     
                     processing_time = time.time() - start_time
                     
+                    # Estimate token usage (rough approximation)
+                    # For more accurate tracking, this should be implemented in each provider
+                    input_tokens = len(prompt.split()) * 1.3  # Rough approximation for text
+                    
+                    # Add significant tokens for image if present
+                    if has_image and image_path:
+                        # Images typically use 85-170 tokens per image depending on size and detail
+                        # Using a conservative estimate of 1000 tokens for vision models
+                        input_tokens += 1000
+                    
+                    output_tokens = len(llm_response.split()) * 1.3  # Rough approximation
+                    
                     # Store result
                     self.results_manager.add_result(
                         question_id=question_id,
@@ -200,7 +212,9 @@ class LLMQuestioner:
                             'image_path': image_path,
                             'correct_answers': correct_answers,
                             'prompt': prompt
-                        }
+                        },
+                        input_tokens=int(input_tokens),
+                        output_tokens=int(output_tokens)
                     )
                     
                     # Small delay to avoid rate limiting
@@ -211,15 +225,9 @@ class LLMQuestioner:
                 failed_operations += len(self.providers)
                 continue
         
-        # Export results and generate summary
-        output_path = self.config.results_dir / output_file
-        self.results_manager.export_to_csv(str(output_path))
+        # Only generate answers folder structure (no results/ folder files)
         self.results_manager.print_summary()
-        
-        # Save summary in multiple formats
-        self.results_manager.save_summary_json()
-        self.results_manager.save_summary_txt()
-        self.results_manager.save_summary_md()
+        self.results_manager.finalize_answers_output()
         
         return {
             'total_operations': total_operations,
@@ -228,7 +236,7 @@ class LLMQuestioner:
             'success_rate': (successful_operations / total_operations * 100) if total_operations > 0 else 0,
             'questions_processed': len(question_files),
             'models_tested': len(self.providers),
-            'output_file': str(output_path)
+            'answers_folder': str(self.results_manager.answers_dir)
         }
     
     def get_provider_info(self) -> List[Dict[str, Any]]:

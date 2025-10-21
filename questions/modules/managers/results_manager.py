@@ -3,10 +3,48 @@
 import os
 import csv
 import json
+import shutil
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 from ..core.exceptions import ProcessingError
+
+
+# Cost lookup table for different models (cost per million tokens)
+MODEL_COSTS = {
+    'google/gemini-2.5-flash-lite': {
+        'input_cost_per_million_tokens': 0.1,
+        'output_cost_per_million_tokens': 0.4
+    },
+    'google/gemini-2.5-flash': {
+        'input_cost_per_million_tokens': 0.3,
+        'output_cost_per_million_tokens': 2.5
+    },
+    'google/gemini-2.5-pro': {
+        'input_cost_per_million_tokens': 1.25,
+        'output_cost_per_million_tokens': 10
+    },
+    'openai/gpt-4o': {
+        'input_cost_per_million_tokens': 2.50,
+        'output_cost_per_million_tokens': 10.00
+    },
+    'openai/gpt-4o-mini': {
+        'input_cost_per_million_tokens': 0.15,
+        'output_cost_per_million_tokens': 0.60
+    },
+    'openai/gpt-3.5-turbo': {
+        'input_cost_per_million_tokens': 0.50,
+        'output_cost_per_million_tokens': 1.50
+    },
+    'anthropic/claude-3-5-sonnet-20241022': {
+        'input_cost_per_million_tokens': 3.00,
+        'output_cost_per_million_tokens': 15.00
+    },
+    'anthropic/claude-3-haiku-20240307': {
+        'input_cost_per_million_tokens': 0.25,
+        'output_cost_per_million_tokens': 1.25
+    }
+}
 
 
 class ResultsManager:
@@ -17,25 +55,52 @@ class ResultsManager:
         Initialize results manager.
         
         Args:
-            results_dir: Directory to store results (defaults to questions/results)
+            results_dir: Directory to store results (not used, kept for compatibility)
         """
-        if results_dir is None:
-            # Default to questions/results relative to this module
-            questions_dir = Path(__file__).parent.parent.parent
-            self.results_dir = questions_dir / 'results'
-        else:
-            self.results_dir = Path(results_dir)
-        
+        # Don't create results directory - we only use answers directory
         self.results: List[Dict[str, Any]] = []
-        self.results_dir.mkdir(parents=True, exist_ok=True)
         
-        # Create answers subdirectory for individual question results
-        self.answers_dir = self.results_dir / 'answers'
+        # Create answers directory structure at project root level (same level as questions/)
+        questions_dir = Path(__file__).parent.parent.parent
+        project_root = questions_dir.parent  # Go up one level from questions/ to project root
+        self.answers_dir = project_root / 'answers'
         self.answers_dir.mkdir(parents=True, exist_ok=True)
+        self.answers_data_dir = self.answers_dir / 'data'
+        self.answers_data_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Track AI calls for metadata and processed models
+        self.ai_calls: List[Dict[str, Any]] = []
+        self.processed_models: set = set()
+    
+    def _prepare_model_folder(self, model_name: str):
+        """
+        Prepare model-specific folder, removing it if it already exists.
+        
+        Args:
+            model_name: Name of the model
+        """
+        # Create safe folder name from model name
+        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
+        model_dir = self.answers_data_dir / safe_model_name
+        
+        # Only remove and recreate folder once per session
+        if model_name not in self.processed_models:
+            # Remove existing model folder if it exists
+            if model_dir.exists():
+                shutil.rmtree(model_dir)
+                print(f"Removed existing results for model: {model_name}")
+            
+            # Create fresh model folder
+            model_dir.mkdir(parents=True, exist_ok=True)
+            self.processed_models.add(model_name)
+            print(f"Created fresh folder for model: {model_name}")
+        
+        return model_dir
     
     def add_result(self, question_id: str, model_name: str, question_type: str,
                    llm_answer: str, correct_answer: str, evaluation: Dict[str, Any],
-                   processing_time: float, error: str = "", question_data: Optional[Dict[str, Any]] = None):
+                   processing_time: float, error: str = "", question_data: Optional[Dict[str, Any]] = None,
+                   input_tokens: int = 0, output_tokens: int = 0):
         """
         Add evaluation result.
         
@@ -49,6 +114,8 @@ class ResultsManager:
             processing_time: Time taken to process
             error: Error message if any
             question_data: Additional question data for individual JSON files
+            input_tokens: Number of input tokens used
+            output_tokens: Number of output tokens generated
         """
         result = {
             'question_id': question_id,
@@ -61,54 +128,101 @@ class ResultsManager:
             'details': evaluation.get('details', ''),
             'processing_time': processing_time,
             'error': error,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'input_tokens': input_tokens,
+            'output_tokens': output_tokens
         }
         
         self.results.append(result)
         
-        # Save individual question result as JSON
-        self._save_individual_result(question_id, result, question_data)
+        # Prepare model-specific folder
+        model_dir = self._prepare_model_folder(model_name)
+        
+        # Track AI call for metadata
+        ai_call = {
+            'description': 'question answering',
+            'model_name': model_name,
+            'input_tokens': input_tokens,
+            'output_tokens': output_tokens,
+            'total_tokens': input_tokens + output_tokens,
+            'processing_time': processing_time,
+            'timestamp': datetime.now().isoformat()
+        }
+        self.ai_calls.append(ai_call)
+        
+        # Save individual question result as JSON in model-specific folder
+        self._save_individual_result(question_id, result, question_data, model_dir)
     
-    def _save_individual_result(self, question_id: str, result: Dict[str, Any], question_data: Optional[Dict[str, Any]] = None):
+    def _save_individual_result(self, question_id: str, result: Dict[str, Any], question_data: Optional[Dict[str, Any]] = None, model_dir: Optional[Path] = None):
         """
-        Save individual question result as JSON file.
+        Save individual question result as JSON file in model-specific folder.
         
         Args:
             question_id: Question identifier
             result: Result data
             question_data: Additional question data
+            model_dir: Model-specific directory path
         """
         try:
+            # Use model-specific directory
+            if model_dir is None:
+                safe_model_name = result['model_name'].replace('/', '_').replace('\\', '_')
+                model_dir = self.answers_data_dir / safe_model_name
+            
+            json_filepath = model_dir / f"{question_id}.json"
+            
+            # Load existing file if it exists to preserve previous AI calls
+            existing_data = {}
+            if json_filepath.exists():
+                with open(json_filepath, 'r', encoding='utf-8') as f:
+                    existing_data = json.load(f)
+            
             # Create comprehensive result data
-            individual_result = {
+            individual_result = existing_data.copy() if existing_data else {
                 'question_id': question_id,
-                'evaluation': {
-                    'model_name': result['model_name'],
-                    'question_type': result['question_type'],
-                    'llm_answer': result['llm_answer'],
-                    'correct_answer': result['correct_answer'],
-                    'is_correct': result['is_correct'],
-                    'score': result['score'],
-                    'details': result['details'],
-                    'processing_time': result['processing_time'],
-                    'error': result['error'],
-                    'timestamp': result['timestamp']
-                }
+                'ai_calls': []
             }
             
-            # Add question data if provided
-            if question_data:
+            # Add question data if provided and not already present
+            if question_data and 'question_data' not in individual_result:
                 individual_result['question_data'] = question_data
             
-            # Save to individual JSON file
-            json_filepath = self.answers_dir / f"{question_id}.json"
+            # Add current AI call to the ai_calls array
+            ai_call = {
+                'description': 'question answering',
+                'model_name': result['model_name'],
+                'input_tokens': result.get('input_tokens', 0),
+                'output_tokens': result.get('output_tokens', 0),
+                'total_tokens': result.get('input_tokens', 0) + result.get('output_tokens', 0),
+                'processing_time': result['processing_time'],
+                'timestamp': result['timestamp']
+            }
+            individual_result['ai_calls'].append(ai_call)
+            
+            # Add evaluation results
+            individual_result['evaluation'] = {
+                'model_name': result['model_name'],
+                'question_type': result['question_type'],
+                'llm_answer': result['llm_answer'],
+                'correct_answer': result['correct_answer'],
+                'is_correct': result['is_correct'],
+                'score': result['score'],
+                'details': result['details'],
+                'processing_time': result['processing_time'],
+                'error': result['error'],
+                'timestamp': result['timestamp']
+            }
+            
+            # Save to individual JSON file in model-specific folder
             with open(json_filepath, 'w', encoding='utf-8') as f:
                 json.dump(individual_result, f, indent=2, ensure_ascii=False)
             
-            print(f"Individual result saved to {json_filepath}")
+            print(f"Individual result saved to {json_filepath} for question {question_id}")
             
         except Exception as e:
             print(f"Warning: Failed to save individual result for question {question_id}: {e}")
+            import traceback
+            traceback.print_exc()
     
     def export_to_csv(self, filepath: str):
         """
@@ -125,9 +239,9 @@ class ResultsManager:
             return
         
         try:
-            fieldnames = ['question_id', 'model_name', 'question_type', 'llm_answer', 
-                         'correct_answer', 'is_correct', 'score', 'details', 
-                         'processing_time', 'error', 'timestamp']
+            fieldnames = ['question_id', 'model_name', 'question_type', 'llm_answer',
+                         'correct_answer', 'is_correct', 'score', 'details',
+                         'processing_time', 'error', 'timestamp', 'input_tokens', 'output_tokens']
             
             with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -157,17 +271,18 @@ class ResultsManager:
         if not valid_results:
             return {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'accuracy': 0.0}
         
-        # For binary classification (correct/incorrect)
-        true_positives = sum(1 for r in valid_results if r['is_correct'] and r['score'] > 0.5)
-        false_positives = sum(1 for r in valid_results if not r['is_correct'] and r['score'] > 0.5)
-        false_negatives = sum(1 for r in valid_results if r['is_correct'] and r['score'] <= 0.5)
-        true_negatives = sum(1 for r in valid_results if not r['is_correct'] and r['score'] <= 0.5)
+        # Simple accuracy-based calculation for question answering
+        correct_answers = sum(1 for r in valid_results if r['is_correct'])
+        total_answers = len(valid_results)
         
-        # Calculate metrics
-        precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0.0
-        recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0.0
-        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
-        accuracy = (true_positives + true_negatives) / len(valid_results) if valid_results else 0.0
+        # Calculate accuracy
+        accuracy = correct_answers / total_answers if total_answers > 0 else 0.0
+        
+        # For question answering, precision = recall = F1 = accuracy when we have binary correct/incorrect
+        # This is because each question has exactly one prediction and one ground truth
+        precision = accuracy
+        recall = accuracy
+        f1 = accuracy
         
         return {
             'precision': precision,
@@ -278,125 +393,21 @@ class ResultsManager:
     
     def save_summary_json(self, filepath: Optional[str] = None):
         """
-        Save summary as JSON file.
-        
-        Args:
-            filepath: Path to JSON file (defaults to results_dir/evaluation_summary.json)
+        Save summary as JSON file - DISABLED (no results folder created).
         """
-        if filepath is None:
-            filepath = self.results_dir / 'evaluation_summary.json'
-        
-        try:
-            summary = self.generate_summary()
-            with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(summary, f, indent=2, ensure_ascii=False)
-            print(f"Summary saved to {filepath}")
-        except Exception as e:
-            raise ProcessingError(f"Failed to save summary: {e}")
+        pass
     
     def save_summary_txt(self, filepath: Optional[str] = None):
         """
-        Save summary as TXT file.
-        
-        Args:
-            filepath: Path to TXT file (defaults to results_dir/evaluation_summary.txt)
+        Save summary as TXT file - DISABLED (no results folder created).
         """
-        if filepath is None:
-            filepath = self.results_dir / 'evaluation_summary.txt'
-        
-        try:
-            summary = self.generate_summary()
-            
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write("="*70 + "\n")
-                f.write("EVALUATION SUMMARY\n")
-                f.write("="*70 + "\n")
-                f.write(f"Total Questions: {summary.get('total_questions', 0)}\n")
-                f.write(f"Total Evaluations: {summary.get('total_evaluations', 0)}\n")
-                f.write(f"Errors: {summary.get('errors', 0)}\n")
-                f.write(f"Average Processing Time: {summary.get('average_processing_time', 0):.2f}s\n")
-                f.write(f"Average Score: {summary.get('average_score', 0):.3f}\n")
-                
-                # Overall metrics
-                overall = summary.get('overall_metrics', {})
-                f.write(f"\nOVERALL PERFORMANCE:\n")
-                f.write(f"  Accuracy:  {overall.get('accuracy', 0):.3f}\n")
-                f.write(f"  Precision: {overall.get('precision', 0):.3f}\n")
-                f.write(f"  Recall:    {overall.get('recall', 0):.3f}\n")
-                f.write(f"  F1 Score:  {overall.get('f1', 0):.3f}\n")
-                f.write(f"  Samples:   {overall.get('total_samples', 0)}\n")
-                
-                # Metrics by model
-                f.write(f"\nPERFORMANCE BY MODEL:\n")
-                f.write(f"{'Model':<35} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Samples':<8}\n")
-                f.write("-" * 70 + "\n")
-                for model, metrics in summary.get('metrics_by_model', {}).items():
-                    f.write(f"{model:<35} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
-                           f"{metrics.get('recall', 0):.3f}  {metrics.get('f1', 0):.3f}  {metrics.get('total_samples', 0):<8}\n")
-                
-                # Metrics by question type
-                f.write(f"\nPERFORMANCE BY QUESTION TYPE:\n")
-                f.write(f"{'Question Type':<25} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Samples':<8}\n")
-                f.write("-" * 70 + "\n")
-                for qtype, metrics in summary.get('metrics_by_type', {}).items():
-                    f.write(f"{qtype:<25} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
-                           f"{metrics.get('recall', 0):.3f}  {metrics.get('f1', 0):.3f}  {metrics.get('total_samples', 0):<8}\n")
-            
-            print(f"Summary saved to {filepath}")
-        except Exception as e:
-            raise ProcessingError(f"Failed to save summary as TXT: {e}")
+        pass
     
     def save_summary_md(self, filepath: Optional[str] = None):
         """
-        Save summary as Markdown file.
-        
-        Args:
-            filepath: Path to MD file (defaults to results_dir/evaluation_summary.md)
+        Save summary as Markdown file - DISABLED (no results folder created).
         """
-        if filepath is None:
-            filepath = self.results_dir / 'evaluation_summary.md'
-        
-        try:
-            summary = self.generate_summary()
-            
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write("# Evaluation Summary\n\n")
-                
-                f.write("## Overview\n\n")
-                f.write(f"- **Total Questions**: {summary.get('total_questions', 0)}\n")
-                f.write(f"- **Total Evaluations**: {summary.get('total_evaluations', 0)}\n")
-                f.write(f"- **Errors**: {summary.get('errors', 0)}\n")
-                f.write(f"- **Average Processing Time**: {summary.get('average_processing_time', 0):.2f}s\n")
-                f.write(f"- **Average Score**: {summary.get('average_score', 0):.3f}\n\n")
-                
-                # Overall metrics
-                overall = summary.get('overall_metrics', {})
-                f.write("## Overall Performance\n\n")
-                f.write(f"- **Accuracy**: {overall.get('accuracy', 0):.3f}\n")
-                f.write(f"- **Precision**: {overall.get('precision', 0):.3f}\n")
-                f.write(f"- **Recall**: {overall.get('recall', 0):.3f}\n")
-                f.write(f"- **F1 Score**: {overall.get('f1', 0):.3f}\n")
-                f.write(f"- **Samples**: {overall.get('total_samples', 0)}\n\n")
-                
-                # Metrics by model
-                f.write("## Performance by Model\n\n")
-                f.write("| Model | Accuracy | Precision | Recall | F1 Score | Samples |\n")
-                f.write("|-------|----------|-----------|--------|----------|----------|\n")
-                for model, metrics in summary.get('metrics_by_model', {}).items():
-                    f.write(f"| {model} | {metrics.get('accuracy', 0):.3f} | {metrics.get('precision', 0):.3f} | "
-                           f"{metrics.get('recall', 0):.3f} | {metrics.get('f1', 0):.3f} | {metrics.get('total_samples', 0)} |\n")
-                
-                # Metrics by question type
-                f.write("\n## Performance by Question Type\n\n")
-                f.write("| Question Type | Accuracy | Precision | Recall | F1 Score | Samples |\n")
-                f.write("|---------------|----------|-----------|--------|----------|----------|\n")
-                for qtype, metrics in summary.get('metrics_by_type', {}).items():
-                    f.write(f"| {qtype} | {metrics.get('accuracy', 0):.3f} | {metrics.get('precision', 0):.3f} | "
-                           f"{metrics.get('recall', 0):.3f} | {metrics.get('f1', 0):.3f} | {metrics.get('total_samples', 0)} |\n")
-            
-            print(f"Summary saved to {filepath}")
-        except Exception as e:
-            raise ProcessingError(f"Failed to save summary as MD: {e}")
+        pass
     
     def clear_results(self):
         """Clear all stored results."""
@@ -429,3 +440,377 @@ class ResultsManager:
             List of results for the question type
         """
         return [r for r in self.results if r['question_type'] == question_type]
+    
+    def _load_existing_metadata(self) -> Dict[str, Any]:
+        """Load existing metadata.json if it exists."""
+        metadata_path = self.answers_dir / 'metadata.json'
+        if metadata_path.exists():
+            try:
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Warning: Failed to load existing metadata: {e}")
+        return {}
+    
+    def _load_all_model_results(self) -> List[Dict[str, Any]]:
+        """Load all results from all model folders."""
+        all_results = []
+        
+        # Load from current session results
+        all_results.extend(self.results)
+        
+        # Load from existing model folders (excluding current session models)
+        for model_dir in self.answers_data_dir.iterdir():
+            if model_dir.is_dir():
+                model_name = model_dir.name.replace('_', '/')  # Convert back from safe name
+                
+                # Skip if this model was processed in current session
+                if model_name in self.processed_models:
+                    continue
+                
+                # Load all JSON files from this model folder
+                for json_file in model_dir.glob('*.json'):
+                    try:
+                        with open(json_file, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            
+                        # Extract result data from the JSON structure
+                        if 'evaluation' in data:
+                            eval_data = data['evaluation']
+                            result = {
+                                'question_id': data.get('question_id', json_file.stem),
+                                'model_name': eval_data.get('model_name', model_name),
+                                'question_type': eval_data.get('question_type', ''),
+                                'llm_answer': eval_data.get('llm_answer', ''),
+                                'correct_answer': eval_data.get('correct_answer', ''),
+                                'is_correct': eval_data.get('is_correct'),
+                                'score': eval_data.get('score'),
+                                'details': eval_data.get('details', ''),
+                                'processing_time': eval_data.get('processing_time', 0),
+                                'error': eval_data.get('error', ''),
+                                'timestamp': eval_data.get('timestamp', ''),
+                                'input_tokens': 0,  # Default for existing data
+                                'output_tokens': 0  # Default for existing data
+                            }
+                            
+                            # Try to get token info from ai_calls if available
+                            if 'ai_calls' in data and data['ai_calls']:
+                                latest_call = data['ai_calls'][-1]
+                                result['input_tokens'] = latest_call.get('input_tokens', 0)
+                                result['output_tokens'] = latest_call.get('output_tokens', 0)
+                            
+                            all_results.append(result)
+                    except Exception as e:
+                        print(f"Warning: Failed to load {json_file}: {e}")
+        
+        return all_results
+    
+    def generate_answers_metadata(self) -> Dict[str, Any]:
+        """
+        Generate metadata for the answers folder, including existing data.
+        
+        Returns:
+            Metadata dictionary
+        """
+        # Load all results (current + existing)
+        all_results = self._load_all_model_results()
+        
+        if not all_results:
+            return {}
+        
+        # Count questions and exercises
+        question_ids = set(r['question_id'] for r in all_results)
+        exercise_ids = set(q.split('_')[0] for q in question_ids)
+        
+        # Count questions with images - need to check the stored question data properly
+        questions_with_images = 0
+        processed_questions = set()
+        
+        # Check from current results
+        for result in self.results:
+            question_id = result['question_id']
+            if question_id not in processed_questions:
+                # Try to load the individual JSON file to get question data
+                safe_model_name = result['model_name'].replace('/', '_').replace('\\', '_')
+                model_dir = self.answers_data_dir / safe_model_name
+                json_filepath = model_dir / f"{question_id}.json"
+                
+                if json_filepath.exists():
+                    try:
+                        with open(json_filepath, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        if data.get('question_data', {}).get('has_image', False):
+                            questions_with_images += 1
+                        processed_questions.add(question_id)
+                    except Exception:
+                        pass
+        
+        # Check from existing model folders for questions not in current session
+        for model_dir in self.answers_data_dir.iterdir():
+            if model_dir.is_dir():
+                for json_file in model_dir.glob('*.json'):
+                    question_id = json_file.stem
+                    if question_id not in processed_questions:
+                        try:
+                            with open(json_file, 'r', encoding='utf-8') as f:
+                                data = json.load(f)
+                            if data.get('question_data', {}).get('has_image', False):
+                                questions_with_images += 1
+                            processed_questions.add(question_id)
+                        except Exception:
+                            pass
+        
+        # Count questions by type (count each question only once, not per model)
+        questions_by_type = {}
+        processed_question_types = set()
+        
+        for result in all_results:
+            question_id = result['question_id']
+            qtype = result['question_type']
+            question_key = f"{question_id}_{qtype}"
+            
+            # Only count each question once, regardless of how many models processed it
+            if question_key not in processed_question_types:
+                questions_by_type[qtype] = questions_by_type.get(qtype, 0) + 1
+                processed_question_types.add(question_key)
+        
+        # Generate model statistics
+        models = []
+        for model_name in set(r['model_name'] for r in all_results):
+            model_results = [r for r in all_results if r['model_name'] == model_name]
+            model_metrics = self.calculate_precision_recall_f1(model_results)
+            
+            # Calculate token usage and costs
+            total_input_tokens = sum(r.get('input_tokens', 0) for r in model_results)
+            total_output_tokens = sum(r.get('output_tokens', 0) for r in model_results)
+            total_processing_time = sum(r.get('processing_time', 0) for r in model_results)
+            
+            # Get cost information
+            cost_info = MODEL_COSTS.get(model_name, {})
+            input_cost_per_million = cost_info.get('input_cost_per_million_tokens', 0)
+            output_cost_per_million = cost_info.get('output_cost_per_million_tokens', 0)
+            
+            # Calculate question type breakdown for this model
+            question_types = []
+            for qtype in set(r['question_type'] for r in model_results):
+                type_results = [r for r in model_results if r['question_type'] == qtype]
+                type_metrics = self.calculate_precision_recall_f1(type_results)
+                
+                # Count questions with images for this type - check individual JSON files
+                type_questions_with_images = 0
+                type_processed_questions = set()
+                
+                for r in type_results:
+                    question_id = r['question_id']
+                    if question_id not in type_processed_questions:
+                        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
+                        model_dir = self.answers_data_dir / safe_model_name
+                        json_filepath = model_dir / f"{question_id}.json"
+                        
+                        if json_filepath.exists():
+                            try:
+                                with open(json_filepath, 'r', encoding='utf-8') as f:
+                                    data = json.load(f)
+                                if data.get('question_data', {}).get('has_image', False):
+                                    type_questions_with_images += 1
+                                type_processed_questions.add(question_id)
+                            except Exception:
+                                pass
+                
+                correctly_answered = sum(1 for r in type_results if r.get('is_correct', False))
+                
+                question_types.append({
+                    'type': qtype,
+                    'number_of_questions': len(type_results),
+                    'questions_with_images': type_questions_with_images,
+                    'correctly_answered_questions': correctly_answered,
+                    'precision': type_metrics.get('precision', 0),
+                    'recall': type_metrics.get('recall', 0),
+                    'f1': type_metrics.get('f1', 0)
+                })
+            
+            models.append({
+                'model_name': model_name,
+                'precision': model_metrics.get('precision', 0),
+                'recall': model_metrics.get('recall', 0),
+                'f1': model_metrics.get('f1', 0),
+                'input_cost_per_million_tokens': input_cost_per_million,
+                'output_cost_per_million_tokens': output_cost_per_million,
+                'ai_calls': [{
+                    'description': 'question_answer',
+                    'input_tokens': total_input_tokens,
+                    'output_tokens': total_output_tokens,
+                    'total_tokens': total_input_tokens + total_output_tokens,
+                    'processing_time': total_processing_time
+                }],
+                'question_type': question_types
+            })
+        
+        metadata = {
+            'creation_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'version': 0.3,
+            'exercise_count': len(exercise_ids),
+            'question_count': len(question_ids),
+            'questions_with_images': questions_with_images,
+            'questions_by_type': questions_by_type,
+            'models': models
+        }
+        
+        return metadata
+    
+    def save_answers_metadata(self):
+        """Save metadata.json in the answers folder."""
+        try:
+            metadata = self.generate_answers_metadata()
+            metadata_path = self.answers_dir / 'metadata.json'
+            
+            with open(metadata_path, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+            
+            print(f"Metadata saved to {metadata_path}")
+        except Exception as e:
+            print(f"Warning: Failed to save metadata: {e}")
+    
+    def generate_answers_readme(self) -> str:
+        """
+        Generate README.md content for the answers folder.
+        
+        Returns:
+            README content as string
+        """
+        if not self.results:
+            return "# Evaluation Results\n\nNo results available."
+        
+        metadata = self.generate_answers_metadata()
+        
+        readme_content = f"""# LLM Evaluation Results
+
+## Overview
+
+This directory contains the results of evaluating Large Language Models (LLMs) on Italian art history questions.
+
+- **Creation Date**: {metadata.get('creation_datetime', 'N/A')}
+- **Version**: {metadata.get('version', 'N/A')}
+- **Total Exercises**: {metadata.get('exercise_count', 0)}
+- **Total Questions**: {metadata.get('question_count', 0)}
+- **Questions with Images**: {metadata.get('questions_with_images', 0)}
+
+## Directory Structure
+
+```
+answers/
+├── metadata.json          # Comprehensive evaluation metadata
+├── README.md             # This file
+└── data/                 # Individual question results organized by model
+    ├── google_gemini-2.5-flash-lite/
+    │   ├── 5_1.json      # Results for question 1 from exercise 5
+    │   ├── 5_2.json      # Results for question 2 from exercise 5
+    │   └── ...           # More question results
+    ├── openai_gpt-4o/
+    │   ├── 5_1.json      # Results for question 1 from exercise 5
+    │   └── ...           # More question results
+    └── ...               # More model folders
+```
+
+## Question Types Distribution
+
+"""
+        
+        questions_by_type = metadata.get('questions_by_type', {})
+        for qtype, count in questions_by_type.items():
+            readme_content += f"- **{qtype}**: {count} questions\n"
+        
+        readme_content += "\n## Model Performance Summary\n\n"
+        
+        # Performance table with actual costs
+        readme_content += "| Model | Precision | Recall | F1 Score | Input Tokens | Output Tokens | Actual Cost |\n"
+        readme_content += "|-------|-----------|--------|----------|--------------|---------------|-------------|\n"
+        
+        for model in metadata.get('models', []):
+            model_name = model.get('model_name', 'Unknown')
+            precision = model.get('precision', 0)
+            recall = model.get('recall', 0)
+            f1 = model.get('f1', 0)
+            
+            # Get token usage and calculate actual cost
+            ai_calls = model.get('ai_calls', [])
+            if ai_calls:
+                input_tokens = ai_calls[0].get('input_tokens', 0)
+                output_tokens = ai_calls[0].get('output_tokens', 0)
+                
+                # Calculate actual cost
+                input_cost_per_million = model.get('input_cost_per_million_tokens', 0)
+                output_cost_per_million = model.get('output_cost_per_million_tokens', 0)
+                
+                actual_cost = (input_tokens * input_cost_per_million / 1_000_000) + (output_tokens * output_cost_per_million / 1_000_000)
+                
+                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {input_tokens:,} | {output_tokens:,} | ${actual_cost:.4f} |\n"
+            else:
+                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | 0 | 0 | $0.0000 |\n"
+        
+        readme_content += "\n## Performance by Question Type\n\n"
+        
+        # Get all unique question types across all models
+        all_question_types = set()
+        for model in metadata.get('models', []):
+            for qt in model.get('question_type', []):
+                all_question_types.add(qt['type'])
+        
+        for qtype in sorted(all_question_types):
+            readme_content += f"### {qtype}\n\n"
+            readme_content += "| Model | Questions | With Images | Correct | Precision | Recall | F1 Score |\n"
+            readme_content += "|-------|-----------|-------------|---------|-----------|--------|-----------|\n"
+            
+            for model in metadata.get('models', []):
+                model_name = model.get('model_name', 'Unknown')
+                type_data = next((qt for qt in model.get('question_type', []) if qt['type'] == qtype), None)
+                
+                if type_data:
+                    questions = type_data.get('number_of_questions', 0)
+                    with_images = type_data.get('questions_with_images', 0)
+                    correct = type_data.get('correctly_answered_questions', 0)
+                    precision = type_data.get('precision', 0)
+                    recall = type_data.get('recall', 0)
+                    f1 = type_data.get('f1', 0)
+                    
+                    readme_content += f"| {model_name} | {questions} | {with_images} | {correct} | {precision:.3f} | {recall:.3f} | {f1:.3f} |\n"
+            
+            readme_content += "\n"
+        
+        readme_content += "\n"
+        
+        return readme_content
+    
+    def save_answers_readme(self):
+        """Save README.md in the answers folder."""
+        try:
+            readme_content = self.generate_answers_readme()
+            readme_path = self.answers_dir / 'README.md'
+            
+            with open(readme_path, 'w', encoding='utf-8') as f:
+                f.write(readme_content)
+            
+            print(f"README saved to {readme_path}")
+        except Exception as e:
+            print(f"Warning: Failed to save README: {e}")
+    
+    def finalize_answers_output(self):
+        """Generate and save all answers folder outputs."""
+        self.save_answers_metadata()
+        self.save_answers_readme()
+        
+        # Count files in all model folders
+        total_files = 0
+        model_folders = []
+        for model_dir in self.answers_data_dir.iterdir():
+            if model_dir.is_dir():
+                file_count = len(list(model_dir.glob('*.json')))
+                total_files += file_count
+                model_folders.append(f"  - {model_dir.name}/: {file_count} files")
+        
+        print(f"\nAnswers folder structure created at: {self.answers_dir}")
+        print(f"- metadata.json: Comprehensive evaluation metadata")
+        print(f"- README.md: Human-readable summary and analysis")
+        print(f"- data/: Individual question results organized by model ({total_files} total files)")
+        for folder_info in model_folders:
+            print(folder_info)

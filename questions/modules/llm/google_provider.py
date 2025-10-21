@@ -10,8 +10,8 @@ from ..core.exceptions import ProcessingError
 class GoogleProvider(LLMProvider):
     """Google Gemini LLM provider using LangChain."""
     
-    def __init__(self, model_name: str, api_key: Optional[str] = None, 
-                 temperature: float = 0.1, max_tokens: int = 512):
+    def __init__(self, model_name: str, api_key: Optional[str] = None,
+                 temperature: float = 0.1, max_tokens: int = 2048):
         """
         Initialize Google provider.
         
@@ -34,12 +34,26 @@ class GoogleProvider(LLMProvider):
                 from langchain_google_genai import ChatGoogleGenerativeAI
                 from langchain.schema import HumanMessage
                 
-                self._model = ChatGoogleGenerativeAI(
-                    model=self.model_name,
-                    temperature=self.temperature,
-                    max_output_tokens=self.max_tokens,
-                    google_api_key=self.api_key
-                )
+                # Model-specific configuration
+                model_config = {
+                    'model': self.model_name,
+                    'temperature': self.temperature,
+                    'google_api_key': self.api_key
+                }
+                
+                # Handle different model versions
+                if 'gemini-2.5' in self.model_name:
+                    # For Gemini 2.5 models, try without max_output_tokens first
+                    try:
+                        self._model = ChatGoogleGenerativeAI(**model_config)
+                    except Exception:
+                        model_config['max_output_tokens'] = self.max_tokens
+                        self._model = ChatGoogleGenerativeAI(**model_config)
+                else:
+                    # For other models, use max_output_tokens
+                    model_config['max_output_tokens'] = self.max_tokens
+                    self._model = ChatGoogleGenerativeAI(**model_config)
+                
                 self._human_message = HumanMessage
             except ImportError as e:
                 raise ProcessingError(f"Google Gemini dependencies not available: {e}")
