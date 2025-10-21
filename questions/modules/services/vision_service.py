@@ -395,6 +395,7 @@ class VisionModelService:
             )
 
 
+            question_image = Path(str(image_path).replace(".png", ".jpg").replace("raw", "imgs"))
             
             # Step 3: Combine data into QuestionData object
             combined_data = {**type_data, **text_data}
@@ -410,9 +411,9 @@ class VisionModelService:
                 question_title=combined_data.get('question_title'),
                 question_text=combined_data.get('question_text'),
                 choices=combined_data.get('choices'),
-                image_path=str(image_path) if image_path.exists() else None,
+                image_path=str(question_image) if question_image.exists() else None,
                 ocr_text=ocr_text,
-                has_image=image_path.exists(),
+                has_image=question_image.exists(),
                 ai_calls=ai_calls
             )
             
