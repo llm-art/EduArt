@@ -31,8 +31,16 @@ REPORT_CONFIG = {
         'exercise_count',
         'question_count',
         'questions_with_images',
-        'questions_by_type'
-    ]
+        'questions_by_type',
+        'ai_calls_summary',
+        'cost_analysis'
+    ],
+    'pricing': {
+        'Google gemini-2.5-flash-lite': {
+            'input_cost_per_million': 0.1,  # $0.1 per 1M input tokens
+            'output_cost_per_million': 0.4  # $0.4 per 1M output tokens
+        }
+    }
 }
 
 
@@ -365,7 +373,8 @@ def collect_statistics_from_metadata(metadata_files, imgs_dir):
         'exercises': set(),
         'total_questions': len(metadata_files),
         'questions_with_images': 0,
-        'questions_by_type': defaultdict(int)
+        'questions_by_type': defaultdict(int),
+        'ai_calls': {}
     }
     
     # Count questions with images
@@ -373,7 +382,7 @@ def collect_statistics_from_metadata(metadata_files, imgs_dir):
         image_files = glob.glob(os.path.join(imgs_dir, "*"))
         stats['questions_with_images'] = len(image_files)
     
-    # Process each metadata JSON file to get exercise numbers and question types
+    # Process each metadata JSON file to get exercise numbers, question types, and AI calls
     for json_file in metadata_files:
         try:
             # Read JSON to get question type and extract exercise info
@@ -389,6 +398,33 @@ def collect_statistics_from_metadata(metadata_files, imgs_dir):
                     if len(path_parts) >= 3:
                         exercise_num = path_parts[-3]  # exercise number
                         stats['exercises'].add(exercise_num)
+                
+                # Process AI calls
+                ai_calls = json_data.get("ai_calls", [])
+                for ai_call in ai_calls:
+                    description = ai_call.get("description", "unknown")
+                    model_name = ai_call.get("model_name", "unknown")
+                    
+                    # Create a unique key for this AI call type
+                    call_key = f"{description}_{model_name}"
+                    
+                    if call_key not in stats['ai_calls']:
+                        stats['ai_calls'][call_key] = {
+                            'description': description,
+                            'model_name': model_name,
+                            'input_tokens': 0,
+                            'output_tokens': 0,
+                            'total_tokens': 0,
+                            'processing_time': 0.0,
+                            'call_count': 0
+                        }
+                    
+                    # Aggregate the numeric values
+                    stats['ai_calls'][call_key]['input_tokens'] += ai_call.get('input_tokens', 0)
+                    stats['ai_calls'][call_key]['output_tokens'] += ai_call.get('output_tokens', 0)
+                    stats['ai_calls'][call_key]['total_tokens'] += ai_call.get('total_tokens', 0)
+                    stats['ai_calls'][call_key]['processing_time'] += ai_call.get('processing_time', 0.0)
+                    stats['ai_calls'][call_key]['call_count'] += 1
                 
         except Exception as e:
             print(f"Warning: Could not process statistics for {json_file}: {e}")
@@ -409,10 +445,47 @@ def collect_statistics_from_metadata(metadata_files, imgs_dir):
     return stats
 
 
+def calculate_ai_costs(stats):
+    """Calculate the total cost of AI calls based on token usage and pricing."""
+    total_cost = 0.0
+    cost_breakdown = {}
+    
+    for call_data in stats['ai_calls'].values():
+        model_name = call_data['model_name']
+        input_tokens = call_data['input_tokens']
+        output_tokens = call_data['output_tokens']
+        
+        # Get pricing for this model (default to 0 if not found)
+        pricing = REPORT_CONFIG['pricing'].get(model_name, {
+            'input_cost_per_million': 0.0,
+            'output_cost_per_million': 0.0
+        })
+        
+        # Calculate costs (convert tokens to millions)
+        input_cost = (input_tokens / 1_000_000) * pricing['input_cost_per_million']
+        output_cost = (output_tokens / 1_000_000) * pricing['output_cost_per_million']
+        call_cost = input_cost + output_cost
+        
+        cost_breakdown[f"{call_data['description']} ({model_name})"] = {
+            'input_tokens': input_tokens,
+            'output_tokens': output_tokens,
+            'input_cost': input_cost,
+            'output_cost': output_cost,
+            'total_cost': call_cost
+        }
+        
+        total_cost += call_cost
+    
+    return total_cost, cost_breakdown
+
+
 def generate_report(start_time, end_time, stats, dataset_dir, version):
     """Generate the dataset bundle report in markdown format."""
     # Calculate processing time
     processing_time = end_time - start_time
+    
+    # Calculate AI costs
+    total_cost, cost_breakdown = calculate_ai_costs(stats)
     
     # Generate report content
     report_content = f"""# Dataset Bundle Report
@@ -429,6 +502,8 @@ def generate_report(start_time, end_time, stats, dataset_dir, version):
 
 **Number of Questions with Images:** {stats['questions_with_images']}
 
+**Total Cost:** ${total_cost:.4f}
+
 ## Questions by Type
 
 """
@@ -436,6 +511,38 @@ def generate_report(start_time, end_time, stats, dataset_dir, version):
     # Add questions by type section
     for question_type, count in sorted(stats['questions_by_type'].items()):
         report_content += f"- **{question_type}:** {count}\n"
+    
+    # Add AI calls section
+    if stats['ai_calls']:
+        report_content += f"""
+## AI Calls Summary
+
+"""
+        for call_data in stats['ai_calls'].values():
+            report_content += f"""### {call_data['description'].title()}
+- **Model:** {call_data['model_name']}
+- **Input Tokens:** {call_data['input_tokens']:,}
+- **Output Tokens:** {call_data['output_tokens']:,}
+- **Total Tokens:** {call_data['total_tokens']:,}
+- **Processing Time:** {call_data['processing_time']:.2f} seconds
+
+"""
+    
+    # Add cost breakdown section
+    if cost_breakdown:
+        report_content += f"""
+## Cost Breakdown
+
+"""
+        for call_type, cost_data in cost_breakdown.items():
+            report_content += f"""### {call_type}
+- **Input Tokens:** {cost_data['input_tokens']:,} (${cost_data['input_cost']:.4f})
+- **Output Tokens:** {cost_data['output_tokens']:,} (${cost_data['output_cost']:.4f})
+- **Total Cost:** ${cost_data['total_cost']:.4f}
+
+"""
+        
+        report_content += f"**Grand Total:** ${total_cost:.4f}\n"
     
     report_content += f"""
 ---
@@ -451,6 +558,18 @@ def generate_metadata(start_time, end_time, stats, dataset_dir, version):
     # Calculate processing time
     processing_time = end_time - start_time
     
+    # Convert AI calls dictionary to list format for JSON
+    ai_calls_list = []
+    for call_data in stats['ai_calls'].values():
+        ai_calls_list.append({
+            "description": call_data['description'],
+            "model_name": call_data['model_name'],
+            "input_tokens": call_data['input_tokens'],
+            "output_tokens": call_data['output_tokens'],
+            "total_tokens": call_data['total_tokens'],
+            "processing_time": call_data['processing_time']
+        })
+    
     # Generate metadata structure
     metadata = {
         "creation_datetime": start_time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -461,6 +580,7 @@ def generate_metadata(start_time, end_time, stats, dataset_dir, version):
         "questions_with_images": stats['questions_with_images'],
         "questions_by_type": dict(stats['questions_by_type']),
         "exercises": sorted(list(stats['exercises'])),
+        "ai_calls": ai_calls_list,
         "last_updated": end_time.strftime('%Y-%m-%d %H:%M:%S')
     }
     
