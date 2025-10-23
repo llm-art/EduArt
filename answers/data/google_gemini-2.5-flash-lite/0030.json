@@ -1,0 +1,177 @@
+{
+  "question_id": "0030",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 447,
+      "output_tokens": 18,
+      "total_tokens": 465,
+      "processing_time": 0.6849496364593506,
+      "timestamp": "2025-10-23T12:42:41.487536"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "completion_closed",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "completion_closed",
+      "answers": [
+        {
+          "id": "BLANK_1",
+          "description": "1475"
+        },
+        {
+          "id": "BLANK_2",
+          "description": "piccola"
+        },
+        {
+          "id": "BLANK_3",
+          "description": "arco"
+        },
+        {
+          "id": "BLANK_4",
+          "description": "gotico"
+        },
+        {
+          "id": "BLANK_5",
+          "description": "vano"
+        },
+        {
+          "id": "BLANK_6",
+          "description": "accesso"
+        },
+        {
+          "id": "BLANK_7",
+          "description": "teatrale"
+        }
+      ],
+      "raw_data": {
+        "exercise": 2,
+        "question": 10,
+        "type": "completion_closed",
+        "answers": [
+          {
+            "id": "BLANK_1",
+            "description": "1475"
+          },
+          {
+            "id": "BLANK_2",
+            "description": "piccola"
+          },
+          {
+            "id": "BLANK_3",
+            "description": "arco"
+          },
+          {
+            "id": "BLANK_4",
+            "description": "gotico"
+          },
+          {
+            "id": "BLANK_5",
+            "description": "vano"
+          },
+          {
+            "id": "BLANK_6",
+            "description": "accesso"
+          },
+          {
+            "id": "BLANK_7",
+            "description": "teatrale"
+          }
+        ],
+        "question_title": "Il San Geròlamo nello studio di Antonello da Messina",
+        "question_text": "Il San Geròlamo nello studio di Antonello da Messina è databile attorno al [BLANK_1]. La [BLANK_2] tavola londinese mostra, al di là di un [BLANK_3] ribassato di foggia catalana, un ombroso interno [BLANK_4], con volte ogivali e bifore, alquanto ambiguo. Al centro di un grande [BLANK_5] prospettico, San Gerolamo, illuminato dalla luce che penetra dall'arco di [BLANK_6], è rappresentato nel suo studio. La costruzione prospettica di questi ambienti appare come una specie di meravigliosa macchina [BLANK_7].",
+        "choices": [
+          {
+            "id": "BLANK_1",
+            "options": [
+              "1475",
+              "gotico"
+            ]
+          },
+          {
+            "id": "BLANK_2",
+            "options": [
+              "piccola",
+              "grande"
+            ]
+          },
+          {
+            "id": "BLANK_3",
+            "options": [
+              "arco",
+              "vano"
+            ]
+          },
+          {
+            "id": "BLANK_4",
+            "options": [
+              "napoli",
+              "gotico"
+            ]
+          },
+          {
+            "id": "BLANK_5",
+            "options": [
+              "vano",
+              "arco"
+            ]
+          },
+          {
+            "id": "BLANK_6",
+            "options": [
+              "accesso",
+              "teatrale"
+            ]
+          },
+          {
+            "id": "BLANK_7",
+            "options": [
+              "teatrale",
+              "accesso"
+            ]
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3578,
+            "output_tokens": 16,
+            "total_tokens": 3594,
+            "processing_time": 2.1915979385375977,
+            "timestamp": "2025-10-21T13:38:47.110760"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3651,
+            "output_tokens": 358,
+            "total_tokens": 4009,
+            "processing_time": 2.9764788150787354,
+            "timestamp": "2025-10-21T13:38:50.087350"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: closed completion\n- Title: Il San Geròlamo nello studio di Antonello da Messina\n- Question: Il San Geròlamo nello studio di Antonello da Messina è databile attorno al [BLANK_1]. La [BLANK_2] tavola londinese mostra, al di là di un [BLANK_3] ribassato di foggia catalana, un ombroso interno [BLANK_4], con volte ogivali e bifore, alquanto ambiguo. Al centro di un grande [BLANK_5] prospettico, San Gerolamo, illuminato dalla luce che penetra dall'arco di [BLANK_6], è rappresentato nel suo studio. La costruzione prospettica di questi ambienti appare come una specie di meravigliosa macchina [BLANK_7].\n- Language: Italian\n\nOptions:\n\nBLANK_1:\n\n1. 1475\n\n2. gotico\n\nBLANK_2:\n\n1. piccola\n\n2. grande\n\nBLANK_3:\n\n1. arco\n\n2. vano\n\nBLANK_4:\n\n1. napoli\n\n2. gotico\n\nBLANK_5:\n\n1. vano\n\n2. arco\n\nBLANK_6:\n\n1. accesso\n\n2. teatrale\n\nBLANK_7:\n\n1. teatrale\n\n2. accesso\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "completion_closed",
+    "llm_answer": "BLANK_1: 1475, BLANK_2: piccola, BLANK_3: arco, BLANK_4: gotico, BLANK_5: vano, BLANK_6: accesso, BLANK_7: teatrale",
+    "correct_answer": "[{'id': 'BLANK_1', 'description': '1475'}, {'id': 'BLANK_2', 'description': 'piccola'}, {'id': 'BLANK_3', 'description': 'arco'}, {'id': 'BLANK_4', 'description': 'gotico'}, {'id': 'BLANK_5', 'description': 'vano'}, {'id': 'BLANK_6', 'description': 'accesso'}, {'id': 'BLANK_7', 'description': 'teatrale'}]",
+    "is_correct": true,
+    "score": 1.0,
+    "details": "Matched 7/7 blanks",
+    "processing_time": 0.6849496364593506,
+    "error": "",
+    "timestamp": "2025-10-23T12:42:41.487536"
+  }
+}

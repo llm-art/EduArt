@@ -1,0 +1,132 @@
+{
+  "question_id": "0028",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash",
+      "input_tokens": 442,
+      "output_tokens": 16,
+      "total_tokens": 458,
+      "processing_time": 16.21780562400818,
+      "timestamp": "2025-10-23T12:41:39.313025"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "positioning",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "positioning",
+      "answers": [
+        {
+          "blank_position": 1,
+          "correct_term": "Perugino"
+        },
+        {
+          "blank_position": 2,
+          "correct_term": "tempio"
+        },
+        {
+          "blank_position": 3,
+          "correct_term": "Dio"
+        },
+        {
+          "blank_position": 4,
+          "correct_term": "Cristo"
+        },
+        {
+          "blank_position": 5,
+          "correct_term": "Cesare"
+        },
+        {
+          "blank_position": 6,
+          "correct_term": "Costantino"
+        }
+      ],
+      "raw_data": {
+        "exercise": 2,
+        "question": 8,
+        "type": "positioning",
+        "answers": [
+          {
+            "blank_position": 1,
+            "correct_term": "Perugino"
+          },
+          {
+            "blank_position": 2,
+            "correct_term": "tempio"
+          },
+          {
+            "blank_position": 3,
+            "correct_term": "Dio"
+          },
+          {
+            "blank_position": 4,
+            "correct_term": "Cristo"
+          },
+          {
+            "blank_position": 5,
+            "correct_term": "Cesare"
+          },
+          {
+            "blank_position": 6,
+            "correct_term": "Costantino"
+          }
+        ],
+        "question_title": "La Consegna delle chiavi a San Pietro",
+        "question_text": "Il capolavoro di Pietro [BLANK_1] resta la Consegna delle chiavi a San Pietro, un grande affresco realizzato in cinquantuno giornate a Roma nella [BLANK_2] tra il 1481 e il 1483. L'opera è carica di significato. Il soggetto, infatti, rende esplicita la trasmissione del potere [BLANK_3] da [BLANK_4] a Pietro e da questi ai papi suoi successori. L'episodio si svolge in una piazza antistante ad un grande [BLANK_5] a pianta centrale affiancato da due archi di trionfo gemelli, citazioni quasi letterali dell'Arco di [BLANK_6].",
+        "choices": [
+          "della Francesca",
+          "Cappella Niccolina",
+          "Cesare",
+          "temporale",
+          "Costantino",
+          "politico",
+          "battistero",
+          "tempio",
+          "Dio",
+          "Cappella Sistina",
+          "Cristo",
+          "Perugino"
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7193,
+            "output_tokens": 14,
+            "total_tokens": 7207,
+            "processing_time": 2.05623459815979,
+            "timestamp": "2025-10-21T13:38:37.753449"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7228,
+            "output_tokens": 336,
+            "total_tokens": 7564,
+            "processing_time": 1.7155530452728271,
+            "timestamp": "2025-10-21T13:38:39.469088"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: positioning\n- Title: La Consegna delle chiavi a San Pietro\n- Question: Il capolavoro di Pietro [BLANK_1] resta la Consegna delle chiavi a San Pietro, un grande affresco realizzato in cinquantuno giornate a Roma nella [BLANK_2] tra il 1481 e il 1483. L'opera è carica di significato. Il soggetto, infatti, rende esplicita la trasmissione del potere [BLANK_3] da [BLANK_4] a Pietro e da questi ai papi suoi successori. L'episodio si svolge in una piazza antistante ad un grande [BLANK_5] a pianta centrale affiancato da due archi di trionfo gemelli, citazioni quasi letterali dell'Arco di [BLANK_6].\n- Language: Italian\n\nOptions:\n\n1. della Francesca\n\n2. Cappella Niccolina\n\n3. Cesare\n\n4. temporale\n\n5. Costantino\n\n6. politico\n\n7. battistero\n\n8. tempio\n\n9. Dio\n\n10. Cappella Sistina\n\n11. Cristo\n\n12. Perugino\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash",
+    "question_type": "positioning",
+    "llm_answer": "BLANK_1: Perugino, BLANK_2: Cappella Sistina, BLANK_3: politico, BLANK_4: Cristo, BLANK_5: tempio, BLANK_6: Costantino",
+    "correct_answer": "[{'blank_position': 1, 'correct_term': 'Perugino'}, {'blank_position': 2, 'correct_term': 'tempio'}, {'blank_position': 3, 'correct_term': 'Dio'}, {'blank_position': 4, 'correct_term': 'Cristo'}, {'blank_position': 5, 'correct_term': 'Cesare'}, {'blank_position': 6, 'correct_term': 'Costantino'}]",
+    "is_correct": false,
+    "score": 0.5,
+    "details": "Matched 3/6 blanks. BLANK_1: 'Perugino' ≈ 'Perugino' ✓; BLANK_2: 'Cappella Sistina' ≠ 'tempio' ✗; BLANK_3: 'politico' ≠ 'Dio' ✗; BLANK_4: 'Cristo' ≈ 'Cristo' ✓; BLANK_5: 'tempio' ≠ 'Cesare' ✗; BLANK_6: 'Costantino' ≈ 'Costantino' ✓",
+    "processing_time": 16.21780562400818,
+    "error": "",
+    "timestamp": "2025-10-23T12:41:39.313025"
+  }
+}

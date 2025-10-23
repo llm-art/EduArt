@@ -1,0 +1,147 @@
+{
+  "question_id": "0056",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-pro",
+      "input_tokens": 416,
+      "output_tokens": 13,
+      "total_tokens": 429,
+      "processing_time": 11.120218515396118,
+      "timestamp": "2025-10-23T12:56:38.821003"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "true_false",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "true_false",
+      "answers": [
+        {
+          "id": "A",
+          "text": "True",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "B",
+          "text": "True",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "C",
+          "text": "False",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "D",
+          "text": "False",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "E",
+          "text": "True",
+          "note": "Risposta esatta."
+        }
+      ],
+      "raw_data": {
+        "exercise": 4,
+        "question": 16,
+        "type": "true_false",
+        "answers": [
+          {
+            "id": "A",
+            "text": "True",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "B",
+            "text": "True",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "C",
+            "text": "False",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "D",
+            "text": "False",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "E",
+            "text": "True",
+            "note": "Risposta esatta."
+          }
+        ],
+        "question_title": "Paolo III Farnese e i ritratti di Tiziano",
+        "question_text": "Individua le affermazioni vere e quelle false.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Nel ritratto omonimo, Paolo III Farnese è raffigurato fra i nipoti Alessandro e Ottavio.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "Per realizzare quest'opera, Tiziano prende spunto dal ritratto di Leone X di Raffaello.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "In quest'opera Tiziano usa una pennellata precisa e dettagliata.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "Il ritratto dei personaggi, come sempre in Tiziano, ne definisce le caratteristiche somatiche e non entra nella caratterizzazione psicologica.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Il colore non è più steso uniformemente, ma quasi trattato come una materia solida avente un proprio rilievo e una propria corposità.",
+            "is_correct": null
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3683,
+            "output_tokens": 14,
+            "total_tokens": 3697,
+            "processing_time": 2.0181519985198975,
+            "timestamp": "2025-10-21T13:40:38.361561"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3335,
+            "output_tokens": 354,
+            "total_tokens": 3689,
+            "processing_time": 2.2267260551452637,
+            "timestamp": "2025-10-21T13:40:40.588365"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: true/false\n- Title: Paolo III Farnese e i ritratti di Tiziano\n- Question: Individua le affermazioni vere e quelle false.\n- Language: Italian\n\nOptions:\n\nA. Nel ritratto omonimo, Paolo III Farnese è raffigurato fra i nipoti Alessandro e Ottavio.\n\nB. Per realizzare quest'opera, Tiziano prende spunto dal ritratto di Leone X di Raffaello.\n\nC. In quest'opera Tiziano usa una pennellata precisa e dettagliata.\n\nD. Il ritratto dei personaggi, come sempre in Tiziano, ne definisce le caratteristiche somatiche e non entra nella caratterizzazione psicologica.\n\nE. Il colore non è più steso uniformemente, ma quasi trattato come una materia solida avente un proprio rilievo e una propria corposità.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-pro",
+    "question_type": "true_false",
+    "llm_answer": "A: true, B: true, C: false, D: false, E: true",
+    "correct_answer": "[{'id': 'A', 'text': 'True', 'note': 'Risposta esatta.'}, {'id': 'B', 'text': 'True', 'note': 'Risposta esatta.'}, {'id': 'C', 'text': 'False', 'note': 'Risposta esatta.'}, {'id': 'D', 'text': 'False', 'note': 'Risposta esatta.'}, {'id': 'E', 'text': 'True', 'note': 'Risposta esatta.'}]",
+    "is_correct": true,
+    "score": 1.0,
+    "details": "Matched 5/5 statements",
+    "processing_time": 11.120218515396118,
+    "error": "",
+    "timestamp": "2025-10-23T12:56:38.821003"
+  }
+}

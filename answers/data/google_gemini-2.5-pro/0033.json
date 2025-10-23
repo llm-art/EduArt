@@ -1,0 +1,134 @@
+{
+  "question_id": "0033",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-pro",
+      "input_tokens": 1373,
+      "output_tokens": 3,
+      "total_tokens": 1376,
+      "processing_time": 9.02119779586792,
+      "timestamp": "2025-10-23T12:44:07.942818"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "multiple_choice_check",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/3/imgs/3.jpg",
+    "correct_answers": {
+      "type": "multiple_choice_check",
+      "answers": [
+        {
+          "id": "A",
+          "description": "L'opera è di grandi dimensioni."
+        },
+        {
+          "id": "B",
+          "description": "S'intitola Flagellazione di Cristo."
+        },
+        {
+          "id": "C",
+          "description": "L'opera si compone di due scene distinte."
+        },
+        {
+          "id": "E",
+          "description": "L'autore è Piero della Francesca."
+        }
+      ],
+      "raw_data": {
+        "exercise": 3,
+        "question": 3,
+        "type": "multiple_choice_check",
+        "answers": [
+          {
+            "id": "A",
+            "description": "L'opera è di grandi dimensioni."
+          },
+          {
+            "id": "B",
+            "description": "S'intitola Flagellazione di Cristo."
+          },
+          {
+            "id": "C",
+            "description": "L'opera si compone di due scene distinte."
+          },
+          {
+            "id": "E",
+            "description": "L'autore è Piero della Francesca."
+          }
+        ],
+        "question_title": "La pittura rinascimentale",
+        "question_text": "Individua le affermazioni corrette riferite all'opera rappresentata.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "L'opera è di grandi dimensioni.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "S'intitola Flagellazione di Cristo.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "L'opera si compone di due scene distinte.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "I tre personaggi in primo piano sono stati riconosciuti senza dubbio come il committente e i suoi familiari.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "L'autore è Piero della Francesca.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "L'azione dei carnefici è dinamica e concitata.",
+            "is_correct": null
+          }
+        ],
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/3/imgs/3.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2485,
+            "output_tokens": 14,
+            "total_tokens": 2499,
+            "processing_time": 1.501795768737793,
+            "timestamp": "2025-10-21T13:38:59.447183"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2130,
+            "output_tokens": 294,
+            "total_tokens": 2424,
+            "processing_time": 1.565760850906372,
+            "timestamp": "2025-10-21T13:39:01.013022"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice check\n- Title: La pittura rinascimentale\n- Question: Individua le affermazioni corrette riferite all'opera rappresentata.\n- Language: Italian\n\nOptions:\n\nA. L'opera è di grandi dimensioni.\n\nB. S'intitola Flagellazione di Cristo.\n\nC. L'opera si compone di due scene distinte.\n\nD. I tre personaggi in primo piano sono stati riconosciuti senza dubbio come il committente e i suoi familiari.\n\nE. L'autore è Piero della Francesca.\n\nF. L'azione dei carnefici è dinamica e concitata.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-pro",
+    "question_type": "multiple_choice_check",
+    "llm_answer": "B; C; E",
+    "correct_answer": "[{'id': 'A', 'description': \"L'opera è di grandi dimensioni.\"}, {'id': 'B', 'description': \"S'intitola Flagellazione di Cristo.\"}, {'id': 'C', 'description': \"L'opera si compone di due scene distinte.\"}, {'id': 'E', 'description': \"L'autore è Piero della Francesca.\"}]",
+    "is_correct": false,
+    "score": 0.75,
+    "details": "User: ['B', 'C', 'E'], Correct: ['A', 'B', 'C', 'E']",
+    "processing_time": 9.02119779586792,
+    "error": "",
+    "timestamp": "2025-10-23T12:44:07.942818"
+  }
+}

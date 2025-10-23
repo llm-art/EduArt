@@ -1,0 +1,147 @@
+{
+  "question_id": "0042",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-pro",
+      "input_tokens": 405,
+      "output_tokens": 13,
+      "total_tokens": 418,
+      "processing_time": 9.437318801879883,
+      "timestamp": "2025-10-23T12:47:53.962102"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "true_false",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "true_false",
+      "answers": [
+        {
+          "id": "A",
+          "text": "Vero",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "B",
+          "text": "Falso",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "C",
+          "text": "Falso",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "D",
+          "text": "Falso",
+          "note": "Risposta esatta."
+        },
+        {
+          "id": "E",
+          "text": "Falso",
+          "note": "Risposta esatta."
+        }
+      ],
+      "raw_data": {
+        "exercise": 4,
+        "question": 2,
+        "type": "true_false",
+        "answers": [
+          {
+            "id": "A",
+            "text": "Vero",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "B",
+            "text": "Falso",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "C",
+            "text": "Falso",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "D",
+            "text": "Falso",
+            "note": "Risposta esatta."
+          },
+          {
+            "id": "E",
+            "text": "Falso",
+            "note": "Risposta esatta."
+          }
+        ],
+        "question_title": "La vita di Giorgione",
+        "question_text": "Individua le affermazioni vere e quelle false. Le caratteristiche che descrivono la breve vita di Giorgione sono:",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Giorgione nasce a Pieve di Cadore, in provincia di Belluno.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "Mentre la sua data di nascita è incerta, la data della morte è sicuramente il 1510.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "La sua è un'arte colta condivisa con il patriziato veneziano.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "Nel disegno Paesaggio con fiume dimostra una scarsa padronanza del tratteggio e del chiaroscuro.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Aprirà una sua bottega a Venezia, dove faranno esperienza sia Correggio che Tiziano.",
+            "is_correct": null
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3652,
+            "output_tokens": 14,
+            "total_tokens": 3666,
+            "processing_time": 1.9449868202209473,
+            "timestamp": "2025-10-21T13:39:41.945296"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3305,
+            "output_tokens": 333,
+            "total_tokens": 3638,
+            "processing_time": 1.6806738376617432,
+            "timestamp": "2025-10-21T13:39:43.626045"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: true/false\n- Title: La vita di Giorgione\n- Question: Individua le affermazioni vere e quelle false. Le caratteristiche che descrivono la breve vita di Giorgione sono:\n- Language: Italian\n\nOptions:\n\nA. Giorgione nasce a Pieve di Cadore, in provincia di Belluno.\n\nB. Mentre la sua data di nascita è incerta, la data della morte è sicuramente il 1510.\n\nC. La sua è un'arte colta condivisa con il patriziato veneziano.\n\nD. Nel disegno Paesaggio con fiume dimostra una scarsa padronanza del tratteggio e del chiaroscuro.\n\nE. Aprirà una sua bottega a Venezia, dove faranno esperienza sia Correggio che Tiziano.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-pro",
+    "question_type": "true_false",
+    "llm_answer": "A: false, B: true, C: true, D: false, E: false",
+    "correct_answer": "[{'id': 'A', 'text': 'Vero', 'note': 'Risposta esatta.'}, {'id': 'B', 'text': 'Falso', 'note': 'Risposta esatta.'}, {'id': 'C', 'text': 'Falso', 'note': 'Risposta esatta.'}, {'id': 'D', 'text': 'Falso', 'note': 'Risposta esatta.'}, {'id': 'E', 'text': 'Falso', 'note': 'Risposta esatta.'}]",
+    "is_correct": false,
+    "score": 0.4,
+    "details": "Matched 2/5 statements",
+    "processing_time": 9.437318801879883,
+    "error": "",
+    "timestamp": "2025-10-23T12:47:53.962102"
+  }
+}

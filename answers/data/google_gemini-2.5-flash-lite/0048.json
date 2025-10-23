@@ -1,0 +1,126 @@
+{
+  "question_id": "0048",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 406,
+      "output_tokens": 5,
+      "total_tokens": 411,
+      "processing_time": 0.39415526390075684,
+      "timestamp": "2025-10-23T12:50:52.186612"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "multiple_choice_check",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "multiple_choice_check",
+      "answers": [
+        {
+          "id": "A",
+          "description": "Risposta non data."
+        },
+        {
+          "id": "B",
+          "description": "Risposta esatta."
+        },
+        {
+          "id": "F",
+          "description": "Risposta non data."
+        }
+      ],
+      "raw_data": {
+        "exercise": 4,
+        "question": 8,
+        "type": "multiple_choice_check",
+        "answers": [
+          {
+            "id": "A",
+            "description": "Risposta non data."
+          },
+          {
+            "id": "B",
+            "description": "Risposta esatta."
+          },
+          {
+            "id": "F",
+            "description": "Risposta non data."
+          }
+        ],
+        "question_title": "Vita e opera di Correggio",
+        "question_text": "Individua le risposte corrette.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Il vero nome di Correggio è Antonio Allegri.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "In Danae, il Correggio affronta in modo lieve e giocoso un tema di grande sensualità.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "Nella cupola del Duomo di Modena realizza L'Assunzione di Maria fra il 1526 e il 1530.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "Dipinge la Camera della Badessa nel Convento di San Paolo tra il 1520 e il 1524.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Usa il disegno come forma espressiva autonoma.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "La sua maturazione avviene anche grazie ad un viaggio a Roma.",
+            "is_correct": null
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2312,
+            "output_tokens": 17,
+            "total_tokens": 2329,
+            "processing_time": 1.5638492107391357,
+            "timestamp": "2025-10-21T13:40:05.930234"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 1957,
+            "output_tokens": 277,
+            "total_tokens": 2234,
+            "processing_time": 1.5185949802398682,
+            "timestamp": "2025-10-21T13:40:07.448903"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice check\n- Title: Vita e opera di Correggio\n- Question: Individua le risposte corrette.\n- Language: Italian\n\nOptions:\n\nA. Il vero nome di Correggio è Antonio Allegri.\n\nB. In Danae, il Correggio affronta in modo lieve e giocoso un tema di grande sensualità.\n\nC. Nella cupola del Duomo di Modena realizza L'Assunzione di Maria fra il 1526 e il 1530.\n\nD. Dipinge la Camera della Badessa nel Convento di San Paolo tra il 1520 e il 1524.\n\nE. Usa il disegno come forma espressiva autonoma.\n\nF. La sua maturazione avviene anche grazie ad un viaggio a Roma.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "multiple_choice_check",
+    "llm_answer": "A; B; D; F",
+    "correct_answer": "[{'id': 'A', 'description': 'Risposta non data.'}, {'id': 'B', 'description': 'Risposta esatta.'}, {'id': 'F', 'description': 'Risposta non data.'}]",
+    "is_correct": false,
+    "score": 0.75,
+    "details": "User: ['A', 'B', 'D', 'F'], Correct: ['A', 'B', 'F']",
+    "processing_time": 0.39415526390075684,
+    "error": "",
+    "timestamp": "2025-10-23T12:50:52.186612"
+  }
+}

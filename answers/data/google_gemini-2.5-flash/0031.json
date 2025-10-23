@@ -1,0 +1,105 @@
+{
+  "question_id": "0031",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash",
+      "input_tokens": 1345,
+      "output_tokens": 1,
+      "total_tokens": 1346,
+      "processing_time": 9.478838682174683,
+      "timestamp": "2025-10-23T12:43:17.988218"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "multiple_choice_radio",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/3/imgs/1.jpg",
+    "correct_answers": {
+      "type": "multiple_choice_radio",
+      "answers": [
+        {
+          "id": "A",
+          "description": "Piero della Francesca, Sacra conversazione."
+        }
+      ],
+      "raw_data": {
+        "exercise": 3,
+        "question": 1,
+        "type": "multiple_choice_radio",
+        "answers": [
+          {
+            "id": "A",
+            "description": "Piero della Francesca, Sacra conversazione."
+          }
+        ],
+        "question_title": "Question 1",
+        "question_text": "Scegli l'affermazione corretta che individua l'autore e il titolo dell'opera.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Piero della Francesca, Sacra conversazione.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "Sandro Botticelli, Pala Medici.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "Giovanni Bellini, Madonna in trono con Bambino.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "Paolo Uccello, Sacra Conversazione.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Andrea Verrocchio, Pala Montefeltro.",
+            "is_correct": null
+          }
+        ],
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/3/imgs/1.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2558,
+            "output_tokens": 17,
+            "total_tokens": 2575,
+            "processing_time": 2.145836114883423,
+            "timestamp": "2025-10-21T13:38:52.237070"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2203,
+            "output_tokens": 191,
+            "total_tokens": 2394,
+            "processing_time": 1.8160412311553955,
+            "timestamp": "2025-10-21T13:38:54.053186"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice radio\n- Title: Question 1\n- Question: Scegli l'affermazione corretta che individua l'autore e il titolo dell'opera.\n- Language: Italian\n\nOptions:\n\nA. Piero della Francesca, Sacra conversazione.\n\nB. Sandro Botticelli, Pala Medici.\n\nC. Giovanni Bellini, Madonna in trono con Bambino.\n\nD. Paolo Uccello, Sacra Conversazione.\n\nE. Andrea Verrocchio, Pala Montefeltro.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash",
+    "question_type": "multiple_choice_radio",
+    "llm_answer": "A",
+    "correct_answer": "[{'id': 'A', 'description': 'Piero della Francesca, Sacra conversazione.'}]",
+    "is_correct": true,
+    "score": 1.0,
+    "details": "User: A, Correct: A",
+    "processing_time": 9.478838682174683,
+    "error": "",
+    "timestamp": "2025-10-23T12:43:17.988218"
+  }
+}

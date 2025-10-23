@@ -1,0 +1,110 @@
+{
+  "question_id": "0065",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash",
+      "input_tokens": 413,
+      "output_tokens": 3,
+      "total_tokens": 416,
+      "processing_time": 14.5077486038208,
+      "timestamp": "2025-10-23T13:01:53.699392"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "multiple_choice_check",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "multiple_choice_check",
+      "answers": [
+        {
+          "id": "F",
+          "description": "Risposta esatta."
+        }
+      ],
+      "raw_data": {
+        "exercise": 5,
+        "question": 5,
+        "type": "multiple_choice_check",
+        "answers": [
+          {
+            "id": "F",
+            "description": "Risposta esatta."
+          }
+        ],
+        "question_title": "Il miracolo dello schiavo di Tintoretto",
+        "question_text": "Individua le affermazioni corrette.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "La scena, ricca di luce e movimento, si svolge sotto una pergola.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "Il colore è violento e pastoso in primo piano e tenue e incerto sullo sfondo.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "È un dipinto di piccole dimensioni datato 1548.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "La linea d'orizzonte nella costruzione prospettica è molto bassa.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Fu realizzato per la Scuola Grande di San Rocco ed è conservato alle Gallerie dell'Accademia.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "Il soggetto si rifà al miracolo di San Marco che aveva reso invulnerabile uno schiavo condannato a morte.",
+            "is_correct": null
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2332,
+            "output_tokens": 17,
+            "total_tokens": 2349,
+            "processing_time": 1.5997931957244873,
+            "timestamp": "2025-10-21T13:41:19.109421"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 1977,
+            "output_tokens": 258,
+            "total_tokens": 2235,
+            "processing_time": 1.5861728191375732,
+            "timestamp": "2025-10-21T13:41:20.695671"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice check\n- Title: Il miracolo dello schiavo di Tintoretto\n- Question: Individua le affermazioni corrette.\n- Language: Italian\n\nOptions:\n\nA. La scena, ricca di luce e movimento, si svolge sotto una pergola.\n\nB. Il colore è violento e pastoso in primo piano e tenue e incerto sullo sfondo.\n\nC. È un dipinto di piccole dimensioni datato 1548.\n\nD. La linea d'orizzonte nella costruzione prospettica è molto bassa.\n\nE. Fu realizzato per la Scuola Grande di San Rocco ed è conservato alle Gallerie dell'Accademia.\n\nF. Il soggetto si rifà al miracolo di San Marco che aveva reso invulnerabile uno schiavo condannato a morte.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash",
+    "question_type": "multiple_choice_check",
+    "llm_answer": "B; D; F",
+    "correct_answer": "[{'id': 'F', 'description': 'Risposta esatta.'}]",
+    "is_correct": false,
+    "score": 0.3333333333333333,
+    "details": "User: ['B', 'D', 'F'], Correct: ['F']",
+    "processing_time": 14.5077486038208,
+    "error": "",
+    "timestamp": "2025-10-23T13:01:53.699392"
+  }
+}

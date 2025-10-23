@@ -1,0 +1,119 @@
+{
+  "question_id": "0066",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash",
+      "input_tokens": 1447,
+      "output_tokens": 7,
+      "total_tokens": 1454,
+      "processing_time": 12.756276607513428,
+      "timestamp": "2025-10-23T13:02:23.574874"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "select_errors",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/5/imgs/6.jpg",
+    "correct_answers": {
+      "type": "select_errors",
+      "answers": [
+        {
+          "correct": "L'ultima cena",
+          "error": "l'Autoritratto"
+        },
+        {
+          "correct": "Palladio",
+          "error": "Vasari"
+        },
+        {
+          "correct": "trasversalmente",
+          "error": "verticalmente"
+        },
+        {
+          "correct": "non parallela",
+          "error": "non perpendicolare"
+        },
+        {
+          "correct": "lampada",
+          "error": "finestra"
+        },
+        {
+          "correct": "soprannaturali",
+          "error": "naturali"
+        }
+      ],
+      "raw_data": {
+        "exercise": 5,
+        "question": 6,
+        "type": "select_errors",
+        "answers": [
+          {
+            "correct": "L'ultima cena",
+            "error": "l'Autoritratto"
+          },
+          {
+            "correct": "Palladio",
+            "error": "Vasari"
+          },
+          {
+            "correct": "trasversalmente",
+            "error": "verticalmente"
+          },
+          {
+            "correct": "non parallela",
+            "error": "non perpendicolare"
+          },
+          {
+            "correct": "lampada",
+            "error": "finestra"
+          },
+          {
+            "correct": "soprannaturali",
+            "error": "naturali"
+          }
+        ],
+        "question_title": "L'innovazione nella pittura di Tintoretto",
+        "question_text": "Nel testo sono stati inseriti degli errori. Individuali facendo clic sulle parole che ritieni sbagliate.\nL'ultima opera di Tintoretto è l'Autoritratto, ora nella chiesa, progettata da Vasari, di SanGiorgioMaggiore a Venezia. La piccola tela, pur riprendendo un tema comune alla pittura del tempo e già precedentemente trattato anche dallo stesso artista, presenta importanti caratteri tradizionali. In primo luogo l'ambientazione, all'interno di una specie di osteria popolare, e poi la composizione, con la mensa disposta verticalmente, scorciata dalla prospettiva, e non perpendicolare al piano del dipinto come avveniva ad esempio, perfino nell'UltimaCena di Leonardo. La luce, che proviene per la maggiore parte da una finestra ma ha anche altre fonti naturali, è la protagonista assoluta del dipinto.",
+        "choices": null,
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/5/imgs/6.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 14918,
+            "output_tokens": 15,
+            "total_tokens": 14933,
+            "processing_time": 2.414534568786621,
+            "timestamp": "2025-10-21T13:41:23.129238"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 15552,
+            "output_tokens": 357,
+            "total_tokens": 15909,
+            "processing_time": 1.9009475708007812,
+            "timestamp": "2025-10-21T13:41:25.030325"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: error selection\n- Title: L'innovazione nella pittura di Tintoretto\n- Question: Nel testo sono stati inseriti degli errori. Individuali facendo clic sulle parole che ritieni sbagliate. L'ultima opera di Tintoretto è l'Autoritratto, ora nella chiesa, progettata da Vasari, di SanGiorgioMaggiore a Venezia. La piccola tela, pur riprendendo un tema comune alla pittura del tempo e già precedentemente trattato anche dallo stesso artista, presenta importanti caratteri tradizionali. In primo luogo l'ambientazione, all'interno di una specie di osteria popolare, e poi la composizione, con la mensa disposta verticalmente, scorciata dalla prospettiva, e non perpendicolare al piano del dipinto come avveniva ad esempio, perfino nell'UltimaCena di Leonardo. La luce, che proviene per la maggiore parte da una finestra ma ha anche altre fonti naturali, è la protagonista assoluta del dipinto.\n- Language: Italian\n\n\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash",
+    "question_type": "select_errors",
+    "llm_answer": "Autoritratto; Vasari; piccola; tradizionali; finestra; naturali",
+    "correct_answer": "[{'correct': \"L'ultima cena\", 'error': \"l'Autoritratto\"}, {'correct': 'Palladio', 'error': 'Vasari'}, {'correct': 'trasversalmente', 'error': 'verticalmente'}, {'correct': 'non parallela', 'error': 'non perpendicolare'}, {'correct': 'lampada', 'error': 'finestra'}, {'correct': 'soprannaturali', 'error': 'naturali'}]",
+    "is_correct": false,
+    "score": 0.6666666666666666,
+    "details": "Matched 4/6 errors. 'Autoritratto' ≈ 'l'Autoritratto' ✓; 'Vasari' ≈ 'Vasari' ✓; 'verticalmente' not found ✗; 'non perpendicolare' not found ✗; 'finestra' ≈ 'finestra' ✓; 'naturali' ≈ 'naturali' ✓ Extra errors: ['piccola', 'tradizionali']",
+    "processing_time": 12.756276607513428,
+    "error": "",
+    "timestamp": "2025-10-23T13:02:23.574874"
+  }
+}

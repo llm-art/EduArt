@@ -1,0 +1,110 @@
+{
+  "question_id": "0073",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 1410,
+      "output_tokens": 5,
+      "total_tokens": 1415,
+      "processing_time": 0.6727275848388672,
+      "timestamp": "2025-10-23T13:05:55.103236"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "multiple_choice_check",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/6/imgs/3.jpg",
+    "correct_answers": {
+      "type": "multiple_choice_check",
+      "answers": [
+        {
+          "id": "B",
+          "description": "La pala rappresenta la Madonna in trono con San Domenico e San Francesco."
+        }
+      ],
+      "raw_data": {
+        "exercise": 6,
+        "question": 3,
+        "type": "multiple_choice_check",
+        "answers": [
+          {
+            "id": "B",
+            "description": "La pala rappresenta la Madonna in trono con San Domenico e San Francesco."
+          }
+        ],
+        "question_title": "Question 3",
+        "question_text": "Individua le caratteristiche descrittive appropriate all'immagine riprodotta (le risposte corrette sono più di una).",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Il punto di fuga è molto basso, collocato fra i due Santi a lato della Madonna.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "La pala rappresenta la Madonna in trono con San Domenico e San Francesco.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "L'autore usa una prospettiva dipinta, cioè suggerita attraverso il colore.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "Il paesaggio non è più un elemento accessorio, ma fa parte integrante del dipinto.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Il Bambino è strutturato in un atteggiamento ieratico e solenne.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "Rappresenta un'interpretazione innovativa della Sacra Conversazione.",
+            "is_correct": null
+          }
+        ],
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/6/imgs/3.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2581,
+            "output_tokens": 17,
+            "total_tokens": 2598,
+            "processing_time": 1.752626895904541,
+            "timestamp": "2025-10-21T13:43:06.036226"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2226,
+            "output_tokens": 282,
+            "total_tokens": 2508,
+            "processing_time": 1.698986530303955,
+            "timestamp": "2025-10-21T13:43:07.735288"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice check\n- Title: Question 3\n- Question: Individua le caratteristiche descrittive appropriate all'immagine riprodotta (le risposte corrette sono più di una).\n- Language: Italian\n\nOptions:\n\nA. Il punto di fuga è molto basso, collocato fra i due Santi a lato della Madonna.\n\nB. La pala rappresenta la Madonna in trono con San Domenico e San Francesco.\n\nC. L'autore usa una prospettiva dipinta, cioè suggerita attraverso il colore.\n\nD. Il paesaggio non è più un elemento accessorio, ma fa parte integrante del dipinto.\n\nE. Il Bambino è strutturato in un atteggiamento ieratico e solenne.\n\nF. Rappresenta un'interpretazione innovativa della Sacra Conversazione.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "multiple_choice_check",
+    "llm_answer": "B; D; E; F",
+    "correct_answer": "[{'id': 'B', 'description': 'La pala rappresenta la Madonna in trono con San Domenico e San Francesco.'}]",
+    "is_correct": false,
+    "score": 0.25,
+    "details": "User: ['B', 'D', 'E', 'F'], Correct: ['B']",
+    "processing_time": 0.6727275848388672,
+    "error": "",
+    "timestamp": "2025-10-23T13:05:55.103236"
+  }
+}

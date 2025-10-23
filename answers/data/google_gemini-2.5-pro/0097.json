@@ -1,0 +1,132 @@
+{
+  "question_id": "0097",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-pro",
+      "input_tokens": 456,
+      "output_tokens": 16,
+      "total_tokens": 472,
+      "processing_time": 13.588080883026123,
+      "timestamp": "2025-10-23T13:21:00.911880"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "positioning",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "positioning",
+      "answers": [
+        {
+          "blank_position": 1,
+          "correct_term": "Mantova"
+        },
+        {
+          "blank_position": 2,
+          "correct_term": "Mantegna"
+        },
+        {
+          "blank_position": 3,
+          "correct_term": "San Giorgio"
+        },
+        {
+          "blank_position": 4,
+          "correct_term": "1474"
+        },
+        {
+          "blank_position": 5,
+          "correct_term": "illusionistico"
+        },
+        {
+          "blank_position": 6,
+          "correct_term": "prospettiva"
+        }
+      ],
+      "raw_data": {
+        "exercise": 8,
+        "question": 7,
+        "type": "positioning",
+        "answers": [
+          {
+            "blank_position": 1,
+            "correct_term": "Mantova"
+          },
+          {
+            "blank_position": 2,
+            "correct_term": "Mantegna"
+          },
+          {
+            "blank_position": 3,
+            "correct_term": "San Giorgio"
+          },
+          {
+            "blank_position": 4,
+            "correct_term": "1474"
+          },
+          {
+            "blank_position": 5,
+            "correct_term": "illusionistico"
+          },
+          {
+            "blank_position": 6,
+            "correct_term": "prospettiva"
+          }
+        ],
+        "question_title": "La Camera degli Sposi",
+        "question_text": "Completa il periodo con i sei termini mancanti scegliendo tra i dodici proposti, facendo attenzione a non usare due volte lo stesso vocabolo.\nA [BLANK_1] il pittore Andrea B [BLANK_2] realizza la decorazione della cosiddetta Camera degli sposi, la camera da letto di Ludovico II Gonzaga, nel torrione Nord di Castel C [BLANK_3]. Iniziata nel 1465, fu conclusa nel D [BLANK_4]. La grande novità della decorazione è rappresentata dallo sfondamento E [BLANK_5] di due pareti contigue e della volta, attuato tramite l'impiego della F [BLANK_6], in modo da dare l'impressione di trovarsi nello spazio aperto di un loggiato.",
+        "choices": [
+          "reale",
+          "San Luigi",
+          "prospettiva",
+          "geometria",
+          "illusionistico",
+          "1470",
+          "Roma",
+          "San Giorgio",
+          "Verrocchio",
+          "Mantova",
+          "Mantegna",
+          "1474"
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7153,
+            "output_tokens": 14,
+            "total_tokens": 7167,
+            "processing_time": 3.922565460205078,
+            "timestamp": "2025-10-21T13:44:42.923388"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7188,
+            "output_tokens": 355,
+            "total_tokens": 7543,
+            "processing_time": 2.338912010192871,
+            "timestamp": "2025-10-21T13:44:45.262387"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: positioning\n- Title: La Camera degli Sposi\n- Question: Completa il periodo con i sei termini mancanti scegliendo tra i dodici proposti, facendo attenzione a non usare due volte lo stesso vocabolo. A [BLANK_1] il pittore Andrea B [BLANK_2] realizza la decorazione della cosiddetta Camera degli sposi, la camera da letto di Ludovico II Gonzaga, nel torrione Nord di Castel C [BLANK_3]. Iniziata nel 1465, fu conclusa nel D [BLANK_4]. La grande novità della decorazione è rappresentata dallo sfondamento E [BLANK_5] di due pareti contigue e della volta, attuato tramite l'impiego della F [BLANK_6], in modo da dare l'impressione di trovarsi nello spazio aperto di un loggiato.\n- Language: Italian\n\nOptions:\n\n1. reale\n\n2. San Luigi\n\n3. prospettiva\n\n4. geometria\n\n5. illusionistico\n\n6. 1470\n\n7. Roma\n\n8. San Giorgio\n\n9. Verrocchio\n\n10. Mantova\n\n11. Mantegna\n\n12. 1474\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-pro",
+    "question_type": "positioning",
+    "llm_answer": "BLANK_1: Mantova, BLANK_2: Mantegna, BLANK_3: San Giorgio, BLANK_4: 1474, BLANK_5: illusionistico, BLANK_6: prospettiva",
+    "correct_answer": "[{'blank_position': 1, 'correct_term': 'Mantova'}, {'blank_position': 2, 'correct_term': 'Mantegna'}, {'blank_position': 3, 'correct_term': 'San Giorgio'}, {'blank_position': 4, 'correct_term': '1474'}, {'blank_position': 5, 'correct_term': 'illusionistico'}, {'blank_position': 6, 'correct_term': 'prospettiva'}]",
+    "is_correct": true,
+    "score": 1.0,
+    "details": "Matched 6/6 blanks. BLANK_1: 'Mantova' ≈ 'Mantova' ✓; BLANK_2: 'Mantegna' ≈ 'Mantegna' ✓; BLANK_3: 'San Giorgio' ≈ 'San Giorgio' ✓; BLANK_4: '1474' ≈ '1474' ✓; BLANK_5: 'illusionistico' ≈ 'illusionistico' ✓; BLANK_6: 'prospettiva' ≈ 'prospettiva' ✓",
+    "processing_time": 13.588080883026123,
+    "error": "",
+    "timestamp": "2025-10-23T13:21:00.911880"
+  }
+}

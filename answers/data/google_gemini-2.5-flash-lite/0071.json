@@ -1,0 +1,192 @@
+{
+  "question_id": "0071",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 503,
+      "output_tokens": 26,
+      "total_tokens": 529,
+      "processing_time": 0.5354478359222412,
+      "timestamp": "2025-10-23T13:04:43.428626"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "completion_closed",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "completion_closed",
+      "answers": [
+        {
+          "id": "BLANK_1",
+          "description": "Correggio"
+        },
+        {
+          "id": "BLANK_2",
+          "description": "prospettiche"
+        },
+        {
+          "id": "BLANK_3",
+          "description": "scenografico"
+        },
+        {
+          "id": "BLANK_4",
+          "description": "barocca"
+        },
+        {
+          "id": "BLANK_5",
+          "description": "Assunzione di Maria"
+        },
+        {
+          "id": "BLANK_6",
+          "description": "olio su tela"
+        },
+        {
+          "id": "BLANK_7",
+          "description": "mitologica"
+        },
+        {
+          "id": "BLANK_8",
+          "description": "nudi"
+        }
+      ],
+      "raw_data": {
+        "exercise": 6,
+        "question": 1,
+        "type": "completion_closed",
+        "answers": [
+          {
+            "id": "BLANK_1",
+            "description": "Correggio"
+          },
+          {
+            "id": "BLANK_2",
+            "description": "prospettiche"
+          },
+          {
+            "id": "BLANK_3",
+            "description": "scenografico"
+          },
+          {
+            "id": "BLANK_4",
+            "description": "barocca"
+          },
+          {
+            "id": "BLANK_5",
+            "description": "Assunzione di Maria"
+          },
+          {
+            "id": "BLANK_6",
+            "description": "olio su tela"
+          },
+          {
+            "id": "BLANK_7",
+            "description": "mitologica"
+          },
+          {
+            "id": "BLANK_8",
+            "description": "nudi"
+          }
+        ],
+        "question_title": "La tecnica di Correggio",
+        "question_text": "Completa la descrizione inserendo i termini che ritieni corretti.\n\nLa carriera artistica di [BLANK_1] si svolge tutta nel ristretto ambito della sua amata Emilia. La sua pittura, ricca di suggestioni [BLANK_2] che, in parte, anticipano un certo gusto [BLANK_3] della successiva cultura [BLANK_4], non riscuote molto successo, tanto che il grandioso affresco dell'[BLANK_5] per la cupola del Duomo di Parma viene definita dai detrattori addirittura «un guazzetto di rane». È per questo che, a partire dal 1531, si ritira al paese natale abbandonando l'affresco in favore dell'[BLANK_6]. Con questa tecnica realizza diversi dipinti di raffinata ispirazione [BLANK_7] nei quali indulge con elegante compiacimento alla sensuale descrizione di alcuni celebri [BLANK_8] femminili.",
+        "choices": [
+          {
+            "id": "BLANK_1",
+            "options": [
+              "bellezza",
+              "Correggio"
+            ]
+          },
+          {
+            "id": "BLANK_2",
+            "options": [
+              "prospettiche",
+              "prospettiche"
+            ]
+          },
+          {
+            "id": "BLANK_3",
+            "options": [
+              "scenografico",
+              "scenografico"
+            ]
+          },
+          {
+            "id": "BLANK_4",
+            "options": [
+              "barocca",
+              "barocca"
+            ]
+          },
+          {
+            "id": "BLANK_5",
+            "options": [
+              "Assunzione di Maria",
+              "Assunzione di Maria"
+            ]
+          },
+          {
+            "id": "BLANK_6",
+            "options": [
+              "olio su tela",
+              "olio su tela"
+            ]
+          },
+          {
+            "id": "BLANK_7",
+            "options": [
+              "mitologica",
+              "mitologica"
+            ]
+          },
+          {
+            "id": "BLANK_8",
+            "options": [
+              "nudi",
+              "nudi"
+            ]
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3880,
+            "output_tokens": 16,
+            "total_tokens": 3896,
+            "processing_time": 3.3657729625701904,
+            "timestamp": "2025-10-21T13:42:55.743721"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 3953,
+            "output_tokens": 592,
+            "total_tokens": 4545,
+            "processing_time": 2.8049004077911377,
+            "timestamp": "2025-10-21T13:42:58.548962"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: closed completion\n- Title: La tecnica di Correggio\n- Question: Completa la descrizione inserendo i termini che ritieni corretti. La carriera artistica di [BLANK_1] si svolge tutta nel ristretto ambito della sua amata Emilia. La sua pittura, ricca di suggestioni [BLANK_2] che, in parte, anticipano un certo gusto [BLANK_3] della successiva cultura [BLANK_4], non riscuote molto successo, tanto che il grandioso affresco dell'[BLANK_5] per la cupola del Duomo di Parma viene definita dai detrattori addirittura «un guazzetto di rane». È per questo che, a partire dal 1531, si ritira al paese natale abbandonando l'affresco in favore dell'[BLANK_6]. Con questa tecnica realizza diversi dipinti di raffinata ispirazione [BLANK_7] nei quali indulge con elegante compiacimento alla sensuale descrizione di alcuni celebri [BLANK_8] femminili.\n- Language: Italian\n\nOptions:\n\nBLANK_1:\n\n1. bellezza\n\n2. Correggio\n\nBLANK_2:\n\n1. prospettiche\n\n2. prospettiche\n\nBLANK_3:\n\n1. scenografico\n\n2. scenografico\n\nBLANK_4:\n\n1. barocca\n\n2. barocca\n\nBLANK_5:\n\n1. Assunzione di Maria\n\n2. Assunzione di Maria\n\nBLANK_6:\n\n1. olio su tela\n\n2. olio su tela\n\nBLANK_7:\n\n1. mitologica\n\n2. mitologica\n\nBLANK_8:\n\n1. nudi\n\n2. nudi\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "completion_closed",
+    "llm_answer": "BLANK_1: Correggio, BLANK_2: prospettiche, BLANK_3: scenografico, BLANK_4: barocca, BLANK_5: Assunzione di Maria, BLANK_6: olio su tela, BLANK_7: mitologica, BLANK_8: nudi",
+    "correct_answer": "[{'id': 'BLANK_1', 'description': 'Correggio'}, {'id': 'BLANK_2', 'description': 'prospettiche'}, {'id': 'BLANK_3', 'description': 'scenografico'}, {'id': 'BLANK_4', 'description': 'barocca'}, {'id': 'BLANK_5', 'description': 'Assunzione di Maria'}, {'id': 'BLANK_6', 'description': 'olio su tela'}, {'id': 'BLANK_7', 'description': 'mitologica'}, {'id': 'BLANK_8', 'description': 'nudi'}]",
+    "is_correct": true,
+    "score": 1.0,
+    "details": "Matched 8/8 blanks",
+    "processing_time": 0.5354478359222412,
+    "error": "",
+    "timestamp": "2025-10-23T13:04:43.428626"
+  }
+}

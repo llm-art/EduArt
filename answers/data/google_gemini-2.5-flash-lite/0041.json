@@ -1,0 +1,192 @@
+{
+  "question_id": "0041",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 512,
+      "output_tokens": 28,
+      "total_tokens": 540,
+      "processing_time": 0.4544095993041992,
+      "timestamp": "2025-10-23T12:46:52.983346"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "completion_closed",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "completion_closed",
+      "answers": [
+        {
+          "id": "BLANK_1",
+          "description": "aristocratico"
+        },
+        {
+          "id": "BLANK_2",
+          "description": "ecclesiastici"
+        },
+        {
+          "id": "BLANK_3",
+          "description": "economica"
+        },
+        {
+          "id": "BLANK_4",
+          "description": "intellettuali"
+        },
+        {
+          "id": "BLANK_5",
+          "description": "artisti, musici e letterati"
+        },
+        {
+          "id": "BLANK_6",
+          "description": "arte e di filosofia"
+        },
+        {
+          "id": "BLANK_7",
+          "description": "Cinquecento"
+        },
+        {
+          "id": "BLANK_8",
+          "description": "Giorgione"
+        }
+      ],
+      "raw_data": {
+        "exercise": 4,
+        "question": 1,
+        "type": "completion_closed",
+        "answers": [
+          {
+            "id": "BLANK_1",
+            "description": "aristocratico"
+          },
+          {
+            "id": "BLANK_2",
+            "description": "ecclesiastici"
+          },
+          {
+            "id": "BLANK_3",
+            "description": "economica"
+          },
+          {
+            "id": "BLANK_4",
+            "description": "intellettuali"
+          },
+          {
+            "id": "BLANK_5",
+            "description": "artisti, musici e letterati"
+          },
+          {
+            "id": "BLANK_6",
+            "description": "arte e di filosofia"
+          },
+          {
+            "id": "BLANK_7",
+            "description": "Cinquecento"
+          },
+          {
+            "id": "BLANK_8",
+            "description": "Giorgione"
+          }
+        ],
+        "question_title": "L'ambiente veneziano fra XV e XVI secolo",
+        "question_text": "Ricostruisci il testo scegliendo i termini corretti.\n\nNei primi decenni del XVI secolo a Venezia il ricco ceto [BLANK_1] veneziano (mercanti, armatóri, [BLANK_2]) conosce uno dei suoi momenti di maggior splendore economico e politico. L'intensa attività [BLANK_3] e la raffinatezza della vita sociale, ad esempio, ne costituiscono due delle testimonianze più evidenti. A tale situazione di benessere e di stabilità generali fa riscontro l'estrema vivacità degli ambienti [BLANK_4]. I patrizi amano riunirsi nei loro palazzi e nei loro giardini circondandosi di [BLANK_5], per discutere di [BLANK_6]. È nell'ambito di questa raffinata cornice culturale che maturano alcune delle personalità artistiche di maggior rilievo del [BLANK_7] veneto: Giovanni Bellini [BLANK_8] e Tiziano Vecellio.",
+        "choices": [
+          {
+            "id": "BLANK_1",
+            "options": [
+              "aristocratico",
+              "borghese"
+            ]
+          },
+          {
+            "id": "BLANK_2",
+            "options": [
+              "ecclesiastici",
+              "banchieri"
+            ]
+          },
+          {
+            "id": "BLANK_3",
+            "options": [
+              "edilizia",
+              "economica"
+            ]
+          },
+          {
+            "id": "BLANK_4",
+            "options": [
+              "politici",
+              "intellettuali"
+            ]
+          },
+          {
+            "id": "BLANK_5",
+            "options": [
+              "artisti, musici e letterati",
+              "banchieri, artigiani e armatori"
+            ]
+          },
+          {
+            "id": "BLANK_6",
+            "options": [
+              "arte e di filosofia",
+              "economia e politica"
+            ]
+          },
+          {
+            "id": "BLANK_7",
+            "options": [
+              "Cinquecento",
+              "Quattrocento"
+            ]
+          },
+          {
+            "id": "BLANK_8",
+            "options": [
+              "Giovanni Bellini",
+              "Giorgione"
+            ]
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 5781,
+            "output_tokens": 16,
+            "total_tokens": 5797,
+            "processing_time": 3.833185911178589,
+            "timestamp": "2025-10-21T13:39:37.167519"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 5854,
+            "output_tokens": 621,
+            "total_tokens": 6475,
+            "processing_time": 2.8298044204711914,
+            "timestamp": "2025-10-21T13:39:39.997407"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: closed completion\n- Title: L'ambiente veneziano fra XV e XVI secolo\n- Question: Ricostruisci il testo scegliendo i termini corretti. Nei primi decenni del XVI secolo a Venezia il ricco ceto [BLANK_1] veneziano (mercanti, armatóri, [BLANK_2]) conosce uno dei suoi momenti di maggior splendore economico e politico. L'intensa attività [BLANK_3] e la raffinatezza della vita sociale, ad esempio, ne costituiscono due delle testimonianze più evidenti. A tale situazione di benessere e di stabilità generali fa riscontro l'estrema vivacità degli ambienti [BLANK_4]. I patrizi amano riunirsi nei loro palazzi e nei loro giardini circondandosi di [BLANK_5], per discutere di [BLANK_6]. È nell'ambito di questa raffinata cornice culturale che maturano alcune delle personalità artistiche di maggior rilievo del [BLANK_7] veneto: Giovanni Bellini [BLANK_8] e Tiziano Vecellio.\n- Language: Italian\n\nOptions:\n\nBLANK_1:\n\n1. aristocratico\n\n2. borghese\n\nBLANK_2:\n\n1. ecclesiastici\n\n2. banchieri\n\nBLANK_3:\n\n1. edilizia\n\n2. economica\n\nBLANK_4:\n\n1. politici\n\n2. intellettuali\n\nBLANK_5:\n\n1. artisti, musici e letterati\n\n2. banchieri, artigiani e armatori\n\nBLANK_6:\n\n1. arte e di filosofia\n\n2. economia e politica\n\nBLANK_7:\n\n1. Cinquecento\n\n2. Quattrocento\n\nBLANK_8:\n\n1. Giovanni Bellini\n\n2. Giorgione\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "completion_closed",
+    "llm_answer": "BLANK_1: borghese, BLANK_2: banchieri, BLANK_3: economica, BLANK_4: intellettuali, BLANK_5: artisti, musici e letterati, BLANK_6: arte e di filosofia, BLANK_7: Cinquecento, BLANK_8: Giorgione",
+    "correct_answer": "[{'id': 'BLANK_1', 'description': 'aristocratico'}, {'id': 'BLANK_2', 'description': 'ecclesiastici'}, {'id': 'BLANK_3', 'description': 'economica'}, {'id': 'BLANK_4', 'description': 'intellettuali'}, {'id': 'BLANK_5', 'description': 'artisti, musici e letterati'}, {'id': 'BLANK_6', 'description': 'arte e di filosofia'}, {'id': 'BLANK_7', 'description': 'Cinquecento'}, {'id': 'BLANK_8', 'description': 'Giorgione'}]",
+    "is_correct": false,
+    "score": 0.625,
+    "details": "Matched 5/8 blanks",
+    "processing_time": 0.4544095993041992,
+    "error": "",
+    "timestamp": "2025-10-23T12:46:52.983346"
+  }
+}

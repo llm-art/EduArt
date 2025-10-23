@@ -1,0 +1,126 @@
+{
+  "question_id": "0025",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 1373,
+      "output_tokens": 3,
+      "total_tokens": 1376,
+      "processing_time": 1.018791913986206,
+      "timestamp": "2025-10-23T12:39:14.125114"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "multiple_choice_check",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/2/imgs/5.jpg",
+    "correct_answers": {
+      "type": "multiple_choice_check",
+      "answers": [
+        {
+          "id": "D",
+          "description": "Il paesaggio nei toni dell'azzurro sarà sviluppato da Raffaello."
+        },
+        {
+          "id": "E",
+          "description": "L'autore è Pietro Perugino."
+        },
+        {
+          "id": "F",
+          "description": "L'invenzione dell'autore è una creazione di grande dolcezza."
+        }
+      ],
+      "raw_data": {
+        "exercise": 2,
+        "question": 5,
+        "type": "multiple_choice_check",
+        "answers": [
+          {
+            "id": "D",
+            "description": "Il paesaggio nei toni dell'azzurro sarà sviluppato da Raffaello."
+          },
+          {
+            "id": "E",
+            "description": "L'autore è Pietro Perugino."
+          },
+          {
+            "id": "F",
+            "description": "L'invenzione dell'autore è una creazione di grande dolcezza."
+          }
+        ],
+        "question_title": "La pittura rinascimentale",
+        "question_text": "Individua le affermazioni corrette riferite all'opera rappresentata.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "L'artista realizzò questo modello molte volte, sfuggendo però alla ripetitività.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "La posa della Vergine e del bambino è di profilo.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "L'opera è di Giovanni Bellini.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "Il paesaggio nei toni dell'azzurro sarà sviluppato da Raffaello.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "L'autore è Pietro Perugino.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "L'invenzione dell'autore è una creazione di grande dolcezza.",
+            "is_correct": null
+          }
+        ],
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/2/imgs/5.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2491,
+            "output_tokens": 17,
+            "total_tokens": 2508,
+            "processing_time": 2.245981216430664,
+            "timestamp": "2025-10-21T13:38:24.991930"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2136,
+            "output_tokens": 288,
+            "total_tokens": 2424,
+            "processing_time": 2.978607416152954,
+            "timestamp": "2025-10-21T13:38:27.970614"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice check\n- Title: La pittura rinascimentale\n- Question: Individua le affermazioni corrette riferite all'opera rappresentata.\n- Language: Italian\n\nOptions:\n\nA. L'artista realizzò questo modello molte volte, sfuggendo però alla ripetitività.\n\nB. La posa della Vergine e del bambino è di profilo.\n\nC. L'opera è di Giovanni Bellini.\n\nD. Il paesaggio nei toni dell'azzurro sarà sviluppato da Raffaello.\n\nE. L'autore è Pietro Perugino.\n\nF. L'invenzione dell'autore è una creazione di grande dolcezza.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "multiple_choice_check",
+    "llm_answer": "A; D; F",
+    "correct_answer": "[{'id': 'D', 'description': \"Il paesaggio nei toni dell'azzurro sarà sviluppato da Raffaello.\"}, {'id': 'E', 'description': \"L'autore è Pietro Perugino.\"}, {'id': 'F', 'description': \"L'invenzione dell'autore è una creazione di grande dolcezza.\"}]",
+    "is_correct": false,
+    "score": 0.5,
+    "details": "User: ['A', 'D', 'F'], Correct: ['D', 'E', 'F']",
+    "processing_time": 1.018791913986206,
+    "error": "",
+    "timestamp": "2025-10-23T12:39:14.125114"
+  }
+}

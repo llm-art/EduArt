@@ -1,0 +1,132 @@
+{
+  "question_id": "0037",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 413,
+      "output_tokens": 15,
+      "total_tokens": 428,
+      "processing_time": 0.5988502502441406,
+      "timestamp": "2025-10-23T12:45:24.240937"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "positioning",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "positioning",
+      "answers": [
+        {
+          "blank_position": 1,
+          "correct_term": "Lorenzo"
+        },
+        {
+          "blank_position": 2,
+          "correct_term": "padre"
+        },
+        {
+          "blank_position": 3,
+          "correct_term": "zio"
+        },
+        {
+          "blank_position": 4,
+          "correct_term": "Verrocchio"
+        },
+        {
+          "blank_position": 5,
+          "correct_term": "1473"
+        },
+        {
+          "blank_position": 6,
+          "correct_term": "porfido"
+        }
+      ],
+      "raw_data": {
+        "exercise": 3,
+        "question": 7,
+        "type": "positioning",
+        "answers": [
+          {
+            "blank_position": 1,
+            "correct_term": "Lorenzo"
+          },
+          {
+            "blank_position": 2,
+            "correct_term": "padre"
+          },
+          {
+            "blank_position": 3,
+            "correct_term": "zio"
+          },
+          {
+            "blank_position": 4,
+            "correct_term": "Verrocchio"
+          },
+          {
+            "blank_position": 5,
+            "correct_term": "1473"
+          },
+          {
+            "blank_position": 6,
+            "correct_term": "porfido"
+          }
+        ],
+        "question_title": "La tomba di Piero e Giovanni de Medici",
+        "question_text": "La tomba di Piero e Giovanni de' Medici si trova nella basilica fiorentina di San [BLANK_1]. Commissionata da Lorenzo il Magnifico, il monumento funebre è dedicato al [BLANK_2] Piero e allo [BLANK_3] Giovanni. Andrea [BLANK_4] negli anni 1472-[BLANK_5] realizza un sarcofago preziosissimo, quasi un reliquiario, con l'impiego di [BLANK_6] rosso e verde nelle facce, e fasciato da una motivi a foglie d'acanto.",
+        "choices": [
+          "della Robbia",
+          "1490",
+          "fratello",
+          "zio",
+          "Giovanni",
+          "Lorenzo",
+          "figlio",
+          "Verrocchio",
+          "alabastro",
+          "1473",
+          "padre",
+          "porfido"
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 6945,
+            "output_tokens": 14,
+            "total_tokens": 6959,
+            "processing_time": 3.7587058544158936,
+            "timestamp": "2025-10-21T13:39:19.080713"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 6980,
+            "output_tokens": 299,
+            "total_tokens": 7279,
+            "processing_time": 1.9958312511444092,
+            "timestamp": "2025-10-21T13:39:21.076627"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: positioning\n- Title: La tomba di Piero e Giovanni de Medici\n- Question: La tomba di Piero e Giovanni de' Medici si trova nella basilica fiorentina di San [BLANK_1]. Commissionata da Lorenzo il Magnifico, il monumento funebre è dedicato al [BLANK_2] Piero e allo [BLANK_3] Giovanni. Andrea [BLANK_4] negli anni 1472-[BLANK_5] realizza un sarcofago preziosissimo, quasi un reliquiario, con l'impiego di [BLANK_6] rosso e verde nelle facce, e fasciato da una motivi a foglie d'acanto.\n- Language: Italian\n\nOptions:\n\n1. della Robbia\n\n2. 1490\n\n3. fratello\n\n4. zio\n\n5. Giovanni\n\n6. Lorenzo\n\n7. figlio\n\n8. Verrocchio\n\n9. alabastro\n\n10. 1473\n\n11. padre\n\n12. porfido\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "positioning",
+    "llm_answer": "BLANK_1: Lorenzo; BLANK_2: padre; BLANK_3: zio; BLANK_4: Verrocchio; BLANK_5: 1473; BLANK_6: porfido",
+    "correct_answer": "[{'blank_position': 1, 'correct_term': 'Lorenzo'}, {'blank_position': 2, 'correct_term': 'padre'}, {'blank_position': 3, 'correct_term': 'zio'}, {'blank_position': 4, 'correct_term': 'Verrocchio'}, {'blank_position': 5, 'correct_term': '1473'}, {'blank_position': 6, 'correct_term': 'porfido'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "Matched 0/6 blanks. BLANK_1: 'Lorenzo; BLANK_2: padre; BLANK_3: zio; BLANK_4: Verrocchio; BLANK_5: 1473; BLANK_6: porfido' ≠ 'Lorenzo' ✗; BLANK_2: '' ≠ 'padre' ✗; BLANK_3: '' ≠ 'zio' ✗; BLANK_4: '' ≠ 'Verrocchio' ✗; BLANK_5: '' ≠ '1473' ✗; BLANK_6: '' ≠ 'porfido' ✗",
+    "processing_time": 0.5988502502441406,
+    "error": "",
+    "timestamp": "2025-10-23T12:45:24.240937"
+  }
+}

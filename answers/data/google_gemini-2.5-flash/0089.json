@@ -1,0 +1,126 @@
+{
+  "question_id": "0089",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash",
+      "input_tokens": 1388,
+      "output_tokens": 3,
+      "total_tokens": 1391,
+      "processing_time": 8.534294605255127,
+      "timestamp": "2025-10-23T13:15:36.494859"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "multiple_choice_check",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/7/imgs/9.jpg",
+    "correct_answers": {
+      "type": "multiple_choice_check",
+      "answers": [
+        {
+          "id": "C",
+          "description": "Si tratta dello Sposalizio della Vergine, di Raffaello, 1504."
+        },
+        {
+          "id": "E",
+          "description": "La linea d'orizzonte alta crea un effetto scenografico dello sfondo."
+        },
+        {
+          "id": "F",
+          "description": "I personaggi sono disposti a semicerchio con atteggiamenti diversi nei due gruppi."
+        }
+      ],
+      "raw_data": {
+        "exercise": 7,
+        "question": 9,
+        "type": "multiple_choice_check",
+        "answers": [
+          {
+            "id": "C",
+            "description": "Si tratta dello Sposalizio della Vergine, di Raffaello, 1504."
+          },
+          {
+            "id": "E",
+            "description": "La linea d'orizzonte alta crea un effetto scenografico dello sfondo."
+          },
+          {
+            "id": "F",
+            "description": "I personaggi sono disposti a semicerchio con atteggiamenti diversi nei due gruppi."
+          }
+        ],
+        "question_title": "La pittura rinascimentale",
+        "question_text": "Individua le affermazioni corrette riferite alla celebre pala rappresentata.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Si tratta dello Sposalizio della Vergine, di Perugino, 1503-1504.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "I personaggi sono disposti secondi due diagonali.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "Si tratta dello Sposalizio della Vergine, di Raffaello, 1504.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "La linea dell'orizzonte bassa esalta l'effetto scenografico del tempio.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "La linea d'orizzonte alta crea un effetto scenografico dello sfondo.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "I personaggi sono disposti a semicerchio con atteggiamenti diversi nei due gruppi.",
+            "is_correct": null
+          }
+        ],
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/7/imgs/9.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2561,
+            "output_tokens": 17,
+            "total_tokens": 2578,
+            "processing_time": 1.8574883937835693,
+            "timestamp": "2025-10-21T13:44:07.981934"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2206,
+            "output_tokens": 326,
+            "total_tokens": 2532,
+            "processing_time": 2.167104721069336,
+            "timestamp": "2025-10-21T13:44:10.149128"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice check\n- Title: La pittura rinascimentale\n- Question: Individua le affermazioni corrette riferite alla celebre pala rappresentata.\n- Language: Italian\n\nOptions:\n\nA. Si tratta dello Sposalizio della Vergine, di Perugino, 1503-1504.\n\nB. I personaggi sono disposti secondi due diagonali.\n\nC. Si tratta dello Sposalizio della Vergine, di Raffaello, 1504.\n\nD. La linea dell'orizzonte bassa esalta l'effetto scenografico del tempio.\n\nE. La linea d'orizzonte alta crea un effetto scenografico dello sfondo.\n\nF. I personaggi sono disposti a semicerchio con atteggiamenti diversi nei due gruppi.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash",
+    "question_type": "multiple_choice_check",
+    "llm_answer": "C; D; F",
+    "correct_answer": "[{'id': 'C', 'description': 'Si tratta dello Sposalizio della Vergine, di Raffaello, 1504.'}, {'id': 'E', 'description': \"La linea d'orizzonte alta crea un effetto scenografico dello sfondo.\"}, {'id': 'F', 'description': 'I personaggi sono disposti a semicerchio con atteggiamenti diversi nei due gruppi.'}]",
+    "is_correct": false,
+    "score": 0.5,
+    "details": "User: ['C', 'D', 'F'], Correct: ['C', 'E', 'F']",
+    "processing_time": 8.534294605255127,
+    "error": "",
+    "timestamp": "2025-10-23T13:15:36.494859"
+  }
+}

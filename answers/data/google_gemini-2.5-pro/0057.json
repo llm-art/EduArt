@@ -1,0 +1,135 @@
+{
+  "question_id": "0057",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-pro",
+      "input_tokens": 1392,
+      "output_tokens": 26,
+      "total_tokens": 1418,
+      "processing_time": 34.28369474411011,
+      "timestamp": "2025-10-23T12:57:28.059778"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "select_errors",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/4/imgs/17.jpg",
+    "correct_answers": {
+      "type": "select_errors",
+      "answers": [
+        {
+          "correct": "degli Uffizi",
+          "error": "dell'Accademia"
+        },
+        {
+          "correct": "realista",
+          "error": "idealizzato"
+        },
+        {
+          "correct": "scurissimo",
+          "error": "abbagliante"
+        },
+        {
+          "correct": "sinistra",
+          "error": "destra"
+        },
+        {
+          "correct": "rossa",
+          "error": "blu"
+        },
+        {
+          "correct": "destra",
+          "error": "sinistra"
+        },
+        {
+          "correct": "purezza",
+          "error": "opacità"
+        },
+        {
+          "correct": "primavera",
+          "error": "giovinezza"
+        }
+      ],
+      "raw_data": {
+        "exercise": 4,
+        "question": 17,
+        "type": "select_errors",
+        "answers": [
+          {
+            "correct": "degli Uffizi",
+            "error": "dell'Accademia"
+          },
+          {
+            "correct": "realista",
+            "error": "idealizzato"
+          },
+          {
+            "correct": "scurissimo",
+            "error": "abbagliante"
+          },
+          {
+            "correct": "sinistra",
+            "error": "destra"
+          },
+          {
+            "correct": "rossa",
+            "error": "blu"
+          },
+          {
+            "correct": "destra",
+            "error": "sinistra"
+          },
+          {
+            "correct": "purezza",
+            "error": "opacità"
+          },
+          {
+            "correct": "primavera",
+            "error": "giovinezza"
+          }
+        ],
+        "question_title": "La Flora di Tiziano",
+        "question_text": "La Flora di Tiziano, conservata alla Galleria dell'Accademia, è un ritratto idealizzato e ci mostra una giovane donna vestita all'antica, in piena luce contro uno sfondo abbagliante. È rappresentata mentre con la mano destra sorregge un ricco scialle di stoffa blu damascata e con la sinistra stringe una manciata di fiori (gelsomini, viole e rose), dai quali dipende l'identificazione con la ninfa Flora, personaggio che allude alla opacità della vita e alla freschezza della giovinezza.",
+        "choices": null,
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/4/imgs/17.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 11405,
+            "output_tokens": 15,
+            "total_tokens": 11420,
+            "processing_time": 1.7333543300628662,
+            "timestamp": "2025-10-21T13:40:42.335061"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 12039,
+            "output_tokens": 298,
+            "total_tokens": 12337,
+            "processing_time": 1.6598913669586182,
+            "timestamp": "2025-10-21T13:40:43.995058"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: error selection\n- Title: La Flora di Tiziano\n- Question: La Flora di Tiziano, conservata alla Galleria dell'Accademia, è un ritratto idealizzato e ci mostra una giovane donna vestita all'antica, in piena luce contro uno sfondo abbagliante. È rappresentata mentre con la mano destra sorregge un ricco scialle di stoffa blu damascata e con la sinistra stringe una manciata di fiori (gelsomini, viole e rose), dai quali dipende l'identificazione con la ninfa Flora, personaggio che allude alla opacità della vita e alla freschezza della giovinezza.\n- Language: Italian\n\n\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-pro",
+    "question_type": "select_errors",
+    "llm_answer": "conservata alla Galleria dell'Accademia; sfondo abbagliante; con la mano destra sorregge; blu damascata; con la sinistra stringe; opacità della vita",
+    "correct_answer": "[{'correct': 'degli Uffizi', 'error': \"dell'Accademia\"}, {'correct': 'realista', 'error': 'idealizzato'}, {'correct': 'scurissimo', 'error': 'abbagliante'}, {'correct': 'sinistra', 'error': 'destra'}, {'correct': 'rossa', 'error': 'blu'}, {'correct': 'destra', 'error': 'sinistra'}, {'correct': 'purezza', 'error': 'opacità'}, {'correct': 'primavera', 'error': 'giovinezza'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "Matched 0/8 errors. 'dell'Accademia' not found ✗; 'idealizzato' not found ✗; 'abbagliante' not found ✗; 'destra' not found ✗; 'blu' not found ✗; 'sinistra' not found ✗; 'opacità' not found ✗; 'giovinezza' not found ✗ Extra errors: [\"conservata alla Galleria dell'Accademia\", 'sfondo abbagliante', 'con la mano destra sorregge', 'blu damascata', 'con la sinistra stringe', 'opacità della vita']",
+    "processing_time": 34.28369474411011,
+    "error": "",
+    "timestamp": "2025-10-23T12:57:28.059778"
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "question_id": "0076",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 438,
+      "output_tokens": 16,
+      "total_tokens": 454,
+      "processing_time": 0.6676428318023682,
+      "timestamp": "2025-10-23T13:09:15.721498"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "positioning",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "positioning",
+      "answers": [
+        {
+          "blank_position": 1,
+          "correct_term": "Carlo V"
+        },
+        {
+          "blank_position": 2,
+          "correct_term": "Venezia"
+        },
+        {
+          "blank_position": 3,
+          "correct_term": "ordinari"
+        },
+        {
+          "blank_position": 4,
+          "correct_term": "maggior"
+        },
+        {
+          "blank_position": 5,
+          "correct_term": "spatole"
+        },
+        {
+          "blank_position": 6,
+          "correct_term": "dita"
+        }
+      ],
+      "raw_data": {
+        "exercise": 6,
+        "question": 6,
+        "type": "positioning",
+        "answers": [
+          {
+            "blank_position": 1,
+            "correct_term": "Carlo V"
+          },
+          {
+            "blank_position": 2,
+            "correct_term": "Venezia"
+          },
+          {
+            "blank_position": 3,
+            "correct_term": "ordinari"
+          },
+          {
+            "blank_position": 4,
+            "correct_term": "maggior"
+          },
+          {
+            "blank_position": 5,
+            "correct_term": "spatole"
+          },
+          {
+            "blank_position": 6,
+            "correct_term": "dita"
+          }
+        ],
+        "question_title": "La maturità artistica di Tiziano",
+        "question_text": "Nel 1552 Tiziano, dopo aver goduto della stima di [BLANK_1] di Spagna che lo aveva nominato «el pintór primèro», rientra definitivamente a [BLANK_2]. Qui, ormai ricco e famoso, impianta una bottega nella quale allievi e aiuti realizzano con modi \"tizianeschi\" i dipinti più [BLANK_3], riservando a se stesso solo le opere di [BLANK_4] prestigio. Contemporaneamente prosegue nella sperimentazione di tecniche pittoriche sempre nuove e personali arrivando, negli ultimi anni, a dipingere quasi senza [BLANK_5], addensando o stendendo il colore anche con le [BLANK_6].",
+        "choices": [
+          "diluente",
+          "ordinari",
+          "Francesco I",
+          "Venezia",
+          "importanti",
+          "spatole",
+          "pennelli",
+          "dita",
+          "minor",
+          "maggior",
+          "Carlo V",
+          "Padova"
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7144,
+            "output_tokens": 14,
+            "total_tokens": 7158,
+            "processing_time": 2.382420778274536,
+            "timestamp": "2025-10-21T13:43:19.740364"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7179,
+            "output_tokens": 339,
+            "total_tokens": 7518,
+            "processing_time": 1.8710036277770996,
+            "timestamp": "2025-10-21T13:43:21.611448"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: positioning\n- Title: La maturità artistica di Tiziano\n- Question: Nel 1552 Tiziano, dopo aver goduto della stima di [BLANK_1] di Spagna che lo aveva nominato «el pintór primèro», rientra definitivamente a [BLANK_2]. Qui, ormai ricco e famoso, impianta una bottega nella quale allievi e aiuti realizzano con modi \"tizianeschi\" i dipinti più [BLANK_3], riservando a se stesso solo le opere di [BLANK_4] prestigio. Contemporaneamente prosegue nella sperimentazione di tecniche pittoriche sempre nuove e personali arrivando, negli ultimi anni, a dipingere quasi senza [BLANK_5], addensando o stendendo il colore anche con le [BLANK_6].\n- Language: Italian\n\nOptions:\n\n1. diluente\n\n2. ordinari\n\n3. Francesco I\n\n4. Venezia\n\n5. importanti\n\n6. spatole\n\n7. pennelli\n\n8. dita\n\n9. minor\n\n10. maggior\n\n11. Carlo V\n\n12. Padova\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "positioning",
+    "llm_answer": "BLANK_1: Carlo V, BLANK_2: Venezia, BLANK_3: ordinari, BLANK_4: maggior, BLANK_5: pennelli, BLANK_6: dita",
+    "correct_answer": "[{'blank_position': 1, 'correct_term': 'Carlo V'}, {'blank_position': 2, 'correct_term': 'Venezia'}, {'blank_position': 3, 'correct_term': 'ordinari'}, {'blank_position': 4, 'correct_term': 'maggior'}, {'blank_position': 5, 'correct_term': 'spatole'}, {'blank_position': 6, 'correct_term': 'dita'}]",
+    "is_correct": true,
+    "score": 0.8333333333333334,
+    "details": "Matched 5/6 blanks. BLANK_1: 'Carlo V' ≈ 'Carlo V' ✓; BLANK_2: 'Venezia' ≈ 'Venezia' ✓; BLANK_3: 'ordinari' ≈ 'ordinari' ✓; BLANK_4: 'maggior' ≈ 'maggior' ✓; BLANK_5: 'pennelli' ≠ 'spatole' ✗; BLANK_6: 'dita' ≈ 'dita' ✓",
+    "processing_time": 0.6676428318023682,
+    "error": "",
+    "timestamp": "2025-10-23T13:09:15.721498"
+  }
+}

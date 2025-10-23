@@ -1,0 +1,150 @@
+{
+  "question_id": "0058",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash",
+      "input_tokens": 458,
+      "output_tokens": 1,
+      "total_tokens": 459,
+      "processing_time": 7.763561964035034,
+      "timestamp": "2025-10-23T12:57:37.274274"
+    }
+  ],
+  "question_data": {
+    "question_text": "",
+    "question_type": "positioning",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "positioning",
+      "answers": [
+        {
+          "blank_position": 1,
+          "correct_term": "Allegri"
+        },
+        {
+          "blank_position": 2,
+          "correct_term": "barocca"
+        },
+        {
+          "blank_position": 3,
+          "correct_term": "Mantegna"
+        },
+        {
+          "blank_position": 4,
+          "correct_term": "prospettiva"
+        },
+        {
+          "blank_position": 5,
+          "correct_term": "illusionistici"
+        },
+        {
+          "blank_position": 6,
+          "correct_term": "architettonico"
+        },
+        {
+          "blank_position": 7,
+          "correct_term": "rappresentazione"
+        },
+        {
+          "blank_position": 8,
+          "correct_term": "barocca"
+        }
+      ],
+      "raw_data": {
+        "exercise": 4,
+        "question": 18,
+        "type": "positioning",
+        "answers": [
+          {
+            "blank_position": 1,
+            "correct_term": "Allegri"
+          },
+          {
+            "blank_position": 2,
+            "correct_term": "barocca"
+          },
+          {
+            "blank_position": 3,
+            "correct_term": "Mantegna"
+          },
+          {
+            "blank_position": 4,
+            "correct_term": "prospettiva"
+          },
+          {
+            "blank_position": 5,
+            "correct_term": "illusionistici"
+          },
+          {
+            "blank_position": 6,
+            "correct_term": "architettonico"
+          },
+          {
+            "blank_position": 7,
+            "correct_term": "rappresentazione"
+          },
+          {
+            "blank_position": 8,
+            "correct_term": "barocca"
+          }
+        ],
+        "question_title": "La pittura di Correggio",
+        "question_text": "Antonio Allegri meglio noto come Correggio, dalla cittadina emiliana dove nacque, ha una formazione abbastanza barocca, lontana dai grandi centri di potere ove più intenso e stimolante era il dibattito culturale. Riallacciandosi comunque al gusto classicheggiante di Mantegna e al cromatismo dei Veneti, egli matura una tecnica originale basata sull'uso della prospettiva a fini quasi Vecellio. Ciò è particolarmente evidente nei soffitti e nelle cupole che affresca, nei quali lo spazio dipinto appare sempre più profondo e articolato di quello architettonico, in una continua e voluta ambiguità tra realtà e comune che già prefigura alcuni aspetti dell'estetica barocca.",
+        "choices": [
+          "Michelangelo",
+          "architettonico",
+          "comune",
+          "Vecellio",
+          "narrazione",
+          "Allegri",
+          "neoclassica",
+          "rappresentazione",
+          "composizione",
+          "affrescato",
+          "provinciale",
+          "illusionistici",
+          "realistici",
+          "Mantegna"
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 8809,
+            "output_tokens": 14,
+            "total_tokens": 8823,
+            "processing_time": 2.0024824142456055,
+            "timestamp": "2025-10-21T13:40:46.006101"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 8844,
+            "output_tokens": 426,
+            "total_tokens": 9270,
+            "processing_time": 2.6585094928741455,
+            "timestamp": "2025-10-21T13:40:48.664696"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: positioning\n- Title: La pittura di Correggio\n- Question: Antonio Allegri meglio noto come Correggio, dalla cittadina emiliana dove nacque, ha una formazione abbastanza barocca, lontana dai grandi centri di potere ove più intenso e stimolante era il dibattito culturale. Riallacciandosi comunque al gusto classicheggiante di Mantegna e al cromatismo dei Veneti, egli matura una tecnica originale basata sull'uso della prospettiva a fini quasi Vecellio. Ciò è particolarmente evidente nei soffitti e nelle cupole che affresca, nei quali lo spazio dipinto appare sempre più profondo e articolato di quello architettonico, in una continua e voluta ambiguità tra realtà e comune che già prefigura alcuni aspetti dell'estetica barocca.\n- Language: Italian\n\nOptions:\n\n1. Michelangelo\n\n2. architettonico\n\n3. comune\n\n4. Vecellio\n\n5. narrazione\n\n6. Allegri\n\n7. neoclassica\n\n8. rappresentazione\n\n9. composizione\n\n10. affrescato\n\n11. provinciale\n\n12. illusionistici\n\n13. realistici\n\n14. Mantegna\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash",
+    "question_type": "positioning",
+    "llm_answer": "rappresentazione",
+    "correct_answer": "[{'blank_position': 1, 'correct_term': 'Allegri'}, {'blank_position': 2, 'correct_term': 'barocca'}, {'blank_position': 3, 'correct_term': 'Mantegna'}, {'blank_position': 4, 'correct_term': 'prospettiva'}, {'blank_position': 5, 'correct_term': 'illusionistici'}, {'blank_position': 6, 'correct_term': 'architettonico'}, {'blank_position': 7, 'correct_term': 'rappresentazione'}, {'blank_position': 8, 'correct_term': 'barocca'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "Matched 0/8 blanks. BLANK_1: 'rappresentazione' ≠ 'Allegri' ✗; BLANK_2: '' ≠ 'barocca' ✗; BLANK_3: '' ≠ 'Mantegna' ✗; BLANK_4: '' ≠ 'prospettiva' ✗; BLANK_5: '' ≠ 'illusionistici' ✗; BLANK_6: '' ≠ 'architettonico' ✗; BLANK_7: '' ≠ 'rappresentazione' ✗; BLANK_8: '' ≠ 'barocca' ✗",
+    "processing_time": 7.763561964035034,
+    "error": "",
+    "timestamp": "2025-10-23T12:57:37.274274"
+  }
+}
