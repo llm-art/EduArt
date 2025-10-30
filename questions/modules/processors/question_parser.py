@@ -190,21 +190,44 @@ class QuestionParser:
         else:
             # For text mode, use the original template formatting
             question_type = self.refine_question_type(question_data)
-            english_question_type = self._map_question_type_to_english(question_type)
             
             # Format choices for the English template
             choices_text = self._format_choices_for_english_template(question_data.get('choices', []))
             
+            # Generate type-specific instructions
+            instructions = self._get_type_specific_instructions(question_type)
+            
             # Use the loaded English template and format it
             prompt = self.prompt_template.format(
-                question_type=english_question_type,
-                question_title=question_data.get('title', ''),
                 question_text=question_data.get('question_text', ''),
-                language="Italian",
-                choices_text=choices_text
+                choices_text=choices_text,
+                instructions=instructions
             )
             
             return prompt
+    
+    def _get_type_specific_instructions(self, question_type: str) -> str:
+        """
+        Generate type-specific instructions for the LLM.
+        
+        Args:
+            question_type: Internal question type
+            
+        Returns:
+            Type-specific instruction text
+        """
+        instructions_map = {
+            "multiple_choice_radio": "Respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)",
+            "multiple_choice": "Respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)",
+            "multiple_choice_check": "Respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")",
+            "true_false": "Respond with true or false for each statement (e.g., \"A: true, B: false\")",
+            "completion_open": "Provide a concise answer",
+            "completion_closed": "Provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers",
+            "positioning": "Provide the correct sequence or position",
+            "select_errors": "Identify the errors"
+        }
+        
+        return instructions_map.get(question_type, "Provide the best answer based on the question type")
     
     def get_question_id_from_path(self, txt_file: str) -> str:
         """

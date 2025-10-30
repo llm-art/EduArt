@@ -4,52 +4,52 @@
     {
       "description": "question answering",
       "model_name": "google/gemini-2.5-flash-lite",
-      "input_tokens": 1335,
+      "input_tokens": 113,
       "output_tokens": 1,
-      "total_tokens": 1336,
-      "processing_time": 0.9362356662750244,
-      "timestamp": "2025-10-30T13:57:05.752687"
+      "total_tokens": 114,
+      "processing_time": 0.5333592891693115,
+      "timestamp": "2025-10-30T22:48:59.233324"
     }
   ],
   "question_data": {
     "question_text": "Chi è il personaggio rappresentato nell'immagine?",
     "question_type": "multiple_choice_radio",
-    "has_image": true,
-    "image_path": "/home/vitadmin/gspinaci/datasets/questions/data/1/imgs/3.jpg",
+    "has_image": false,
+    "image_path": null,
     "correct_answers": {
-      "type": "multiple_choice_radio",
+      "type": "multiple_choice",
       "answers": [
         {
-          "id": "B",
-          "description": "Risposta esatta. Si tratta del famoso ritratto di Giovanni Bellini del Doge Leonardo Loredan, eseguito per la sua elezione circa nel 1501."
+          "id": "E",
+          "description": "Il Doge Leonardo Loredan."
         }
       ],
       "raw_data": {
         "exercise": 1,
         "question": 3,
-        "type": "multiple_choice_radio",
+        "type": "multiple_choice",
         "answers": [
           {
-            "id": "B",
-            "description": "Risposta esatta. Si tratta del famoso ritratto di Giovanni Bellini del Doge Leonardo Loredan, eseguito per la sua elezione circa nel 1501."
+            "id": "E",
+            "description": "Il Doge Leonardo Loredan."
           }
         ],
-        "question_title": "Question 3",
+        "question_title": "La pittura rinascimentale",
         "question_text": "Chi è il personaggio rappresentato nell'immagine?",
         "choices": [
           {
             "id": "A",
-            "text": "Il Doge Sebastiano Venier.",
+            "text": "Il Doge Francesco Morosini.",
             "is_correct": null
           },
           {
             "id": "B",
-            "text": "Il Doge Leonardo Loredan.",
+            "text": "Il Doge Alvise Pisani.",
             "is_correct": null
           },
           {
             "id": "C",
-            "text": "Il Doge Francesco Morosini.",
+            "text": "Il Doge Sebastiano Venier.",
             "is_correct": null
           },
           {
@@ -59,48 +59,39 @@
           },
           {
             "id": "E",
-            "text": "Il Doge Alvise Pisani.",
+            "text": "Il Doge Leonardo Loredan.",
             "is_correct": null
           }
         ],
-        "image": "/home/vitadmin/gspinaci/datasets/questions/data/1/imgs/3.jpg",
+        "image": null,
         "language": "it",
-        "has_image": true,
+        "has_image": false,
         "ai_calls": [
-          {
-            "description": "type extraction",
-            "model_name": "Google gemini-2.5-flash-lite",
-            "input_tokens": 2472,
-            "output_tokens": 14,
-            "total_tokens": 2486,
-            "processing_time": 1.6272556781768799,
-            "timestamp": "2025-10-21T13:36:50.324257"
-          },
           {
             "description": "text extraction",
             "model_name": "Google gemini-2.5-flash-lite",
-            "input_tokens": 2117,
-            "output_tokens": 190,
-            "total_tokens": 2307,
-            "processing_time": 1.6875205039978027,
-            "timestamp": "2025-10-21T13:36:52.011857"
+            "input_tokens": 7316,
+            "output_tokens": 139,
+            "total_tokens": 7455,
+            "processing_time": 1.0790135860443115,
+            "timestamp": "2025-10-30T22:27:32.365567"
           }
         ]
       }
     },
-    "prompt": "You are an expert Art History student taking an exam. You will receive a question with its context and possibly an image.\n\nYour task is to analyze the question and provide the best answer based on your Art History knowledge.\n\nQUESTION INFORMATION:\n- Type: multiple choice radio\n- Title: Question 3\n- Question: Chi è il personaggio rappresentato nell'immagine?\n- Language: Italian\n\nOptions:\n\nA. Il Doge Sebastiano Venier.\n\nB. Il Doge Leonardo Loredan.\n\nC. Il Doge Francesco Morosini.\n\nD. Il Doge Andrea Gritti.\n\nE. Il Doge Alvise Pisani.\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and any visual information provided in the image."
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question and provide the best answer based on your Art History knowledge.\n\nChi è il personaggio rappresentato nell'immagine?\n\nOptions:\n\nA. Il Doge Francesco Morosini.\n\nB. Il Doge Alvise Pisani.\n\nC. Il Doge Sebastiano Venier.\n\nD. Il Doge Andrea Gritti.\n\nE. Il Doge Leonardo Loredan.\n\nINSTRUCTIONS:\nRespond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n\nCRITICAL: Your response must be in the exact format expected by the question type."
   },
   "evaluation": {
     "model_name": "google/gemini-2.5-flash-lite",
     "question_type": "multiple_choice_radio",
-    "llm_answer": "B",
-    "correct_answer": "[{'id': 'B', 'description': 'Risposta esatta. Si tratta del famoso ritratto di Giovanni Bellini del Doge Leonardo Loredan, eseguito per la sua elezione circa nel 1501.'}]",
+    "llm_answer": "E",
+    "correct_answer": "[{'id': 'E', 'description': 'Il Doge Leonardo Loredan.'}]",
     "is_correct": true,
     "score": 1.0,
-    "details": "User: B, Correct: B",
-    "processing_time": 0.9362356662750244,
+    "details": "User: E, Correct: E",
+    "processing_time": 0.5333592891693115,
     "error": "",
-    "timestamp": "2025-10-30T13:57:05.752687",
+    "timestamp": "2025-10-30T22:48:59.233324",
     "metrics": {
       "exact_match": true,
       "accuracy": 1.0,
@@ -114,7 +105,7 @@
       "missing_answers": [],
       "incorrect_answers": [],
       "correct_answers": [
-        "B"
+        "E"
       ]
     }
   }

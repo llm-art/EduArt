@@ -62,13 +62,16 @@ class QuestionProcessor:
             print(f"\n=== Processing Question {exercise}/{question} ===")
             
             # Step 1: Validate input files
-            image_path = self.data_path / f"{exercise}/raw/{question}.png"
-            html_path = self.data_path / f"{exercise}/raw/{question}.html"
+            image_path = self.data_path / f"{exercise}/raw/screenshot/{question}.png"
+            html_path = self.data_path / f"{exercise}/raw/html/{question}.html"
+            txt_path = self.data_path / f"{exercise}/raw/txt/{question}.txt"
             
             if not image_path.exists():
                 raise FileOperationError(f"Image file not found: {image_path}")
             if not html_path.exists():
                 raise FileOperationError(f"HTML file not found: {html_path}")
+            if not txt_path.exists():
+                raise FileOperationError(f"Text file not found: {txt_path}")
             
             # Step 2: Text extraction (HTML or OCR based on force_ocr setting)
             if self.config.force_ocr:
@@ -90,12 +93,22 @@ class QuestionProcessor:
             with open(html_path, 'r', encoding='utf-8') as f:
                 html_text = f.read()
             
-            # Step 4: Vision model processing
-            print("Step 3: Vision model processing...")
-            question_data = self.vision_service.process_question(
+            # Step 3b: Read txt content for question type detection
+            print("Step 2b: Reading text file for question type detection...")
+            with open(txt_path, 'r', encoding='utf-8') as f:
+                txt_content = f.read()
+            
+            # Step 4: Detect question type from txt file
+            print("Step 3: Detecting question type from text file...")
+            type_data = self.vision_service.detect_question_type_from_text(txt_content)
+            
+            # Step 5: Vision model processing with detected type
+            print("Step 4: Vision model processing...")
+            question_data = self.vision_service.process_question_with_detected_type(
                 image_path=image_path,
                 ocr_text=ocr_text,
                 html_text=html_text,
+                question_type=type_data.get('type', 'unknown'),
                 exercise=exercise,
                 question=question,
                 track_metadata=self.config.metadata_ai
@@ -103,7 +116,7 @@ class QuestionProcessor:
 
             
             # Step 6: Save results
-            print("Step 6: Saving results...")
+            print("Step 5: Saving results...")
             self._save_question_data(question_data)
             
             # Mark as completed

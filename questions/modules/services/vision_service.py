@@ -148,7 +148,36 @@ class VisionModelService:
         """Clear AI call metadata."""
         self.ai_calls.clear()
     
-    def extract_question_type(self, image_path: Path, ocr_text: str, 
+    def detect_question_type_from_text(self, text_content: str) -> Dict[str, Any]:
+        """
+        Detect question type from text content by looking for Italian keywords.
+        
+        Args:
+            text_content: Text content to analyze
+            
+        Returns:
+            Dictionary containing question type
+        """
+        # Map of Italian keywords to question types
+        keyword_mapping = {
+            "Scelta multipla": "multiple_choice",
+            "Vero o falso": "true_false",
+            "Completamento chiuso": "completion_closed",
+            "Completamento aperto": "completion_open",
+            "Trova errore": "select_errors",
+            "Posizionamento": "positioning"
+        }
+        
+        # Check for each keyword in the text
+        for keyword, question_type in keyword_mapping.items():
+            if keyword in text_content:
+                print(f"Detected question type from text: {question_type} (keyword: '{keyword}')")
+                return {"type": question_type}
+        
+        print(f"Warning: Could not detect question type from text, defaulting to unknown")
+        return {"type": "unknown"}
+    
+    def extract_question_type(self, image_path: Path, ocr_text: str,
                             html_text: str) -> Dict[str, Any]:
         """
         Extract question type using vision model.
@@ -170,7 +199,7 @@ class VisionModelService:
         try:
             # Get the type extraction prompt
             user_prompt = self.prompt_manager.get_type_extraction_prompt(
-                ocr_text=ocr_text, 
+                ocr_text=ocr_text,
                 html_text=html_text
             )
             
@@ -360,6 +389,68 @@ class VisionModelService:
         except json.JSONDecodeError as e:
             print(f"JSON parsing failed: {e}")
             return {"type": "unknown", "parsing_error": "failed_json_decode"}
+    
+    def process_question_with_detected_type(self, image_path: Path, ocr_text: str, html_text: str,
+                        question_type: str, exercise: int, question: int, track_metadata: bool = True) -> QuestionData:
+        """
+        Complete question processing pipeline with pre-detected question type.
+        
+        This skips the LLM call for type detection and uses the provided type directly.
+        
+        Args:
+            image_path: Path to the question image
+            ocr_text: OCR extracted text
+            html_text: HTML content text
+            question_type: Pre-detected question type
+            exercise: Exercise number
+            question: Question number
+            track_metadata: Whether to track AI call metadata
+            
+        Returns:
+            Structured QuestionData object
+            
+        Raises:
+            VisionModelError: If processing fails
+        """
+        try:
+            # Clear previous AI calls for this question
+            if track_metadata:
+                self.clear_ai_calls()
+            
+            # Step 1: Use provided question type (no LLM call needed)
+            type_data = {"type": question_type}
+            
+            # Step 2: Extract question text based on type
+            text_data = self.extract_question_text(
+                image_path, question_type, ocr_text, html_text
+            )
+
+            question_image = Path(str(image_path).replace(".png", ".jpg").replace("raw", "imgs"))
+            
+            # Step 3: Combine data into QuestionData object
+            combined_data = {**type_data, **text_data}
+            
+            # Get AI call metadata if tracking is enabled
+            ai_calls = self.get_ai_calls() if track_metadata else []
+            
+            question_data = QuestionData(
+                exercise=exercise,
+                question=question,
+                type=question_type,
+                answers=combined_data.get('answers'),
+                question_title=combined_data.get('question_title'),
+                question_text=combined_data.get('question_text'),
+                choices=combined_data.get('choices'),
+                image_path=str(question_image) if question_image.exists() else None,
+                ocr_text=ocr_text,
+                has_image=question_image.exists(),
+                ai_calls=ai_calls
+            )
+            
+            return question_data
+            
+        except Exception as e:
+            raise VisionModelError(f"Question processing failed: {e}")
     
     def process_question(self, image_path: Path, ocr_text: str, html_text: str,
                         exercise: int, question: int, track_metadata: bool = True) -> QuestionData:

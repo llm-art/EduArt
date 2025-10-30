@@ -41,16 +41,26 @@ class FileManager:
         imgs_dir = exercise_dir / "imgs"
         raw_dir = exercise_dir / "raw"
         
-        # Create directories
+        # Create subdirectories under raw/
+        raw_screenshot_dir = raw_dir / "screenshot"
+        raw_html_dir = raw_dir / "html"
+        raw_txt_dir = raw_dir / "txt"
+        
+        # Create all directories
         imgs_dir.mkdir(parents=True, exist_ok=True)
-        raw_dir.mkdir(parents=True, exist_ok=True)
+        raw_screenshot_dir.mkdir(parents=True, exist_ok=True)
+        raw_html_dir.mkdir(parents=True, exist_ok=True)
+        raw_txt_dir.mkdir(parents=True, exist_ok=True)
         
         print(f"✓ Created directories for exercise {exercise_number}")
         
         return {
             'exercise': exercise_dir,
             'imgs': imgs_dir,
-            'raw': raw_dir
+            'raw': raw_dir,
+            'raw_screenshot': raw_screenshot_dir,
+            'raw_html': raw_html_dir,
+            'raw_txt': raw_txt_dir
         }
     
     def get_exercise_directories(self, exercise_number: int) -> Dict[str, Path]:
@@ -66,22 +76,28 @@ class FileManager:
         exercise_dir = self.data_dir / str(exercise_number)
         imgs_dir = exercise_dir / "imgs"
         raw_dir = exercise_dir / "raw"
+        raw_screenshot_dir = raw_dir / "screenshot"
+        raw_html_dir = raw_dir / "html"
+        raw_txt_dir = raw_dir / "txt"
         
         return {
             'exercise': exercise_dir,
             'imgs': imgs_dir,
-            'raw': raw_dir
+            'raw': raw_dir,
+            'raw_screenshot': raw_screenshot_dir,
+            'raw_html': raw_html_dir,
+            'raw_txt': raw_txt_dir
         }
     
     def save_html_content(
-        self, 
-        content: str, 
-        question_number: int, 
+        self,
+        content: str,
+        question_number: int,
         exercise_number: int,
         title: str = None
     ) -> Path:
         """
-        Save HTML content to a file.
+        Save HTML content to a file in raw/html/ directory.
         
         Args:
             content: HTML content to save
@@ -93,7 +109,7 @@ class FileManager:
             Path to the saved file
         """
         dirs = self.create_exercise_directories(exercise_number)
-        html_file = dirs['raw'] / f"{question_number}.html"
+        html_file = dirs['raw_html'] / f"{question_number}.html"
         
         # Create full HTML document
         html_document = self._create_html_document(content, question_number, title)
@@ -101,10 +117,39 @@ class FileManager:
         try:
             with open(html_file, 'w', encoding='utf-8') as f:
                 f.write(html_document)
-            print(f"✓ HTML content saved: {html_file.name}")
+            print(f"✓ HTML content saved: {html_file}")
             return html_file
         except Exception as e:
             print(f"❌ Error saving HTML content: {e}")
+            raise
+    
+    def save_text_content(
+        self,
+        text: str,
+        question_number: int,
+        exercise_number: int
+    ) -> Path:
+        """
+        Save text-only content to a file in raw/txt/ directory.
+        
+        Args:
+            text: Text content to save (without HTML tags)
+            question_number: Question number
+            exercise_number: Exercise number
+            
+        Returns:
+            Path to the saved file
+        """
+        dirs = self.create_exercise_directories(exercise_number)
+        txt_file = dirs['raw_txt'] / f"{question_number}.txt"
+        
+        try:
+            with open(txt_file, 'w', encoding='utf-8') as f:
+                f.write(text)
+            print(f"✓ Text content saved: {txt_file}")
+            return txt_file
+        except Exception as e:
+            print(f"❌ Error saving text content: {e}")
             raise
     
     def _create_html_document(self, content: str, question_number: int, title: str = None) -> str:
@@ -175,7 +220,7 @@ class FileManager:
     
     def get_screenshot_path(self, question_number: int, exercise_number: int) -> Path:
         """
-        Get the path for a question screenshot.
+        Get the path for a question screenshot in raw/screenshot/ directory.
         
         Args:
             question_number: Question number
@@ -185,11 +230,11 @@ class FileManager:
             Path for the screenshot
         """
         dirs = self.get_exercise_directories(exercise_number)
-        return dirs['raw'] / f"{question_number}.png"
+        return dirs['raw_screenshot'] / f"{question_number}.png"
     
     def get_pre_screenshot_path(self, question_number: int, exercise_number: int) -> Path:
         """
-        Get the path for a pre-interaction question screenshot.
+        Get the path for a pre-interaction question screenshot in raw/screenshot/ directory.
         
         Args:
             question_number: Question number
@@ -199,7 +244,7 @@ class FileManager:
             Path for the pre-interaction screenshot
         """
         dirs = self.get_exercise_directories(exercise_number)
-        return dirs['raw'] / f"pre_{question_number}.png"
+        return dirs['raw_screenshot'] / f"{question_number}-pre.png"
     
     def get_image_path(
         self, 

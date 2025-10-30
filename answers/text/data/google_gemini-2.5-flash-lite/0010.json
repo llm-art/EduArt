@@ -1,0 +1,141 @@
+{
+  "question_id": "0010",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 171,
+      "output_tokens": 226,
+      "total_tokens": 397,
+      "processing_time": 1.7050244808197021,
+      "timestamp": "2025-10-30T22:49:07.205089"
+    }
+  ],
+  "question_data": {
+    "question_text": "Attorno al 1450 Pietro Perugino dipinge il SanSebastiano del Louvre. Il Santo martire, in secondo piano, rappresentato legato ad una colonna, è posto esattamente al centro della tavola. Sullo sfondo oltre una bassa siepe si apre un paesaggio fatto di verdi colline punteggiate di arbusti e di lontani, azzurri picchi scoscesi. Il Santo, in quasi completa nudità, trafitto da due frecce, si mostra alla pietà dei fedeli con gli occhi rivolti a terra. L'atteggiamento aggraziato, la nudità impudica, le membra lunghe sono elementi che rinviano alla statuaria gotica.",
+    "question_type": "select_errors",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "select_errors",
+      "answers": [
+        {
+          "correct": "1490",
+          "error": "1450"
+        },
+        {
+          "correct": "primo",
+          "error": "secondo"
+        },
+        {
+          "correct": "transenna",
+          "error": "siepe"
+        },
+        {
+          "correct": "cielo",
+          "error": "terra"
+        },
+        {
+          "correct": "eroica",
+          "error": "impudica"
+        },
+        {
+          "correct": "classica",
+          "error": "gotica"
+        }
+      ],
+      "raw_data": {
+        "exercise": 1,
+        "question": 10,
+        "type": "select_errors",
+        "answers": [
+          {
+            "correct": "1490",
+            "error": "1450"
+          },
+          {
+            "correct": "primo",
+            "error": "secondo"
+          },
+          {
+            "correct": "transenna",
+            "error": "siepe"
+          },
+          {
+            "correct": "cielo",
+            "error": "terra"
+          },
+          {
+            "correct": "eroica",
+            "error": "impudica"
+          },
+          {
+            "correct": "classica",
+            "error": "gotica"
+          }
+        ],
+        "question_title": "Il San Sebastiano di Pietro Perugino",
+        "question_text": "Attorno al 1450 Pietro Perugino dipinge il SanSebastiano del Louvre. Il Santo martire, in secondo piano, rappresentato legato ad una colonna, è posto esattamente al centro della tavola. Sullo sfondo oltre una bassa siepe si apre un paesaggio fatto di verdi colline punteggiate di arbusti e di lontani, azzurri picchi scoscesi. Il Santo, in quasi completa nudità, trafitto da due frecce, si mostra alla pietà dei fedeli con gli occhi rivolti a terra. L'atteggiamento aggraziato, la nudità impudica, le membra lunghe sono elementi che rinviano alla statuaria gotica.",
+        "choices": null,
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 29314,
+            "output_tokens": 279,
+            "total_tokens": 29593,
+            "processing_time": 3.554597854614258,
+            "timestamp": "2025-10-30T22:27:46.732398"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question and provide the best answer based on your Art History knowledge.\n\nAttorno al 1450 Pietro Perugino dipinge il SanSebastiano del Louvre. Il Santo martire, in secondo piano, rappresentato legato ad una colonna, è posto esattamente al centro della tavola. Sullo sfondo oltre una bassa siepe si apre un paesaggio fatto di verdi colline punteggiate di arbusti e di lontani, azzurri picchi scoscesi. Il Santo, in quasi completa nudità, trafitto da due frecce, si mostra alla pietà dei fedeli con gli occhi rivolti a terra. L'atteggiamento aggraziato, la nudità impudica, le membra lunghe sono elementi che rinviano alla statuaria gotica.\n\n\n\nINSTRUCTIONS:\nIdentify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "select_errors",
+    "llm_answer": "**Errori:**\n\n*   **\"quasi completa nudità\"**: San Sebastiano è tradizionalmente rappresentato nudo, ma non \"quasi\" completamente nudo. La nudità è un elemento iconografico centrale.\n*   **\"impudica\"**: L'aggettivo \"impudica\" è inappropriato per descrivere la nudità di San Sebastiano in un contesto religioso. La sua nudità è intesa a simboleggiare purezza, martirio e la vulnerabilità umana di fronte alla sofferenza, non lussuria o vergogna.\n*   **\"membra lunghe\"**: Sebbene la figura possa apparire slanciata, l'espressione \"membra lunghe\" non è un termine tecnico o descrittivo comunemente usato in critica d'arte per caratterizzare la statuaria gotica o le opere di Perugino. Potrebbe essere un'interpretazione soggettiva o un'imprecisione.\n*   **\"statuaria gotica\"**: Mentre alcuni elementi di grazia e allungamento possono essere presenti, attribuire direttamente le caratteristiche di San Sebastiano di Perugino alla \"statuaria gotica\" è una generalizzazione eccessiva e potenzialmente imprecisa. Perugino opera nel pieno Rinascimento, e sebbene ci siano influenze e continuità, la sua estetica è profondamente radicata nei principi rinascimentali di proporzione, armonia e prospettiva. La statuaria gotica ha caratteristiche stilistiche distinte che potrebbero non essere pienamente rappresentate in quest'opera.",
+    "correct_answer": "[{'correct': '1490', 'error': '1450'}, {'correct': 'primo', 'error': 'secondo'}, {'correct': 'transenna', 'error': 'siepe'}, {'correct': 'cielo', 'error': 'terra'}, {'correct': 'eroica', 'error': 'impudica'}, {'correct': 'classica', 'error': 'gotica'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "Matched 0/6 errors. '1450' not found ✗; 'secondo' not found ✗; 'siepe' not found ✗; 'terra' not found ✗; 'impudica' not found ✗; 'gotica' not found ✗ Extra errors: ['**Errori:**\\n\\n*   **\"quasi completa nudità\"**: San Sebastiano è tradizionalmente rappresentato nudo', 'ma non \"quasi\" completamente nudo. La nudità è un elemento iconografico centrale.\\n*   **\"impudica\"**: L\\'aggettivo \"impudica\" è inappropriato per descrivere la nudità di San Sebastiano in un contesto religioso. La sua nudità è intesa a simboleggiare purezza', 'martirio e la vulnerabilità umana di fronte alla sofferenza', 'non lussuria o vergogna.\\n*   **\"membra lunghe\"**: Sebbene la figura possa apparire slanciata', 'l\\'espressione \"membra lunghe\" non è un termine tecnico o descrittivo comunemente usato in critica d\\'arte per caratterizzare la statuaria gotica o le opere di Perugino. Potrebbe essere un\\'interpretazione soggettiva o un\\'imprecisione.\\n*   **\"statuaria gotica\"**: Mentre alcuni elementi di grazia e allungamento possono essere presenti', 'attribuire direttamente le caratteristiche di San Sebastiano di Perugino alla \"statuaria gotica\" è una generalizzazione eccessiva e potenzialmente imprecisa. Perugino opera nel pieno Rinascimento', 'e sebbene ci siano influenze e continuità', 'la sua estetica è profondamente radicata nei principi rinascimentali di proporzione', \"armonia e prospettiva. La statuaria gotica ha caratteristiche stilistiche distinte che potrebbero non essere pienamente rappresentate in quest'opera.\"]",
+    "processing_time": 1.7050244808197021,
+    "error": "",
+    "timestamp": "2025-10-30T22:49:07.205089",
+    "metrics": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "jaccard": 0.0,
+      "accuracy": 0.0,
+      "exact_match": false
+    },
+    "confidence_level": "low",
+    "error_analysis": {
+      "missing_answers": [
+        "1450",
+        "secondo",
+        "siepe",
+        "terra",
+        "impudica",
+        "gotica"
+      ],
+      "incorrect_answers": [
+        "**Errori:**\n\n*   **\"quasi completa nudità\"**: San Sebastiano è tradizionalmente rappresentato nudo",
+        "ma non \"quasi\" completamente nudo. La nudità è un elemento iconografico centrale.\n*   **\"impudica\"**: L'aggettivo \"impudica\" è inappropriato per descrivere la nudità di San Sebastiano in un contesto religioso. La sua nudità è intesa a simboleggiare purezza",
+        "martirio e la vulnerabilità umana di fronte alla sofferenza",
+        "non lussuria o vergogna.\n*   **\"membra lunghe\"**: Sebbene la figura possa apparire slanciata",
+        "l'espressione \"membra lunghe\" non è un termine tecnico o descrittivo comunemente usato in critica d'arte per caratterizzare la statuaria gotica o le opere di Perugino. Potrebbe essere un'interpretazione soggettiva o un'imprecisione.\n*   **\"statuaria gotica\"**: Mentre alcuni elementi di grazia e allungamento possono essere presenti",
+        "attribuire direttamente le caratteristiche di San Sebastiano di Perugino alla \"statuaria gotica\" è una generalizzazione eccessiva e potenzialmente imprecisa. Perugino opera nel pieno Rinascimento",
+        "e sebbene ci siano influenze e continuità",
+        "la sua estetica è profondamente radicata nei principi rinascimentali di proporzione",
+        "armonia e prospettiva. La statuaria gotica ha caratteristiche stilistiche distinte che potrebbero non essere pienamente rappresentate in quest'opera."
+      ],
+      "correct_answers": []
+    }
+  }
+}

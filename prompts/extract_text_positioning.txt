@@ -18,8 +18,8 @@ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
     "individual term 3"
   ],
   "answers": [
-    {{"blank_position": 1, "correct_term": "correct term for first blank"}},
-    {{"blank_position": 2, "correct_term": "correct term for second blank"}}
+    {{"id": "BLANK_1", "description": "correct term for first blank"}},
+    {{"id": "BLANK_2", "description": "correct term for second blank"}}
   ],
   "language": "it"
 }}}}

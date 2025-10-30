@@ -102,9 +102,9 @@ def post_process_true_false(json_data):
             if "risposta sbagliata" in note.lower():
                 # Flip the True/False value
                 current_text = answer.get("text", "")
-                if current_text.lower() == "true":
+                if current_text.lower() == "vero":
                     answer["text"] = "False"
-                elif current_text.lower() == "false":
+                elif current_text.lower() == "falso":
                     answer["text"] = "True"
                 
                 # Change note to correct answer
@@ -234,8 +234,8 @@ def extract_question_data(json_data):
 def get_question_type_text(question_type):
     """Get the instruction text based on question type."""
     type_texts = {
-        "multiple_choice_radio": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli l'unica risposta esatta tra quelle proposte",
-        "multiple_choice_check": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli tutte le risposte esatta tra quelle proposte",
+        "multiple_choice": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli le risposta esatte tra quelle proposte",
+        #"multiple_choice_check": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli tutte le risposte esatta tra quelle proposte",
         "true_false": "VERO O FALSO\n**Cosa devi fare:** vero o falso? Scegli la risposta esatta",
         "completion_open": "COMPLETAMENTO APERTO\n**Cosa devi fare**: completa l'esercizio con le risposte che ti sembrano esatte",
         "positioning": "POSIZIONAMENTO\n**Cosa devi fare**: completa le parti mancanti dell'esercizio con le alternative proposte",

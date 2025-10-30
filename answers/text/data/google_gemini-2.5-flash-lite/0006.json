@@ -1,0 +1,133 @@
+{
+  "question_id": "0006",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 174,
+      "output_tokens": 1,
+      "total_tokens": 175,
+      "processing_time": 0.5373327732086182,
+      "timestamp": "2025-10-30T22:49:02.447996"
+    }
+  ],
+  "question_data": {
+    "question_text": "Individua le affermazioni corrette riferite all'immagine.",
+    "question_type": "multiple_choice_radio",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "multiple_choice",
+      "answers": [
+        {
+          "id": "A",
+          "description": "Risposta non data."
+        },
+        {
+          "id": "B",
+          "description": "Risposta non data."
+        },
+        {
+          "id": "F",
+          "description": "Risposta non data."
+        }
+      ],
+      "raw_data": {
+        "exercise": 1,
+        "question": 6,
+        "type": "multiple_choice",
+        "answers": [
+          {
+            "id": "A",
+            "description": "Risposta non data."
+          },
+          {
+            "id": "B",
+            "description": "Risposta non data."
+          },
+          {
+            "id": "F",
+            "description": "Risposta non data."
+          }
+        ],
+        "question_title": "I dipinti di Antonello da Messina",
+        "question_text": "Individua le affermazioni corrette riferite all'immagine.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "La figura si stacca con decisa volumetria dallo sfondo.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "Nel libro sono state analizzate in totale 6 opere di questo soggetto.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "L'opera risale al 1470.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "L'opera è stata replicata pressoché priva di variazioni.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Il tema della flagellazione è indifferentemente chiamato Ecce homo o Cristo alla colonna.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "Nella redazione delle repliche l'artista ha usato a volte la tempera, a volte i colori a olio sempre su tavola.",
+            "is_correct": null
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7866,
+            "output_tokens": 286,
+            "total_tokens": 8152,
+            "processing_time": 1.6793012619018555,
+            "timestamp": "2025-10-30T22:27:37.811869"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question and provide the best answer based on your Art History knowledge.\n\nIndividua le affermazioni corrette riferite all'immagine.\n\nOptions:\n\nA. La figura si stacca con decisa volumetria dallo sfondo.\n\nB. Nel libro sono state analizzate in totale 6 opere di questo soggetto.\n\nC. L'opera risale al 1470.\n\nD. L'opera è stata replicata pressoché priva di variazioni.\n\nE. Il tema della flagellazione è indifferentemente chiamato Ecce homo o Cristo alla colonna.\n\nF. Nella redazione delle repliche l'artista ha usato a volte la tempera, a volte i colori a olio sempre su tavola.\n\nINSTRUCTIONS:\nRespond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n\nCRITICAL: Your response must be in the exact format expected by the question type."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "multiple_choice_radio",
+    "llm_answer": "A",
+    "correct_answer": "[{'id': 'A', 'description': 'Risposta non data.'}, {'id': 'B', 'description': 'Risposta non data.'}, {'id': 'F', 'description': 'Risposta non data.'}]",
+    "is_correct": true,
+    "score": 1.0,
+    "details": "User: A, Correct: A",
+    "processing_time": 0.5373327732086182,
+    "error": "",
+    "timestamp": "2025-10-30T22:49:02.447996",
+    "metrics": {
+      "exact_match": true,
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "jaccard": 1.0
+    },
+    "confidence_level": "high",
+    "error_analysis": {
+      "missing_answers": [],
+      "incorrect_answers": [],
+      "correct_answers": [
+        "A"
+      ]
+    }
+  }
+}

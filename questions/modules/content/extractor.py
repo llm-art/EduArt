@@ -22,12 +22,13 @@ class ContentExtractor:
     async def extract_question_content(self, question_number: int) -> Dict[str, Any]:
         """
         Extract the question content (text and HTML) for the current question.
+        Extracts content from div#root and provides both HTML and text-only versions.
         
         Args:
             question_number: Current question number
             
         Returns:
-            Dictionary with extracted content
+            Dictionary with extracted content including 'html', 'text', and 'images'
         """
         print(f"Extracting question content for question {question_number}...")
         
@@ -46,17 +47,23 @@ class ContentExtractor:
             'images': []
         }
         
-        # Try structural approach first
-        content = await self._extract_with_selectors()
+        # Try to extract from div#root first
+        content = await self._extract_from_root_div()
         
         if content and len(content['text']) > 50:
             question_content = content
         else:
-            # Fallback to JavaScript-based extraction
-            print("Trying JavaScript-based content extraction...")
-            js_content = await self._extract_with_javascript()
-            if js_content and len(js_content['text']) > 50:
-                question_content = js_content
+            # Fallback to structural approach
+            content = await self._extract_with_selectors()
+            
+            if content and len(content['text']) > 50:
+                question_content = content
+            else:
+                # Final fallback to JavaScript-based extraction
+                print("Trying JavaScript-based content extraction...")
+                js_content = await self._extract_with_javascript()
+                if js_content and len(js_content['text']) > 50:
+                    question_content = js_content
         
         # Final fallback if we still have no content
         if not question_content['text']:
@@ -64,6 +71,40 @@ class ContentExtractor:
             question_content['html'] = '<div class="no-content">No content extracted</div>'
         
         print(f"Extracted {len(question_content['text'])} characters of text content")
+        return question_content
+    
+    async def _extract_from_root_div(self) -> Dict[str, Any]:
+        """Extract content from div#root element."""
+        question_content = {
+            'text': '',
+            'html': '',
+            'images': []
+        }
+        
+        try:
+            # Try to find div#root
+            root_element = await self.page.query_selector('div#root')
+            
+            if root_element:
+                # Get the inner HTML content
+                html_content = await root_element.inner_html()
+                
+                # Get text content (stripped of HTML tags)
+                text_content = await root_element.text_content()
+                
+                if html_content and text_content:
+                    # Clean up the text content
+                    text_content = text_content.strip()
+                    question_content['html'] = html_content
+                    question_content['text'] = text_content
+                    
+                    # Extract images from this content
+                    question_content['images'] = await self._extract_images_from_element(root_element)
+                    print(f"Successfully extracted content from div#root")
+                    return question_content
+        except Exception as e:
+            print(f"Error extracting from div#root: {e}")
+        
         return question_content
     
     async def _extract_with_selectors(self) -> Dict[str, Any]:

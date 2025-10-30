@@ -32,7 +32,7 @@ from modules.config import Config
 def count_png_files_in_raw(exercise: int) -> int:
     """Count the number of PNG files in the raw folder for the given exercise."""
     base_path = Path(__file__).parent / "data"
-    raw_path = base_path / f"{exercise}/raw/"
+    raw_path = base_path / f"{exercise}/raw/screenshot/"
     
     if not raw_path.exists():
         print(f"Warning: Raw folder does not exist: {raw_path}")

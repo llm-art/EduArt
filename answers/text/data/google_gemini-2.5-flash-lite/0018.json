@@ -1,0 +1,124 @@
+{
+  "question_id": "0018",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 205,
+      "output_tokens": 16,
+      "total_tokens": 221,
+      "processing_time": 0.31893014907836914,
+      "timestamp": "2025-10-30T22:49:14.332155"
+    }
+  ],
+  "question_data": {
+    "question_text": "Il capolavoro di Pietro [BLANK_1] resta la Consegna delle chiavi a San Pietro, un grande affresco realizzato in cinquantuno giornate a Roma nella [BLANK_2] tra il 1481 e il 1483. L'opera è carica di significato. Il soggetto, infatti, rende esplicita la trasmissione del potere [BLANK_3] da [BLANK_4] a Pietro e da questi ai papi suoi successori. L'episodio si svolge in una piazza antistante ad un grande [BLANK_5] a pianta centrale affiancato da due archi di trionfo gemelli, citazioni quasi letterali dell'Arco di [BLANK_6].",
+    "question_type": "positioning",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "positioning",
+      "answers": [
+        {
+          "id": "BLANK_1",
+          "description": "Perugino"
+        },
+        {
+          "id": "BLANK_2",
+          "description": "Cappella Sistina"
+        },
+        {
+          "id": "BLANK_3",
+          "description": "temporale"
+        },
+        {
+          "id": "BLANK_4",
+          "description": "Dio"
+        },
+        {
+          "id": "BLANK_5",
+          "description": "tempio"
+        },
+        {
+          "id": "BLANK_6",
+          "description": "Costantino"
+        }
+      ],
+      "raw_data": {
+        "exercise": 1,
+        "question": 18,
+        "type": "positioning",
+        "answers": [
+          {
+            "id": "BLANK_1",
+            "description": "Perugino"
+          },
+          {
+            "id": "BLANK_2",
+            "description": "Cappella Sistina"
+          },
+          {
+            "id": "BLANK_3",
+            "description": "temporale"
+          },
+          {
+            "id": "BLANK_4",
+            "description": "Dio"
+          },
+          {
+            "id": "BLANK_5",
+            "description": "tempio"
+          },
+          {
+            "id": "BLANK_6",
+            "description": "Costantino"
+          }
+        ],
+        "question_title": "La Consegna delle chiavi a San Pietro",
+        "question_text": "Il capolavoro di Pietro [BLANK_1] resta la Consegna delle chiavi a San Pietro, un grande affresco realizzato in cinquantuno giornate a Roma nella [BLANK_2] tra il 1481 e il 1483. L'opera è carica di significato. Il soggetto, infatti, rende esplicita la trasmissione del potere [BLANK_3] da [BLANK_4] a Pietro e da questi ai papi suoi successori. L'episodio si svolge in una piazza antistante ad un grande [BLANK_5] a pianta centrale affiancato da due archi di trionfo gemelli, citazioni quasi letterali dell'Arco di [BLANK_6].",
+        "choices": [
+          "Cappella Niccolina",
+          "politico",
+          "battistero",
+          "tempio",
+          "della Francesca",
+          "Cristo",
+          "temporale",
+          "Cappella Sistina",
+          "Perugino",
+          "Costantino",
+          "Dio",
+          "Cesare"
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 11292,
+            "output_tokens": 332,
+            "total_tokens": 11624,
+            "processing_time": 1.739617109298706,
+            "timestamp": "2025-10-30T22:28:04.806822"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question and provide the best answer based on your Art History knowledge.\n\nIl capolavoro di Pietro [BLANK_1] resta la Consegna delle chiavi a San Pietro, un grande affresco realizzato in cinquantuno giornate a Roma nella [BLANK_2] tra il 1481 e il 1483. L'opera è carica di significato. Il soggetto, infatti, rende esplicita la trasmissione del potere [BLANK_3] da [BLANK_4] a Pietro e da questi ai papi suoi successori. L'episodio si svolge in una piazza antistante ad un grande [BLANK_5] a pianta centrale affiancato da due archi di trionfo gemelli, citazioni quasi letterali dell'Arco di [BLANK_6].\n\nOptions:\n\n1. Cappella Niccolina\n\n2. politico\n\n3. battistero\n\n4. tempio\n\n5. della Francesca\n\n6. Cristo\n\n7. temporale\n\n8. Cappella Sistina\n\n9. Perugino\n\n10. Costantino\n\n11. Dio\n\n12. Cesare\n\nINSTRUCTIONS:\nProvide the correct sequence or position\n\nCRITICAL: Your response must be in the exact format expected by the question type."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "positioning",
+    "llm_answer": "1. Perugino\n2. Cappella Sistina\n3. politico\n4. Cristo\n5. tempio\n6. Costantino",
+    "correct_answer": "[{'id': 'BLANK_1', 'description': 'Perugino'}, {'id': 'BLANK_2', 'description': 'Cappella Sistina'}, {'id': 'BLANK_3', 'description': 'temporale'}, {'id': 'BLANK_4', 'description': 'Dio'}, {'id': 'BLANK_5', 'description': 'tempio'}, {'id': 'BLANK_6', 'description': 'Costantino'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "No correct answers found",
+    "processing_time": 0.31893014907836914,
+    "error": "",
+    "timestamp": "2025-10-30T22:49:14.332155",
+    "confidence_level": "unknown"
+  }
+}

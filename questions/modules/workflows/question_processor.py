@@ -131,6 +131,11 @@ class QuestionProcessorWorkflow:
             if html_file:
                 results['files_created'].append(str(html_file))
             
+            # Step 7b: Save text-only content
+            txt_file = await self._save_question_text(content_to_use, question_number, exercise_number)
+            if txt_file:
+                results['files_created'].append(str(txt_file))
+            
             # Step 8: Process and download images
             images_downloaded = await self._process_question_images(question_number, exercise_number)
             results['images_downloaded'] = images_downloaded
@@ -289,22 +294,40 @@ class QuestionProcessorWorkflow:
             return None
     
     async def _save_question_content(
-        self, 
-        content: Dict[str, Any], 
-        question_number: int, 
+        self,
+        content: Dict[str, Any],
+        question_number: int,
         exercise_number: int
     ) -> Optional[Path]:
         """Save question content to HTML file."""
         try:
             if content.get('html'):
                 return self.file_manager.save_html_content(
-                    content['html'], 
-                    question_number, 
+                    content['html'],
+                    question_number,
                     exercise_number,
                     f"Question {question_number}"
                 )
         except Exception as e:
-            print(f"❌ Error saving content for question {question_number}: {e}")
+            print(f"❌ Error saving HTML content for question {question_number}: {e}")
+            return None
+    
+    async def _save_question_text(
+        self,
+        content: Dict[str, Any],
+        question_number: int,
+        exercise_number: int
+    ) -> Optional[Path]:
+        """Save question text-only content to TXT file."""
+        try:
+            if content.get('text'):
+                return self.file_manager.save_text_content(
+                    content['text'],
+                    question_number,
+                    exercise_number
+                )
+        except Exception as e:
+            print(f"❌ Error saving text content for question {question_number}: {e}")
             return None
     
     async def _process_question_images(self, question_number: int, exercise_number: int) -> List[Dict[str, Any]]:

@@ -1,0 +1,159 @@
+{
+  "question_id": "0009",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 228,
+      "output_tokens": 13,
+      "total_tokens": 241,
+      "processing_time": 0.3405606746673584,
+      "timestamp": "2025-10-30T22:49:04.999409"
+    }
+  ],
+  "question_data": {
+    "question_text": "Ricostruisci il periodo scegliendo i termini corretti tra quelli proposti. Nel Castello di San Giusto A San Giorgio B Ferrara Mantova Andrea Mantegna affresca la cosiddetta Camera degli sposi negli anni 1465-1474. La novità del ciclo è rappresentata dallo C sfondamento apertura prospettico delle pareti e della cupola D volta. Sulla parete nord viene ritratta la corte dei Este E Gonzaga mentre riceve la notizia della nomina a F Cardinale Papa del loro figlio G Francesco Ludovico.",
+    "question_type": "completion_closed",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "completion_closed",
+      "answers": [
+        {
+          "id": "BLANK_1",
+          "description": "San Giorgio"
+        },
+        {
+          "id": "BLANK_2",
+          "description": "sfondamento"
+        },
+        {
+          "id": "BLANK_3",
+          "description": "Gonzaga"
+        },
+        {
+          "id": "BLANK_4",
+          "description": "Cardinale"
+        },
+        {
+          "id": "BLANK_5",
+          "description": "Francesco"
+        }
+      ],
+      "raw_data": {
+        "exercise": 1,
+        "question": 9,
+        "type": "completion_closed",
+        "answers": [
+          {
+            "id": "BLANK_1",
+            "description": "San Giorgio"
+          },
+          {
+            "id": "BLANK_2",
+            "description": "sfondamento"
+          },
+          {
+            "id": "BLANK_3",
+            "description": "Gonzaga"
+          },
+          {
+            "id": "BLANK_4",
+            "description": "Cardinale"
+          },
+          {
+            "id": "BLANK_5",
+            "description": "Francesco"
+          }
+        ],
+        "question_title": "La Camera degli Sposi di Andrea Mantegna",
+        "question_text": "Ricostruisci il periodo scegliendo i termini corretti tra quelli proposti.\n\nNel Castello di San Giusto A San Giorgio B Ferrara Mantova Andrea Mantegna affresca la cosiddetta Camera degli sposi negli anni 1465-1474. La novità del ciclo è rappresentata dallo C sfondamento apertura prospettico delle pareti e della cupola D volta. Sulla parete nord viene ritratta la corte dei Este E Gonzaga mentre riceve la notizia della nomina a F Cardinale Papa del loro figlio G Francesco Ludovico.",
+        "choices": [
+          {
+            "id": "BLANK_1",
+            "options": [
+              "San Giorgio",
+              "Ferrara"
+            ]
+          },
+          {
+            "id": "BLANK_2",
+            "options": [
+              "sfondamento",
+              "volta"
+            ]
+          },
+          {
+            "id": "BLANK_3",
+            "options": [
+              "Este",
+              "Gonzaga"
+            ]
+          },
+          {
+            "id": "BLANK_4",
+            "options": [
+              "Cardinale",
+              "Papa"
+            ]
+          },
+          {
+            "id": "BLANK_5",
+            "options": [
+              "Francesco",
+              "Ludovico"
+            ]
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 9180,
+            "output_tokens": 382,
+            "total_tokens": 9562,
+            "processing_time": 1.8476438522338867,
+            "timestamp": "2025-10-30T22:27:43.143924"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question and provide the best answer based on your Art History knowledge.\n\nRicostruisci il periodo scegliendo i termini corretti tra quelli proposti. Nel Castello di San Giusto A San Giorgio B Ferrara Mantova Andrea Mantegna affresca la cosiddetta Camera degli sposi negli anni 1465-1474. La novità del ciclo è rappresentata dallo C sfondamento apertura prospettico delle pareti e della cupola D volta. Sulla parete nord viene ritratta la corte dei Este E Gonzaga mentre riceve la notizia della nomina a F Cardinale Papa del loro figlio G Francesco Ludovico.\n\nOptions:\n\nBLANK_1:\n\n1. San Giorgio\n\n2. Ferrara\n\nBLANK_2:\n\n1. sfondamento\n\n2. volta\n\nBLANK_3:\n\n1. Este\n\n2. Gonzaga\n\nBLANK_4:\n\n1. Cardinale\n\n2. Papa\n\nBLANK_5:\n\n1. Francesco\n\n2. Ludovico\n\nINSTRUCTIONS:\nProvide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n\nCRITICAL: Your response must be in the exact format expected by the question type."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "completion_closed",
+    "llm_answer": "BLANK_1: Ferrara, BLANK_2: sfondamento, BLANK_3: Gonzaga, BLANK_4: Cardinale, BLANK_5: Ludovico",
+    "correct_answer": "[{'id': 'BLANK_1', 'description': 'San Giorgio'}, {'id': 'BLANK_2', 'description': 'sfondamento'}, {'id': 'BLANK_3', 'description': 'Gonzaga'}, {'id': 'BLANK_4', 'description': 'Cardinale'}, {'id': 'BLANK_5', 'description': 'Francesco'}]",
+    "is_correct": false,
+    "score": 0.6,
+    "details": "Matched 3/5 blanks",
+    "processing_time": 0.3405606746673584,
+    "error": "",
+    "timestamp": "2025-10-30T22:49:04.999409",
+    "metrics": {
+      "accuracy": 0.6,
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1_score": 0.6,
+      "jaccard": 0.6,
+      "exact_match": false
+    },
+    "confidence_level": "medium",
+    "error_analysis": {
+      "missing_answers": [],
+      "incorrect_answers": [
+        "BLANK_1:ferrara",
+        "BLANK_5:ludovico"
+      ],
+      "correct_answers": [
+        "BLANK_2:sfondamento",
+        "BLANK_3:gonzaga",
+        "BLANK_4:cardinale"
+      ]
+    }
+  }
+}

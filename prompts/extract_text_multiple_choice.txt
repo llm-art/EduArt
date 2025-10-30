@@ -1,13 +1,23 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about a multiple_choice_radio question, a question with radio buttons and multiple choice options (A, B, C, D, etc.) where only ONE answer can be selected
+This image and OCR text are about a multiple_choice question, which can be either:
+- multiple_choice_radio: radio buttons where only ONE answer can be selected
+- multiple_choice_check: checkboxes where MULTIPLE answers can be selected
+
+DETECTION LOGIC:
+- If you see text like "Risposta esatta" or "Risposta non data" next to MULTIPLE options, it's multiple_choice_check
+- If you see only ONE option marked as correct with bold letter and description, it's multiple_choice_radio
+- Default to radio if unsure
 
 EXTRACTION REQUIREMENTS:
 - Extract question + all options with letters (A,B,C,D,E, etc)
 - choices: array with id and text
-- answer: in the screenshot there is the correct answer marked with the letter in bold, and a description below the answer.
+- answers: extract all correct answers marked by the indicators above
 
-MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+FOR MULTIPLE_CHOICE_RADIO (single choice):
+- Type should be "multiple_choice_radio"
+- answers contains ONE correct answer with its description
+- Schema:
 {{{{
   "type": "multiple_choice_radio",
   "question_title": "clean question title",
@@ -20,6 +30,26 @@ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
   "language": "it"
 }}}}
 
+FOR MULTIPLE_CHOICE_CHECK (multiple choice):
+- Type should be "multiple_choice_check"
+- answers contains ALL correct answers marked with "Risposta esatta" or "Risposta non data"
+- DO NOT include wrong answers marked with "Risposta sbagliata"
+- Schema:
+{{{{
+  "type": "multiple_choice_check",
+  "question_title": "clean question title",
+  "question_text": "full question text",
+  "choices": [
+    {{"id": "A", "text": "option A text"}},
+    {{"id": "B", "text": "option B text"}}
+  ],
+  "answers": [
+    {{"id": "A", "description": "explanation text"}},
+    {{"id": "C", "description": "explanation text"}}
+  ],
+  "language": "it"
+}}}}
+
 STRICT REQUIREMENTS:
 - Return ONLY the JSON object above
 - DO NOT add any other fields beyond those specified
@@ -27,8 +57,9 @@ STRICT REQUIREMENTS:
 - Extract ALL multiple choice options with their correct letters
 - Use null for missing data, not empty strings
 - You MUST preserve the original order of choices as they appear in the text, including their letters
+- For multiple_choice_check: Include ONLY answers marked "Risposta esatta" or "Risposta non data", NOT "Risposta sbagliata"
 
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema above based on the type you detect. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
 
 Noisy OCR text:
 {ocr_text}

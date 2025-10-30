@@ -1,0 +1,114 @@
+{
+  "question_id": "0011",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 104,
+      "output_tokens": 1,
+      "total_tokens": 105,
+      "processing_time": 0.5236234664916992,
+      "timestamp": "2025-10-30T22:49:08.229407"
+    }
+  ],
+  "question_data": {
+    "question_text": "Scegli l'affermazione corretta che individua l'autore dell'opera.",
+    "question_type": "multiple_choice_radio",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": {
+      "type": "multiple_choice",
+      "answers": [
+        {
+          "id": "E",
+          "description": "Antonello da Messina."
+        }
+      ],
+      "raw_data": {
+        "exercise": 1,
+        "question": 11,
+        "type": "multiple_choice",
+        "answers": [
+          {
+            "id": "E",
+            "description": "Antonello da Messina."
+          }
+        ],
+        "question_title": "La pittura rinascimentale",
+        "question_text": "Scegli l'affermazione corretta che individua l'autore dell'opera.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Cosmè Tura.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "Ercole de' Roberti.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "Giovanni Bellini.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "Andrea Mantegna.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "Antonello da Messina.",
+            "is_correct": null
+          }
+        ],
+        "image": null,
+        "language": "it",
+        "has_image": false,
+        "ai_calls": [
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 7332,
+            "output_tokens": 132,
+            "total_tokens": 7464,
+            "processing_time": 1.3554966449737549,
+            "timestamp": "2025-10-30T22:27:48.093706"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive a question and provide the best answer based on your Art History knowledge.\n\nScegli l'affermazione corretta che individua l'autore dell'opera.\n\nOptions:\n\nA. Cosmè Tura.\n\nB. Ercole de' Roberti.\n\nC. Giovanni Bellini.\n\nD. Andrea Mantegna.\n\nE. Antonello da Messina.\n\nINSTRUCTIONS:\nRespond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n\nCRITICAL: Your response must be in the exact format expected by the question type."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "multiple_choice_radio",
+    "llm_answer": "B",
+    "correct_answer": "[{'id': 'E', 'description': 'Antonello da Messina.'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "User: B, Correct: E",
+    "processing_time": 0.5236234664916992,
+    "error": "",
+    "timestamp": "2025-10-30T22:49:08.229407",
+    "metrics": {
+      "exact_match": false,
+      "accuracy": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "jaccard": 0.0
+    },
+    "confidence_level": "low",
+    "error_analysis": {
+      "missing_answers": [
+        "E"
+      ],
+      "incorrect_answers": [
+        "B"
+      ],
+      "correct_answers": []
+    }
+  }
+}
