@@ -587,14 +587,88 @@ def generate_metadata(start_time, end_time, stats, dataset_dir, version):
     return metadata
 
 
+def copy_preprocessed_images(dataset_dir, processed_metadata_files):
+    """
+    Optional function to copy images with 'pre_' prefix from raw/ folders
+    to dataset/raw/ with sequential IDs matching the main dataset processing.
+    """
+    # Determine the correct data path
+    data_base = "data"
+    if os.path.exists("questions/data"):
+        data_base = "questions/data"
+    
+    if not os.path.exists(data_base):
+        print(f"Warning: Data directory '{data_base}' not found")
+        return
+    
+    # Create dataset/raw directory if it doesn't exist
+    dataset_raw_dir = os.path.join(dataset_dir, "raw")
+    os.makedirs(dataset_raw_dir, exist_ok=True)
+    
+    copied_count = 0
+    image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp']
+    
+    # Process metadata files in the same order as main processing
+    for metadata_file in processed_metadata_files:
+        try:
+            # Read the metadata to get exercise and question info
+            with open(metadata_file, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+            
+            # Get the file ID from the metadata filename (e.g., "0001.json" -> "0001")
+            metadata_filename = os.path.basename(metadata_file)
+            file_id = os.path.splitext(metadata_filename)[0]
+            
+            # Extract exercise and question numbers from the metadata
+            exercise_num = json_data.get("exercise")
+            question_num = json_data.get("question")
+            
+            if exercise_num is None or question_num is None:
+                continue
+            
+            # Look for preprocessed image in raw folder
+            raw_folder = os.path.join(data_base, str(exercise_num), "raw")
+            if not os.path.exists(raw_folder):
+                continue
+            
+            # Try to find the preprocessed image
+            found_image = None
+            for ext in image_extensions:
+                pre_image_path = os.path.join(raw_folder, f"pre_{question_num}{ext}")
+                if os.path.exists(pre_image_path):
+                    found_image = pre_image_path
+                    break
+            
+            if found_image:
+                # Get the extension from the found image
+                image_ext = os.path.splitext(found_image)[1]
+                # Copy to dataset/raw/ with sequential ID
+                dest_filename = f"{file_id}{image_ext}"
+                dest_path = os.path.join(dataset_raw_dir, dest_filename)
+                shutil.copy2(found_image, dest_path)
+                print(f"Copied preprocessed image: {found_image} -> {dest_path}")
+                copied_count += 1
+                
+        except Exception as e:
+            print(f"Warning: Could not process preprocessed image for {metadata_file}: {e}")
+            continue
+    
+    if copied_count > 0:
+        print(f"Copied {copied_count} preprocessed images to {dataset_raw_dir}")
+    else:
+        print("No preprocessed images with 'pre_' prefix found")
+
+
 @click.command()
 @click.option('--version', type=float, help='Specify version number for the report')
-def main(version):
+@click.option('--copy-preprocessed', is_flag=True, help='Copy images with pre_ prefix from raw/ folders')
+@click.option('--output-dir', default='dataset', help='Output directory for the dataset (default: dataset)')
+def main(version, copy_preprocessed, output_dir):
     """Main function to process all JSON files and create dataset."""
     start_time = datetime.now()
     
     # Read previous version BEFORE removing the dataset directory
-    dataset_dir = "dataset"
+    dataset_dir = output_dir
     previous_version = None
     if version is None:
         previous_version = get_previous_version(dataset_dir)
@@ -710,6 +784,11 @@ def main(version):
     metadata_file = dataset_path / REPORT_CONFIG['metadata_filename']
     with open(metadata_file, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
+    
+    # Copy preprocessed images if requested
+    if copy_preprocessed:
+        print(f"\nCopying preprocessed images...")
+        copy_preprocessed_images(dataset_dir, processed_metadata_files)
     
     print(f"\nProcessing complete!")
     print(f"Processed {len(processed_files)} files")

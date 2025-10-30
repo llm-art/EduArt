@@ -9,16 +9,21 @@ from ..core.exceptions import ProcessingError
 class QuestionParser:
     """Parser for extracting question data from TXT files."""
     
-    def __init__(self):
-        """Initialize the parser and load the English prompt template."""
+    def __init__(self, question_mode: str = 'text'):
+        """Initialize the parser and load the appropriate prompt template."""
+        self.question_mode = question_mode
         self._load_prompt_template()
     
     def _load_prompt_template(self):
-        """Load the English prompt template from the prompts directory."""
+        """Load the appropriate prompt template from the prompts directory."""
         try:
             # Get the prompts directory relative to the questions directory
             current_dir = Path(__file__).parent.parent.parent.parent  # Go up to datasets root
-            prompt_file = current_dir / 'prompts' / 'answer_question.txt'
+            
+            if self.question_mode == 'screenshot':
+                prompt_file = current_dir / 'prompts' / 'answer_question_screenshot.txt'
+            else:
+                prompt_file = current_dir / 'prompts' / 'answer_question.txt'
             
             with open(prompt_file, 'r', encoding='utf-8') as f:
                 self.prompt_template = f.read().strip()
@@ -171,7 +176,7 @@ class QuestionParser:
     
     def create_prompt(self, question_data: Dict[str, Any]) -> str:
         """
-        Create complete prompt for LLM using the English template system.
+        Create complete prompt for LLM using the appropriate template system.
         
         Args:
             question_data: Question data dictionary
@@ -179,22 +184,27 @@ class QuestionParser:
         Returns:
             Complete LLM prompt
         """
-        question_type = self.refine_question_type(question_data)
-        english_question_type = self._map_question_type_to_english(question_type)
-        
-        # Format choices for the English template
-        choices_text = self._format_choices_for_english_template(question_data.get('choices', []))
-        
-        # Use the loaded English template and format it
-        prompt = self.prompt_template.format(
-            question_type=english_question_type,
-            question_title=question_data.get('title', ''),
-            question_text=question_data.get('question_text', ''),
-            language="Italian",
-            choices_text=choices_text
-        )
-        
-        return prompt
+        if self.question_mode == 'screenshot':
+            # For screenshot mode, use the simple screenshot prompt
+            return self.prompt_template
+        else:
+            # For text mode, use the original template formatting
+            question_type = self.refine_question_type(question_data)
+            english_question_type = self._map_question_type_to_english(question_type)
+            
+            # Format choices for the English template
+            choices_text = self._format_choices_for_english_template(question_data.get('choices', []))
+            
+            # Use the loaded English template and format it
+            prompt = self.prompt_template.format(
+                question_type=english_question_type,
+                question_title=question_data.get('title', ''),
+                question_text=question_data.get('question_text', ''),
+                language="Italian",
+                choices_text=choices_text
+            )
+            
+            return prompt
     
     def get_question_id_from_path(self, txt_file: str) -> str:
         """
@@ -221,3 +231,82 @@ class QuestionParser:
         """
         required_fields = ['question_type', 'question_text']
         return all(question_data.get(field) for field in required_fields)
+    
+    def find_screenshot_files(self) -> List[str]:
+        """
+        Find all PNG screenshot files in dataset/raw directory.
+        
+        Returns:
+            List of PNG file paths
+        """
+        try:
+            # Get the dataset/raw directory
+            current_dir = Path(__file__).parent.parent.parent.parent  # Go up to datasets root
+            raw_dir = current_dir / 'dataset' / 'raw'
+            
+            if not raw_dir.exists():
+                return []
+            
+            # Find all PNG files
+            png_files = list(raw_dir.glob('*.png'))
+            return [str(f) for f in sorted(png_files)]
+        except Exception as e:
+            raise ProcessingError(f"Error finding screenshot files: {e}")
+    
+    def parse_screenshot_file(self, png_file: str) -> Dict[str, Any]:
+        """
+        Create minimal question data for screenshot mode.
+        
+        Args:
+            png_file: Path to PNG screenshot file
+            
+        Returns:
+            Dictionary with minimal question components for screenshot mode
+        """
+        filename = Path(png_file).stem
+        
+        # Look for additional images in dataset/imgs with same filename
+        additional_images = self._find_additional_images(filename)
+        
+        return {
+            'title': f"Screenshot Question {filename}",
+            'question_type': 'screenshot',  # Will be determined from metadata
+            'instructions': 'Read the question in the image and answer it',
+            'question_text': f'Question from screenshot {filename}',
+            'choices': [],
+            'screenshot_file': png_file,
+            'additional_images': additional_images
+        }
+    
+    def _find_additional_images(self, filename: str) -> List[str]:
+        """
+        Find additional images in dataset/imgs with the same filename.
+        
+        Args:
+            filename: Base filename (without extension)
+            
+        Returns:
+            List of additional image paths
+        """
+        try:
+            # Get the dataset/imgs directory
+            current_dir = Path(__file__).parent.parent.parent.parent  # Go up to datasets root
+            imgs_dir = current_dir / 'dataset' / 'imgs'
+            
+            if not imgs_dir.exists():
+                return []
+            
+            # Convert filename to 4-digit format (e.g., "1" -> "0001")
+            padded_filename = filename.zfill(4)
+            
+            # Look for images with same base name but different extensions
+            additional_images = []
+            for ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
+                img_path = imgs_dir / f"{padded_filename}{ext}"
+                if img_path.exists():
+                    additional_images.append(str(img_path))
+            
+            return additional_images
+        except Exception as e:
+            print(f"Warning: Error finding additional images for {filename}: {e}")
+            return []

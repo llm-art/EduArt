@@ -8,16 +8,24 @@ from the dataset and evaluates their responses against ground truth answers.
 Features:
 - Modular architecture with reusable components
 - Support for OpenAI, Google Gemini, and Anthropic Claude models
+- Two question modes: text (default) and screenshot
 - Comprehensive evaluation metrics including precision, recall, and F1 score
 - Configurable question filtering by range and type
 - Detailed results export and analysis
 - Retry logic with exponential backoff for API calls
+
+Question Modes:
+- TEXT MODE (default): Uses structured TXT files from dataset/data/ with metadata evaluation
+- SCREENSHOT MODE: Uses PNG images from dataset/raw/ with metadata evaluation
+  Note: Screenshot images may contain different questions than the metadata, affecting accuracy
 
 Usage:
     python 4_llm_questioner.py --start 1 --end 10 --models google-gemini-2.5-flash-lite
     python 4_llm_questioner.py --models model1 --models model2 --models model3
     python 4_llm_questioner.py --types multiple_choice,true_false
     python 4_llm_questioner.py --output my_results.csv
+    python 4_llm_questioner.py --question-mode screenshot --models google-gemini-2.5-flash
+    python 4_llm_questioner.py --question-mode text --start 1 --end 5
 """
 
 import click
@@ -41,12 +49,15 @@ from modules.core.exceptions import ConfigurationError, ProcessingError
 @click.option('--models', multiple=True, help='Model to test (can be specified multiple times)')
 @click.option('--output', default='llm_evaluation_results.csv', help='Output CSV file')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
-def main(start, end, types, models, output, verbose):
+@click.option('--question-mode', type=click.Choice(['text', 'screenshot']), default='text',
+              help='Question mode: "text" uses TXT files (default), "screenshot" uses PNG images from dataset/raw')
+def main(start, end, types, models, output, verbose, question_mode):
     """LLM Questioner for Italian Art History - Modular Version."""
     
     if verbose:
         print("LLM Questioner for Italian Art History - Modular Version")
         print("=" * 60)
+        print(f"Question mode: {question_mode}")
     
     # Parse question types filter
     question_types = None
@@ -67,7 +78,7 @@ def main(start, end, types, models, output, verbose):
         if verbose:
             print("\nInitializing LLM Questioner...")
         
-        questioner = LLMQuestioner(models_to_test=models_to_test)
+        questioner = LLMQuestioner(models_to_test=models_to_test, question_mode=question_mode)
         
         if verbose:
             questioner.print_status()

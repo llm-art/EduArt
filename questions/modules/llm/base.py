@@ -19,13 +19,14 @@ class LLMProvider(ABC):
         self.config = kwargs
     
     @abstractmethod
-    def query(self, prompt: str, image_path: Optional[str] = None) -> str:
+    def query(self, prompt: str, image_path: Optional[str] = None, image_paths: Optional[list] = None) -> str:
         """
-        Query the LLM with a prompt and optional image, return the response.
+        Query the LLM with a prompt and optional image(s), return the response.
         
         Args:
             prompt: The input prompt
-            image_path: Optional path to image file for vision models
+            image_path: Optional path to single image file for vision models (for backward compatibility)
+            image_paths: Optional list of paths to image files for vision models
             
         Returns:
             The LLM response

@@ -58,13 +58,14 @@ class GoogleProvider(LLMProvider):
             except ImportError as e:
                 raise ProcessingError(f"Google Gemini dependencies not available: {e}")
     
-    def query(self, prompt: str, image_path: Optional[str] = None) -> str:
+    def query(self, prompt: str, image_path: Optional[str] = None, image_paths: Optional[list] = None) -> str:
         """
-        Query Google Gemini model with a prompt and optional image.
+        Query Google Gemini model with a prompt and optional image(s).
         
         Args:
             prompt: Input prompt
-            image_path: Optional path to image file
+            image_path: Optional path to single image file (for backward compatibility)
+            image_paths: Optional list of paths to image files
             
         Returns:
             Model response
@@ -78,21 +79,40 @@ class GoogleProvider(LLMProvider):
         try:
             self._initialize_model()
             
-            if image_path and Path(image_path).exists():
+            # Determine which images to use
+            images_to_process = []
+            if image_paths:
+                images_to_process = [img for img in image_paths if Path(img).exists()]
+            elif image_path and Path(image_path).exists():
+                images_to_process = [image_path]
+            
+            if images_to_process:
                 # For vision queries, we need to use a different approach
                 from langchain.schema import HumanMessage
                 from langchain_core.messages import HumanMessage
                 
-                # Create message with image
-                message_content = [
-                    {"type": "text", "text": prompt},
-                    {
+                # Create message with text and images
+                message_content = [{"type": "text", "text": prompt}]
+                
+                # Add all images to the message
+                for img_path in images_to_process:
+                    # Determine image type from extension
+                    img_ext = Path(img_path).suffix.lower()
+                    if img_ext in ['.jpg', '.jpeg']:
+                        img_type = 'image/jpeg'
+                    elif img_ext == '.png':
+                        img_type = 'image/png'
+                    elif img_ext == '.gif':
+                        img_type = 'image/gif'
+                    else:
+                        img_type = 'image/png'  # Default
+                    
+                    message_content.append({
                         "type": "image_url",
                         "image_url": {
-                            "url": f"data:image/png;base64,{self._encode_image(image_path)}"
+                            "url": f"data:{img_type};base64,{self._encode_image(img_path)}"
                         }
-                    }
-                ]
+                    })
                 
                 message = HumanMessage(content=message_content)
                 response = self._model.invoke([message])

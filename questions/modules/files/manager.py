@@ -187,6 +187,20 @@ class FileManager:
         dirs = self.get_exercise_directories(exercise_number)
         return dirs['raw'] / f"{question_number}.png"
     
+    def get_pre_screenshot_path(self, question_number: int, exercise_number: int) -> Path:
+        """
+        Get the path for a pre-interaction question screenshot.
+        
+        Args:
+            question_number: Question number
+            exercise_number: Exercise number
+            
+        Returns:
+            Path for the pre-interaction screenshot
+        """
+        dirs = self.get_exercise_directories(exercise_number)
+        return dirs['raw'] / f"pre_{question_number}.png"
+    
     def get_image_path(
         self, 
         question_number: int, 

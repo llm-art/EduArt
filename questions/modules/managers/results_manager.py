@@ -50,20 +50,28 @@ MODEL_COSTS = {
 class ResultsManager:
     """Manager for storing and exporting evaluation results."""
     
-    def __init__(self, results_dir: Optional[str] = None):
+    def __init__(self, results_dir: Optional[str] = None, question_mode: str = 'text'):
         """
         Initialize results manager.
         
         Args:
             results_dir: Directory to store results (not used, kept for compatibility)
+            question_mode: Question mode - 'text' or 'screenshot'
         """
         # Don't create results directory - we only use answers directory
         self.results: List[Dict[str, Any]] = []
+        self.question_mode = question_mode
         
         # Create answers directory structure at project root level (same level as questions/)
         questions_dir = Path(__file__).parent.parent.parent
         project_root = questions_dir.parent  # Go up one level from questions/ to project root
-        self.answers_dir = project_root / 'answers'
+        
+        # Create mode-specific answers directory
+        if question_mode == 'screenshot':
+            self.answers_dir = project_root / 'answers' / 'screenshot'
+        else:
+            self.answers_dir = project_root / 'answers' / 'text'
+            
         self.answers_dir.mkdir(parents=True, exist_ok=True)
         self.answers_data_dir = self.answers_dir / 'data'
         self.answers_data_dir.mkdir(parents=True, exist_ok=True)
@@ -102,7 +110,7 @@ class ResultsManager:
                    processing_time: float, error: str = "", question_data: Optional[Dict[str, Any]] = None,
                    input_tokens: int = 0, output_tokens: int = 0):
         """
-        Add evaluation result.
+        Add evaluation result with enhanced metrics.
         
         Args:
             question_id: Question identifier
@@ -110,7 +118,7 @@ class ResultsManager:
             question_type: Type of question
             llm_answer: LLM response
             correct_answer: Correct answer
-            evaluation: Evaluation results
+            evaluation: Evaluation results (now includes metrics, confidence_level, error_analysis)
             processing_time: Time taken to process
             error: Error message if any
             question_data: Additional question data for individual JSON files
@@ -130,7 +138,11 @@ class ResultsManager:
             'error': error,
             'timestamp': datetime.now().isoformat(),
             'input_tokens': input_tokens,
-            'output_tokens': output_tokens
+            'output_tokens': output_tokens,
+            # Enhanced metrics
+            'metrics': evaluation.get('metrics', {}),
+            'confidence_level': evaluation.get('confidence_level', 'unknown'),
+            'error_analysis': evaluation.get('error_analysis', {})
         }
         
         self.results.append(result)
@@ -199,8 +211,8 @@ class ResultsManager:
             }
             individual_result['ai_calls'].append(ai_call)
             
-            # Add evaluation results
-            individual_result['evaluation'] = {
+            # Add evaluation results with enhanced metrics
+            evaluation_data = {
                 'model_name': result['model_name'],
                 'question_type': result['question_type'],
                 'llm_answer': result['llm_answer'],
@@ -212,6 +224,20 @@ class ResultsManager:
                 'error': result['error'],
                 'timestamp': result['timestamp']
             }
+            
+            # Add enhanced metrics if available
+            if 'metrics' in result and result['metrics']:
+                evaluation_data['metrics'] = result['metrics']
+            
+            # Add confidence level if available
+            if 'confidence_level' in result and result['confidence_level']:
+                evaluation_data['confidence_level'] = result['confidence_level']
+            
+            # Add error analysis if available
+            if 'error_analysis' in result and result['error_analysis']:
+                evaluation_data['error_analysis'] = result['error_analysis']
+            
+            individual_result['evaluation'] = evaluation_data
             
             # Save to individual JSON file in model-specific folder
             with open(json_filepath, 'w', encoding='utf-8') as f:
@@ -254,42 +280,80 @@ class ResultsManager:
     
     def calculate_precision_recall_f1(self, results_subset: List[Dict]) -> Dict[str, float]:
         """
-        Calculate precision, recall, and F1 score for a subset of results.
+        Calculate comprehensive metrics for a subset of results using enhanced evaluation data.
         
         Args:
             results_subset: Subset of results to analyze
             
         Returns:
-            Dictionary with metrics
+            Dictionary with aggregated metrics
         """
         if not results_subset:
-            return {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'accuracy': 0.0}
+            return {
+                'precision': 0.0, 'recall': 0.0, 'f1_score': 0.0, 'accuracy': 0.0, 'jaccard': 0.0,
+                'exact_match_rate': 0.0, 'total_samples': 0,
+                'confidence_distribution': {'high': 0, 'medium': 0, 'low': 0, 'manual_review': 0}
+            }
         
         # Filter out results without ground truth (None values)
         valid_results = [r for r in results_subset if r['is_correct'] is not None]
         
         if not valid_results:
-            return {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'accuracy': 0.0}
+            return {
+                'precision': 0.0, 'recall': 0.0, 'f1_score': 0.0, 'accuracy': 0.0, 'jaccard': 0.0,
+                'exact_match_rate': 0.0, 'total_samples': 0,
+                'confidence_distribution': {'high': 0, 'medium': 0, 'low': 0, 'manual_review': 0}
+            }
         
-        # Simple accuracy-based calculation for question answering
-        correct_answers = sum(1 for r in valid_results if r['is_correct'])
-        total_answers = len(valid_results)
+        # Aggregate metrics from individual results
+        total_precision = 0.0
+        total_recall = 0.0
+        total_f1 = 0.0
+        total_accuracy = 0.0
+        total_jaccard = 0.0
+        exact_matches = 0
+        confidence_counts = {'high': 0, 'medium': 0, 'low': 0, 'manual_review': 0}
         
-        # Calculate accuracy
-        accuracy = correct_answers / total_answers if total_answers > 0 else 0.0
+        for result in valid_results:
+            # Use enhanced metrics if available, otherwise fall back to legacy calculation
+            if 'metrics' in result and result['metrics']:
+                metrics = result['metrics']
+                total_precision += metrics.get('precision', 0.0)
+                total_recall += metrics.get('recall', 0.0)
+                total_f1 += metrics.get('f1_score', 0.0)
+                total_accuracy += metrics.get('accuracy', 0.0)
+                total_jaccard += metrics.get('jaccard', 0.0)
+                if metrics.get('exact_match', False):
+                    exact_matches += 1
+            else:
+                # Legacy fallback: use is_correct for all metrics
+                score = 1.0 if result['is_correct'] else 0.0
+                total_precision += score
+                total_recall += score
+                total_f1 += score
+                total_accuracy += score
+                total_jaccard += score
+                if result['is_correct']:
+                    exact_matches += 1
+            
+            # Count confidence levels
+            confidence = result.get('confidence_level', 'unknown')
+            if confidence in confidence_counts:
+                confidence_counts[confidence] += 1
+            else:
+                confidence_counts['low'] += 1  # Default unknown to low
         
-        # For question answering, precision = recall = F1 = accuracy when we have binary correct/incorrect
-        # This is because each question has exactly one prediction and one ground truth
-        precision = accuracy
-        recall = accuracy
-        f1 = accuracy
+        total_samples = len(valid_results)
         
         return {
-            'precision': precision,
-            'recall': recall,
-            'f1': f1,
-            'accuracy': accuracy,
-            'total_samples': len(valid_results)
+            'precision': total_precision / total_samples,
+            'recall': total_recall / total_samples,
+            'f1_score': total_f1 / total_samples,
+            'accuracy': total_accuracy / total_samples,
+            'jaccard': total_jaccard / total_samples,
+            'exact_match_rate': exact_matches / total_samples,
+            'total_samples': total_samples,
+            'confidence_distribution': confidence_counts
         }
     
     def generate_summary(self) -> Dict[str, Any]:
@@ -369,27 +433,44 @@ class ResultsManager:
         # Overall metrics
         overall = summary.get('overall_metrics', {})
         print(f"\nOVERALL PERFORMANCE:")
-        print(f"  Accuracy:  {overall.get('accuracy', 0):.3f}")
-        print(f"  Precision: {overall.get('precision', 0):.3f}")
-        print(f"  Recall:    {overall.get('recall', 0):.3f}")
-        print(f"  F1 Score:  {overall.get('f1', 0):.3f}")
-        print(f"  Samples:   {overall.get('total_samples', 0)}")
+        print(f"  Accuracy:       {overall.get('accuracy', 0):.3f}")
+        print(f"  Precision:      {overall.get('precision', 0):.3f}")
+        print(f"  Recall:         {overall.get('recall', 0):.3f}")
+        print(f"  F1 Score:       {overall.get('f1_score', 0):.3f}")
+        print(f"  Jaccard:        {overall.get('jaccard', 0):.3f}")
+        print(f"  Exact Match:    {overall.get('exact_match_rate', 0):.3f}")
+        print(f"  Samples:        {overall.get('total_samples', 0)}")
+        
+        # Confidence distribution
+        confidence_dist = overall.get('confidence_distribution', {})
+        if confidence_dist:
+            print(f"\nCONFIDENCE DISTRIBUTION:")
+            print(f"  High:           {confidence_dist.get('high', 0)}")
+            print(f"  Medium:         {confidence_dist.get('medium', 0)}")
+            print(f"  Low:            {confidence_dist.get('low', 0)}")
+            print(f"  Manual Review:  {confidence_dist.get('manual_review', 0)}")
         
         # Metrics by model
         print(f"\nPERFORMANCE BY MODEL:")
-        print(f"{'Model':<35} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Samples':<8}")
-        print("-" * 70)
+        print(f"{'Model':<35} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Jacc':<6} {'ExM':<6} {'Conf':<12} {'Samples':<8}")
+        print("-" * 100)
         for model, metrics in summary.get('metrics_by_model', {}).items():
+            conf_dist = metrics.get('confidence_distribution', {})
+            conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
             print(f"{model:<35} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
-                  f"{metrics.get('recall', 0):.3f}  {metrics.get('f1', 0):.3f}  {metrics.get('total_samples', 0):<8}")
+                  f"{metrics.get('recall', 0):.3f}  {metrics.get('f1_score', 0):.3f}  {metrics.get('jaccard', 0):.3f}  "
+                  f"{metrics.get('exact_match_rate', 0):.3f}  {conf_summary:<12} {metrics.get('total_samples', 0):<8}")
         
         # Metrics by question type
         print(f"\nPERFORMANCE BY QUESTION TYPE:")
-        print(f"{'Question Type':<25} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Samples':<8}")
-        print("-" * 70)
+        print(f"{'Question Type':<25} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Jacc':<6} {'ExM':<6} {'Conf':<12} {'Samples':<8}")
+        print("-" * 100)
         for qtype, metrics in summary.get('metrics_by_type', {}).items():
+            conf_dist = metrics.get('confidence_distribution', {})
+            conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
             print(f"{qtype:<25} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
-                  f"{metrics.get('recall', 0):.3f}  {metrics.get('f1', 0):.3f}  {metrics.get('total_samples', 0):<8}")
+                  f"{metrics.get('recall', 0):.3f}  {metrics.get('f1_score', 0):.3f}  {metrics.get('jaccard', 0):.3f}  "
+                  f"{metrics.get('exact_match_rate', 0):.3f}  {conf_summary:<12} {metrics.get('total_samples', 0):<8}")
     
     def save_summary_json(self, filepath: Optional[str] = None):
         """
@@ -626,14 +707,22 @@ class ResultsManager:
                     'correctly_answered_questions': correctly_answered,
                     'precision': type_metrics.get('precision', 0),
                     'recall': type_metrics.get('recall', 0),
-                    'f1': type_metrics.get('f1', 0)
+                    'f1_score': type_metrics.get('f1_score', 0),
+                    'f1': type_metrics.get('f1_score', 0),  # Legacy compatibility
+                    'jaccard': type_metrics.get('jaccard', 0),
+                    'exact_match_rate': type_metrics.get('exact_match_rate', 0),
+                    'confidence_distribution': type_metrics.get('confidence_distribution', {})
                 })
             
             models.append({
                 'model_name': model_name,
                 'precision': model_metrics.get('precision', 0),
                 'recall': model_metrics.get('recall', 0),
-                'f1': model_metrics.get('f1', 0),
+                'f1_score': model_metrics.get('f1_score', 0),
+                'f1': model_metrics.get('f1_score', 0),  # Legacy compatibility
+                'jaccard': model_metrics.get('jaccard', 0),
+                'exact_match_rate': model_metrics.get('exact_match_rate', 0),
+                'confidence_distribution': model_metrics.get('confidence_distribution', {}),
                 'input_cost_per_million_tokens': input_cost_per_million,
                 'output_cost_per_million_tokens': output_cost_per_million,
                 'ai_calls': [{
@@ -703,11 +792,11 @@ answers/
 ├── README.md             # This file
 └── data/                 # Individual question results organized by model
     ├── google_gemini-2.5-flash-lite/
-    │   ├── 5_1.json      # Results for question 1 from exercise 5
-    │   ├── 5_2.json      # Results for question 2 from exercise 5
+    │   ├── 0001.json     # Results for question 0001
+    │   ├── 0002.json     # Results for question 0002
     │   └── ...           # More question results
     ├── openai_gpt-4o/
-    │   ├── 5_1.json      # Results for question 1 from exercise 5
+    │   ├── 0001.json     # Results for question 0001
     │   └── ...           # More question results
     └── ...               # More model folders
 ```
@@ -722,15 +811,36 @@ answers/
         
         readme_content += "\n## Model Performance Summary\n\n"
         
-        # Performance table with actual costs
-        readme_content += "| Model | Precision | Recall | F1 Score | Input Tokens | Output Tokens | Actual Cost |\n"
-        readme_content += "|-------|-----------|--------|----------|--------------|---------------|-------------|\n"
+        # Enhanced performance table with comprehensive metrics
+        readme_content += "| Model | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence | Input Tokens | Output Tokens | Actual Cost |\n"
+        readme_content += "|-------|-----------|--------|----------|---------|-------------|------------|--------------|---------------|-------------|\n"
         
-        for model in metadata.get('models', []):
+        # Sort models with Gemini models in specific order
+        models = metadata.get('models', [])
+        def sort_models(model):
+            model_name = model.get('model_name', '')
+            if 'gemini-2.5-flash-lite' in model_name:
+                return (0, model_name)
+            elif 'gemini-2.5-flash' in model_name and 'lite' not in model_name:
+                return (1, model_name)
+            elif 'gemini-2.5-pro' in model_name:
+                return (2, model_name)
+            else:
+                return (999, model_name)  # Other models come after Gemini models
+        
+        sorted_models = sorted(models, key=sort_models)
+        
+        for model in sorted_models:
             model_name = model.get('model_name', 'Unknown')
             precision = model.get('precision', 0)
             recall = model.get('recall', 0)
-            f1 = model.get('f1', 0)
+            f1 = model.get('f1_score', model.get('f1', 0))  # Support both new and legacy keys
+            jaccard = model.get('jaccard', 0)
+            exact_match = model.get('exact_match_rate', 0)
+            
+            # Confidence distribution summary
+            conf_dist = model.get('confidence_distribution', {})
+            conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
             
             # Get token usage and calculate actual cost
             ai_calls = model.get('ai_calls', [])
@@ -744,9 +854,9 @@ answers/
                 
                 actual_cost = (input_tokens * input_cost_per_million / 1_000_000) + (output_tokens * output_cost_per_million / 1_000_000)
                 
-                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {input_tokens:,} | {output_tokens:,} | ${actual_cost:.4f} |\n"
+                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {jaccard:.3f} | {exact_match:.3f} | {conf_summary} | {input_tokens:,} | {output_tokens:,} | ${actual_cost:.4f} |\n"
             else:
-                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | 0 | 0 | $0.0000 |\n"
+                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {jaccard:.3f} | {exact_match:.3f} | {conf_summary} | 0 | 0 | $0.0000 |\n"
         
         readme_content += "\n## Performance by Question Type\n\n"
         
@@ -758,10 +868,10 @@ answers/
         
         for qtype in sorted(all_question_types):
             readme_content += f"### {qtype}\n\n"
-            readme_content += "| Model | Questions | With Images | Correct | Precision | Recall | F1 Score |\n"
-            readme_content += "|-------|-----------|-------------|---------|-----------|--------|-----------|\n"
+            readme_content += "| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |\n"
+            readme_content += "|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|\n"
             
-            for model in metadata.get('models', []):
+            for model in sorted_models:
                 model_name = model.get('model_name', 'Unknown')
                 type_data = next((qt for qt in model.get('question_type', []) if qt['type'] == qtype), None)
                 
@@ -771,9 +881,15 @@ answers/
                     correct = type_data.get('correctly_answered_questions', 0)
                     precision = type_data.get('precision', 0)
                     recall = type_data.get('recall', 0)
-                    f1 = type_data.get('f1', 0)
+                    f1 = type_data.get('f1_score', type_data.get('f1', 0))  # Support both keys
+                    jaccard = type_data.get('jaccard', 0)
+                    exact_match = type_data.get('exact_match_rate', 0)
                     
-                    readme_content += f"| {model_name} | {questions} | {with_images} | {correct} | {precision:.3f} | {recall:.3f} | {f1:.3f} |\n"
+                    # Confidence distribution for this question type
+                    conf_dist = type_data.get('confidence_distribution', {})
+                    conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
+                    
+                    readme_content += f"| {model_name} | {questions} | {with_images} | {correct} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {jaccard:.3f} | {exact_match:.3f} | {conf_summary} |\n"
             
             readme_content += "\n"
         

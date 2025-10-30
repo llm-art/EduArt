@@ -42,17 +42,19 @@ def retry_with_backoff(func, max_retries: int = 3, base_delay: float = 1.0):
 class LLMQuestioner:
     """Main orchestrator for LLM question evaluation."""
     
-    def __init__(self, models_to_test: Optional[List[str]] = None):
+    def __init__(self, models_to_test: Optional[List[str]] = None, question_mode: str = 'text'):
         """
         Initialize LLM questioner.
         
         Args:
             models_to_test: List of model specifications to test
+            question_mode: Question mode - 'text' or 'screenshot'
             
         Raises:
             ConfigurationError: If configuration is invalid
         """
         self.config = QuestionerConfig()
+        self.question_mode = question_mode
         
         # Validate configuration
         errors = self.config.validate_configuration()
@@ -62,9 +64,9 @@ class LLMQuestioner:
         # Initialize components
         try:
             self.providers = create_providers_from_config(models_to_test)
-            self.question_parser = QuestionParser()
+            self.question_parser = QuestionParser(question_mode=question_mode)
             self.answer_evaluator = AnswerEvaluator()
-            self.results_manager = ResultsManager(str(self.config.results_dir))
+            self.results_manager = ResultsManager(str(self.config.results_dir), question_mode=question_mode)
         except Exception as e:
             raise ConfigurationError(f"Failed to initialize components: {e}")
     
@@ -86,13 +88,36 @@ class LLMQuestioner:
         Raises:
             ProcessingError: If processing fails
         """
-        # Find question files
-        question_files = self.config.find_question_files(start, end, question_types)
+        if self.question_mode == 'screenshot':
+            # Find screenshot files instead of text files
+            screenshot_files = self.question_parser.find_screenshot_files()
+            if not screenshot_files:
+                raise ProcessingError("No screenshot files found in dataset/raw")
+            
+            # Filter by range if specified
+            if start is not None or end is not None:
+                filtered_files = []
+                for file_path in screenshot_files:
+                    filename = Path(file_path).stem
+                    try:
+                        file_num = int(filename)
+                        if (start is None or file_num >= start) and (end is None or file_num <= end):
+                            filtered_files.append(file_path)
+                    except ValueError:
+                        continue
+                screenshot_files = filtered_files
+            
+            question_files = screenshot_files
+            print(f"Found {len(question_files)} screenshot files to process")
+        else:
+            # Find question files
+            question_files = self.config.find_question_files(start, end, question_types)
+            
+            if not question_files:
+                raise ProcessingError("No question files found matching the criteria")
+            
+            print(f"Found {len(question_files)} question files to process")
         
-        if not question_files:
-            raise ProcessingError("No question files found matching the criteria")
-        
-        print(f"Found {len(question_files)} question files to process")
         print(f"Testing with {len(self.providers)} LLM providers")
         
         # Process each question with each model
@@ -101,36 +126,84 @@ class LLMQuestioner:
         successful_operations = 0
         failed_operations = 0
         
-        for txt_file in question_files:
-            question_id = self.question_parser.get_question_id_from_path(txt_file)
-            json_file = self.config.get_question_metadata_path(txt_file)
-            
-            if not os.path.exists(json_file):
-                print(f"Warning: JSON file not found for {question_id}")
-                continue
-            
+        for file_path in question_files:
             try:
-                # Parse question
-                question_data = self.question_parser.parse_txt_file(txt_file)
+                all_images = []  # Initialize for all modes
                 
-                if not self.question_parser.validate_question_data(question_data):
-                    print(f"Warning: Invalid question data for {question_id}")
-                    continue
-                
-                question_type = self.question_parser.refine_question_type(question_data)
-                prompt = self.question_parser.create_prompt(question_data)
-                
-                # Extract correct answers
-                correct_answers = self.answer_evaluator.extract_correct_answers(json_file)
-                correct_answer_str = str(correct_answers.get('answers', []))
-                
-                # Check if question has an image
-                has_image = correct_answers.get('raw_data', {}).get('has_image', False)
-                image_path = correct_answers.get('raw_data', {}).get('image') if has_image else None
+                if self.question_mode == 'screenshot':
+                    # Handle screenshot mode
+                    filename = Path(file_path).stem
+                    question_id = filename.zfill(4)  # Pad with zeros to match format
+                    
+                    # Find corresponding metadata file
+                    current_dir = Path(__file__).parent.parent.parent.parent
+                    json_file = current_dir / 'dataset' / 'metadata' / f'{question_id}.json'
+                    
+                    if not os.path.exists(json_file):
+                        print(f"Warning: Metadata file not found for {question_id}")
+                        continue
+                    
+                    # Parse screenshot file (minimal data)
+                    question_data = self.question_parser.parse_screenshot_file(file_path)
+                    prompt = self.question_parser.create_prompt(question_data)
+                    
+                    # Extract correct answers from metadata
+                    correct_answers = self.answer_evaluator.extract_correct_answers(str(json_file))
+                    correct_answer_str = str(correct_answers.get('answers', []))
+                    
+                    # For screenshot mode, collect all images
+                    has_image = True
+                    image_path = file_path  # Primary screenshot
+                    additional_images = question_data.get('additional_images', [])
+                    
+                    # Create list of all images (screenshot first, then additional)
+                    all_images = [file_path] + additional_images
+                    
+                    # Get question type from metadata
+                    try:
+                        import json
+                        with open(json_file, 'r', encoding='utf-8') as f:
+                            metadata = json.load(f)
+                        question_type = metadata.get('type', 'unknown')
+                    except Exception:
+                        question_type = 'unknown'
+                    
+                else:
+                    # Handle text mode (original logic)
+                    txt_file = file_path
+                    question_id = self.question_parser.get_question_id_from_path(txt_file)
+                    json_file = self.config.get_question_metadata_path(txt_file)
+                    
+                    if not os.path.exists(json_file):
+                        print(f"Warning: JSON file not found for {question_id}")
+                        continue
+                    
+                    # Parse question
+                    question_data = self.question_parser.parse_txt_file(txt_file)
+                    
+                    if not self.question_parser.validate_question_data(question_data):
+                        print(f"Warning: Invalid question data for {question_id}")
+                        continue
+                    
+                    question_type = self.question_parser.refine_question_type(question_data)
+                    prompt = self.question_parser.create_prompt(question_data)
+                    
+                    # Extract correct answers
+                    correct_answers = self.answer_evaluator.extract_correct_answers(json_file)
+                    correct_answer_str = str(correct_answers.get('answers', []))
+                    
+                    # Check if question has an image
+                    has_image = correct_answers.get('raw_data', {}).get('has_image', False)
+                    image_path = correct_answers.get('raw_data', {}).get('image') if has_image else None
                 
                 print(f"\nProcessing Question {question_id} ({question_type})")
-                if has_image and image_path:
-                    print(f"Image required: {image_path}")
+                if has_image:
+                    if self.question_mode == 'screenshot' and all_images:
+                        print(f"Images required: {len(all_images)} total")
+                        for i, img in enumerate(all_images):
+                            print(f"  Image {i+1}: {img}")
+                    elif image_path:
+                        print(f"Image required: {image_path}")
                 print(f"Prompt being sent:\n{prompt}\n")
                 
                 for provider in self.providers:
@@ -147,7 +220,10 @@ class LLMQuestioner:
                     try:
                         # Query LLM with retry logic
                         def query_llm():
-                            return provider.query(prompt, image_path)
+                            if self.question_mode == 'screenshot' and all_images:
+                                return provider.query(prompt, image_paths=all_images)
+                            else:
+                                return provider.query(prompt, image_path)
                         
                         llm_response = retry_with_backoff(query_llm)
                         
@@ -206,7 +282,7 @@ class LLMQuestioner:
                         processing_time=processing_time,
                         error=error_msg,
                         question_data={
-                            'question_text': question_data.get('question', ''),
+                            'question_text': question_data.get('question_text', ''),
                             'question_type': question_type,
                             'has_image': has_image,
                             'image_path': image_path,

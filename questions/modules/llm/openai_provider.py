@@ -46,13 +46,14 @@ class OpenAIProvider(LLMProvider):
             except ImportError as e:
                 raise ProcessingError(f"OpenAI dependencies not available: {e}")
     
-    def query(self, prompt: str, image_path: Optional[str] = None) -> str:
+    def query(self, prompt: str, image_path: Optional[str] = None, image_paths: Optional[list] = None) -> str:
         """
-        Query OpenAI model with a prompt and optional image.
+        Query OpenAI model with a prompt and optional image(s).
         
         Args:
             prompt: Input prompt
-            image_path: Optional path to image file (not supported yet)
+            image_path: Optional path to single image file (not supported yet)
+            image_paths: Optional list of paths to image files (not supported yet)
             
         Returns:
             Model response
@@ -63,7 +64,7 @@ class OpenAIProvider(LLMProvider):
         if not self.validate_prompt(prompt):
             raise ProcessingError("Invalid prompt provided")
         
-        if image_path:
+        if image_path or image_paths:
             raise ProcessingError("Image support not implemented for OpenAI provider yet")
         
         try:

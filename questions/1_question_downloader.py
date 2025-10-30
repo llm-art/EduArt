@@ -34,7 +34,7 @@ from modules import ZanichelliExerciseAutomator
 
 
 @click.command()
-@click.option('--exercises', '-e', multiple=True, type=int, help='Exercise numbers to process (1-57). Use multiple times for multiple exercises (e.g., -e 1 -e 3 -e 5). Use --all for all exercises.', required=False)
+@click.option('--exercise', '-e', multiple=True, type=int, help='Exercise numbers to process (1-57). Use multiple times for multiple exercises (e.g., -e 1 -e 3 -e 5). Use --all for all exercises.', required=False)
 @click.option('--all', is_flag=True, help='Process all exercises (1-57)')
 @click.option('--url', '-u', default="https://esercizi.zanichelli.it/argomento/Pittura-rinascimentale/x2rnbu-x2rnih-hv05y-2n_5c", help='Exercise list URL', show_default=True)
 @click.option('--no-login', is_flag=True, help='Skip login process')
@@ -43,26 +43,26 @@ from modules import ZanichelliExerciseAutomator
 @click.option('--no-interaction', is_flag=True, help='Disable question interaction system (legacy mode)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output for detailed logging')
 @click.option('--config', '-c', default='config.json', help='Configuration file path', show_default=True)
-def main(exercises, all, url, no_login, headless, validate_content, no_interaction, verbose, config):
+def main(exercise, all, url, no_login, headless, validate_content, no_interaction, verbose, config):
     """Zanichelli Exercise Automation - Unified Processing."""
     
-    # Only show header if verbose or if no exercises specified
-    if verbose or not (exercises or all):
+    # Only show header if verbose or if no exercise specified
+    if verbose or not (exercise or all):
         click.echo(click.style("Zanichelli Exercise Automation - Unified Processing", fg='cyan', bold=True))
         click.echo("=" * 70)
     
     if all:
         exercise_indices = list(range(57))
         if verbose:
-            click.echo("Processing ALL exercises")
-    elif exercises:
+            click.echo("Processing ALL exercise")
+    elif exercise:
         # Convert user-provided exercise numbers (1-based) to internal indices (0-based)
-        exercise_indices = [ex - 1 for ex in exercises]
+        exercise_indices = [ex - 1 for ex in exercise]
         if verbose:
-            click.echo(f"Processing exercises: {list(exercises)} (user numbers)")
+            click.echo(f"Processing exercise: {list(exercise)} (user numbers)")
             click.echo(f"Internal indices: {exercise_indices} (0-based)")
         else:
-            click.echo(f"Processing exercises: {list(exercises)}")
+            click.echo(f"Processing exercise: {list(exercise)}")
     
     if verbose:
         click.echo(f"Login required: {not no_login}")
@@ -85,7 +85,7 @@ def main(exercises, all, url, no_login, headless, validate_content, no_interacti
                 if verbose:
                     click.echo(click.style("✅ Initialization successful", fg='green'))
                 
-                # Process exercises using unified path (works for both single and multiple)
+                # Process exercise using unified path (works for both single and multiple)
                 results = await automator.process_multiple_exercises(
                     url=url,
                     exercise_indices=exercise_indices,
