@@ -1,0 +1,147 @@
+{
+  "question_id": "0004",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "google/gemini-2.5-flash-lite",
+      "input_tokens": 1358,
+      "output_tokens": 3,
+      "total_tokens": 1361,
+      "processing_time": 1.466538667678833,
+      "timestamp": "2025-10-30T13:45:49.704000"
+    }
+  ],
+  "question_data": {
+    "question_text": "Question from screenshot 0004",
+    "question_type": "multiple_choice_check",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/dataset/raw/0004.png",
+    "correct_answers": {
+      "type": "multiple_choice_check",
+      "answers": [
+        {
+          "id": "B",
+          "description": "Risposta non data."
+        },
+        {
+          "id": "D",
+          "description": "Risposta non data."
+        },
+        {
+          "id": "E",
+          "description": "Risposta esatta."
+        }
+      ],
+      "raw_data": {
+        "exercise": 1,
+        "question": 4,
+        "type": "multiple_choice_check",
+        "answers": [
+          {
+            "id": "B",
+            "description": "Risposta non data."
+          },
+          {
+            "id": "D",
+            "description": "Risposta non data."
+          },
+          {
+            "id": "E",
+            "description": "Risposta esatta."
+          }
+        ],
+        "question_title": "La pittura rinascimentale",
+        "question_text": "Individua le affermazioni corrette riferite all'immagine.",
+        "choices": [
+          {
+            "id": "A",
+            "text": "Data in dono per matrimonio di Francesco Gonzaga con Chiara Bourbon Auvergne.",
+            "is_correct": null
+          },
+          {
+            "id": "B",
+            "text": "Le rovine classiche sono sparse per tutto il paesaggio e nel primo piano.",
+            "is_correct": null
+          },
+          {
+            "id": "C",
+            "text": "Si tratta del San Gerolamo alla colonna.",
+            "is_correct": null
+          },
+          {
+            "id": "D",
+            "text": "È molto evidente l'interesse dell'autore per lo studio dell'anatomia.",
+            "is_correct": null
+          },
+          {
+            "id": "E",
+            "text": "L'autore è Andrea Mantegna.",
+            "is_correct": null
+          },
+          {
+            "id": "F",
+            "text": "Lo sfondo è costituito da una rappresentazione ideale di Mantova.",
+            "is_correct": null
+          }
+        ],
+        "image": "/home/vitadmin/gspinaci/datasets/questions/data/1/imgs/4.jpg",
+        "language": "it",
+        "has_image": true,
+        "ai_calls": [
+          {
+            "description": "type extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2484,
+            "output_tokens": 17,
+            "total_tokens": 2501,
+            "processing_time": 2.9847090244293213,
+            "timestamp": "2025-10-21T13:36:54.998590"
+          },
+          {
+            "description": "text extraction",
+            "model_name": "Google gemini-2.5-flash-lite",
+            "input_tokens": 2129,
+            "output_tokens": 270,
+            "total_tokens": 2399,
+            "processing_time": 1.5247917175292969,
+            "timestamp": "2025-10-21T13:36:56.523460"
+          }
+        ]
+      }
+    },
+    "prompt": "You are an expert Art History student taking an exam. You will receive one or more images related to a question that you need to read and answer.\n\nIMAGES PROVIDED:\n- The first image contains the question text and instructions\n- Additional images (if any) may contain artwork, diagrams, or other visual materials referenced in the question\n\nYour task is to:\n1. Read and understand the question shown in the first image\n2. Examine any additional images for visual context or artwork details\n3. Identify the question type and available options\n4. Provide the best answer based on your Art History knowledge and the visual information\n\nINSTRUCTIONS:\n- If this is a multiple choice radio question (single selection), respond with the correct statement, ONLY the letter (e.g., A, B, C, or D)\n- If this is a multiple choice check question (multiple selections), respond with the correct statements, ONLY the letters (e.g., \"A; B; C\")\n- If this is a true/false question, respond with true or false for each statement. (e.g, \"A: true, B: false\")\n- If this is an open completion, provide a concise answer\n- If this is a closed completion, provide answers for ALL blanks in the format \"BLANK_1: full text answer, BLANK_2: full text answer\" (continue for all blanks present). Use the COMPLETE TEXT of your chosen option, NOT numbers\n- If this is a positioning question, provide the correct sequence or position\n- If this is an error selection, identify the errors\n\nCRITICAL: Your response must be in the exact format expected by the question type.\n\nBase your answer on Art History knowledge and ALL visual information provided in the images."
+  },
+  "evaluation": {
+    "model_name": "google/gemini-2.5-flash-lite",
+    "question_type": "multiple_choice_check",
+    "llm_answer": "A; B; E",
+    "correct_answer": "[{'id': 'B', 'description': 'Risposta non data.'}, {'id': 'D', 'description': 'Risposta non data.'}, {'id': 'E', 'description': 'Risposta esatta.'}]",
+    "is_correct": false,
+    "score": 0.6666666666666666,
+    "details": "User: ['A', 'B', 'E'], Correct: ['B', 'D', 'E']",
+    "processing_time": 1.466538667678833,
+    "error": "",
+    "timestamp": "2025-10-30T13:45:49.704000",
+    "metrics": {
+      "precision": 0.6666666666666666,
+      "recall": 0.6666666666666666,
+      "f1_score": 0.6666666666666666,
+      "jaccard": 0.5,
+      "accuracy": 0.5,
+      "exact_match": false
+    },
+    "confidence_level": "medium",
+    "error_analysis": {
+      "missing_answers": [
+        "D"
+      ],
+      "incorrect_answers": [
+        "A"
+      ],
+      "correct_answers": [
+        "B",
+        "E"
+      ]
+    }
+  }
+}
