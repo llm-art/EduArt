@@ -1,71 +1,49 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image contains a "COMPLETAMENTO CHIUSO" (closed completion) exercise where students must select the correct choice from pairs of options to fill blanks in a text passage.
+This image contains a “COMPLETAMENTO CHIUSO” (closed completion) exercise where students must select the correct choice from pairs of options to fill blanks in a text passage.
 
-EXTRACTION REQUIREMENTS:
-- Extract question text with blanks marked as [BLANK_1], [BLANK_2], etc.
-- Extract pairs of choices for each blank
-- Extract the correct answers for each blank
+# EXTRACTION REQUIREMENTS:
+ - Extract question title
+ - Extract question text with blanks marked as [A], [B], etc.
+ - Extract pairs of choices for highlighted choices in the text
+ - Extract the correct answers for each choice
 
-MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+# MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
   "type": "completion_closed",
   "question_title": "clean question title",
-  "question_text": "full question text with [BLANK_1], [BLANK_2], etc. placeholders",
+  "question_text": "full question text with [A], [B], etc. placeholders",
   "choices": [
-    {{"id": "BLANK_1", "options": ["first choice text", "second choice text"]}},
-    {{"id": "BLANK_2", "options": ["first choice text", "second choice text"]}},
-    {{"id": "BLANK_3", "options": ["first choice text", "second choice text"]}}
+    {{"id": "A", "options": ["first choice text", "second choice text"]}},
+    {{"id": "B", "options": ["first choice text", "second choice text"]}},
+    {{"id": "C", "options": ["first choice text", "second choice text"]}},
+    ...
   ],
   "answers": [
-    {{"id": "BLANK_1", "description": "correct choice text"}},
-    {{"id": "BLANK_2", "description": "correct choice text"}},
-    {{"id": "BLANK_3", "description": "correct choice text"}}
+    {{"id": "A", "description": "correct choice text"}},
+    {{"id": "B", "description": "correct choice text"}},
+    {{"id": "C", "description": "correct choice text"}},
+    ...
   ],
   "language": "it"
 }}}}
 
-STRICT REQUIREMENTS:
-- Return ONLY the JSON object above
-- DO NOT add any other fields beyond those specified
-- DO NOT add comments or explanations
-- Each blank in the text corresponds to exactly ONE pair of choices
-- Use sequential numbering: [BLANK_1], [BLANK_2], [BLANK_3], etc.
-- The choices array contains objects with "id" and "options" (array of exactly 2 choices)
-- The answers array contains objects with "id" and "description" (the correct choice)
+# VISUAL IDENTIFICATION GUIDE:
+- Each choice have a letter (e.g., A, B, C, etc) and two options:
+  1. One is highglighted and may have one out of three border colors
+  2. One is dimmed 
+- Border color and highlight indicate correctness:
+  - Red = incorrect: the dimmed option is the correct choice
+  - Green/Grey = correct: the highlighted option is the correct choice
+- Choices may be divided by new lines, be sure to detect that the choices are close in the text, but new lines my happen (so sequential in the text)
+- To double check the correct answer, use the answers below "Esercizio sbagliato", green/grey means correct answer for the choice, red means that the correct answer is the other option
 
-VISUAL IDENTIFICATION GUIDE:
-- Look for text passage with multiple blanks to be filled
-- Identify pairs of choices that correspond to each blank
-- Choices may be displayed with colored borders indicating their status:
-  * Green border (B): Correct answer ("Risposta corretta")
-  * Red border (C): Incorrect answer ("Risposta sbagliata")
-  * Grey border (A): Not answered ("Risposta non data")
-  * Blue/neutral border: Available options
-- Each blank position has exactly TWO alternative choices to select from
-- The choices appear as labeled options (A, B, C, D, E, F, etc.)
-
-EXTRACTION PROCESS:
-1. Extract the main question text and replace choice positions with [BLANK_1], [BLANK_2], etc.
-2. For each blank, identify the pair of alternative choices
-3. Create one choices object per blank with exactly 2 options
-4. Determine the correct answer for each blank based on:
-   - Green border indicates correct choice
-   - Red border indicates incorrect choice (so the other option is correct)
-   - Grey border may indicate the intended correct answer
-   - Look for answer summary at bottom of image
-5. Maintain sequential order of blanks as they appear in the text
-
-EXAMPLE STRUCTURE:
-If text reads "Nell'opera di [choice A/choice B] si nota [choice C/choice D]", create:
-- BLANK_1 with options [choice A, choice B]
-- BLANK_2 with options [choice C, choice D]
-
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
-
-
-Noisy OCR text:
-{ocr_text}
+# STRICT RULES:
+- Return ONLY the JSON object above - no explanations, no extra text
+- Each letter in the passage corresponds to exactly one pair of choices
+- Report choices and all letters
+- Each element in "choices" has two options only
+- Each element in "answers" lists the correct option only
 
 HTML text:
 {html_text}

@@ -4,23 +4,19 @@ This image contains a "COMPLETAMENTO APERTO" (Open Completion) exercise where st
 
 EXTRACTION REQUIREMENTS:
 - Extract the text passage with blanks marked with letters (A, B, C, etc.)
-- Replace letter-labeled blanks with [BLANK] placeholders
 - Extract correct answers if shown in feedback sections
 
 MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
 {{{{
   "type": "completion_open",
   "question_title": "clean question title",
-  "question_text": "text passage with [BLANK] placeholders where students write answers",
+  "question_text": "text passage with letters (e.g., [A], [B], [C]) placeholders where students write answers",
   "choices": null,
   "answers": [
-    "correct term for blank A",
-    "correct term for blank B",
-    "correct term for blank C",
-    "correct term for blank D",
-    "correct term for blank E",
-    "correct term for blank F",
-    "correct term for blank G"
+    "correct term foe A",
+    "correct term for  B",
+    "correct term for  C",
+    ...
   ],
   "language": "it"
 }}}}
@@ -29,7 +25,6 @@ STRICT REQUIREMENTS:
 - Return ONLY the JSON object above
 - DO NOT add any other fields beyond those specified
 - DO NOT add comments or explanations
-- Replace all letter-labeled blanks (A, B, C, D, etc.) with [BLANK] in the question_text
 - Extract correct answers from "Esercizio sbagliato" feedback section
 - The answers array contains the correct terms in order (A, B, C, D, E, F, G, etc.)
 - Set choices to null for this question type
@@ -43,26 +38,13 @@ VISUAL IDENTIFICATION GUIDE:
 
 EXTRACTION PROCESS:
 1. Extract the question title from the header
-2. Extract the main text passage, replacing letter labels (A, B, C, etc.) with [BLANK]
+2. Extract the main text passage,
 3. **FIND THE FEEDBACK SECTION**: Look for "Esercizio sbagliato" section with red border
 4. **EXTRACT CORRECT ANSWERS**: In the feedback section, find each labeled blank (A, B, C, etc.) and extract the correct answer:
    - For "Risposta non data" (not answered): extract the term shown next to the letter
    - For "Risposta sbagliata" (wrong answer): extract the correct term from "La risposta esatta è:"
    - Extract answers in alphabetical order (A, B, C, D, E, F, G, etc.)
 5. Create the answers array with all correct terms in sequential order
-
-EXAMPLE FROM IMAGE:
-From the "Esercizio sbagliato" feedback section, extract answers for each blank:
-- A: "1475" (from "Risposta non data")
-- B: "piccola" (from "Risposta non data")
-- C: "arco" (from "Risposta non data")
-- D: "gotico" (from "La risposta esatta è: gotico")
-- E: "vano" (from "Risposta non data")
-- F: "accesso" (from "Risposta non data")
-- G: "teatrale" (from "Risposta non data")
-
-Result:
-answers: ["1475", "piccola", "arco", "gotico", "vano", "accesso", "teatrale"]
 
 BLANK IDENTIFICATION:
 - Look for letters in boxes in the feedback section: A, B, C, D, E, F, G, etc.
