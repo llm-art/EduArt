@@ -4,11 +4,11 @@
 
 This directory contains the results of evaluating Large Language Models (LLMs) on Italian art history questions.
 
-- **Creation Date**: 2025-10-30 22:49:17
+- **Creation Date**: 2025-11-07 16:54:44
 - **Version**: 0.3
 - **Total Exercises**: 20
 - **Total Questions**: 20
-- **Questions with Images**: 0
+- **Questions with Images**: 14
 
 ## Directory Structure
 
@@ -29,7 +29,8 @@ answers/
 
 ## Question Types Distribution
 
-- **multiple_choice_radio**: 10 questions
+- **multiple_choice_radio**: 4 questions
+- **multiple_choice_check**: 6 questions
 - **true_false**: 3 questions
 - **completion_closed**: 2 questions
 - **select_errors**: 2 questions
@@ -38,46 +39,22 @@ answers/
 
 ## Model Performance Summary
 
-| Model | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence | Input Tokens | Output Tokens | Actual Cost |
-|-------|-----------|--------|----------|---------|-------------|------------|--------------|---------------|-------------|
-| google/gemini-2.5-flash-lite | 0.379 | 0.379 | 0.379 | 0.379 | 0.211 | H:6 M:2 L:11 | 3,172 | 525 | $0.0005 |
+| Model | Precision | Recall | F1 Score | Exact Match | Input Tokens | Output Tokens | Actual Cost |
+|-------|-----------|--------|----------|-------------|--------------|---------------|-------------|
+| google/gemini-2.5-flash-lite | 0.689 | 0.568 | 0.586 | 0.105 | 1,772 | 1,003 | $0.0006 |
 
-## Performance by Question Type
+## Performance by Model and Question Type
 
-### completion_closed
+### google/gemini-2.5-flash-lite
 
-| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |
-|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|
-| google/gemini-2.5-flash-lite | 2 | 0 | 1 | 0.700 | 0.700 | 0.700 | 0.700 | 0.000 | H:1 M:1 L:0 |
-
-### completion_open
-
-| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |
-|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|
-| google/gemini-2.5-flash-lite | 1 | 0 | 0 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | H:0 M:0 L:0 |
-
-### multiple_choice_radio
-
-| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |
-|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|
-| google/gemini-2.5-flash-lite | 10 | 0 | 4 | 0.400 | 0.400 | 0.400 | 0.400 | 0.400 | H:4 M:0 L:6 |
-
-### positioning
-
-| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |
-|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|
-| google/gemini-2.5-flash-lite | 2 | 0 | 0 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | H:0 M:0 L:2 |
-
-### select_errors
-
-| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |
-|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|
-| google/gemini-2.5-flash-lite | 2 | 0 | 0 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | H:0 M:0 L:2 |
-
-### true_false
-
-| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |
-|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|
-| google/gemini-2.5-flash-lite | 3 | 0 | 1 | 0.600 | 0.600 | 0.600 | 0.600 | 0.000 | H:1 M:1 L:1 |
+| Question Type | Questions | With Images | Correct | Precision | Recall | F1 Score |
+|---------------|-----------|-------------|---------|-----------|--------|----------|
+| completion_closed | 2 | 1 | 2 | 1.000 | 0.845 | 0.916 |
+| completion_open | 1 | 0 | 0 | 0.000 | 0.000 | 0.000 |
+| multiple_choice_check | 6 | 6 | 3 | 0.681 | 0.833 | 0.744 |
+| multiple_choice_radio | 4 | 4 | 1 | 0.250 | 0.250 | 0.250 |
+| positioning | 2 | 0 | 1 | 1.000 | 0.667 | 0.788 |
+| select_errors | 2 | 0 | 0 | 0.500 | 0.083 | 0.143 |
+| true_false | 3 | 3 | 1 | 1.000 | 0.533 | 0.657 |
 
 

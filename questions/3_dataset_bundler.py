@@ -80,37 +80,56 @@ def should_skip_question(json_data):
 
 
 def post_process_questions(json_data):
-  """Post-process questions to fix wrong answers."""
+  """Post-process questions to fix wrong answers and normalize answer structures."""
   question_type = json_data.get("type")
 
   if question_type == "true_false":
-    return post_process_true_false(json_data)
+    json_data = post_process_true_false(json_data)
   elif question_type == "multiple_choice_check":
-    return post_process_multiple_choice_check(json_data)
+    json_data = post_process_multiple_choice_check(json_data)
+  
+  # Normalize answer structures for consistent evaluation
+  json_data = normalize_answers(json_data)
 
   return json_data
 
 
 def post_process_true_false(json_data):
-  """Post-process true_false questions to fix wrong answers."""
+  """Post-process true_false questions to fix wrong answers and translate to Italian."""
   answers = json_data.get("answers", [])
   modified = False
+  translated = False
 
   for answer in answers:
     if isinstance(answer, dict):
+      current_text = answer.get("text", "")
+      
+      # First, translate English to Italian if needed
+      if current_text.lower() in ["true", "vero"]:
+        answer["text"] = "Vero"
+        if current_text.lower() == "true":
+          translated = True
+      elif current_text.lower() in ["false", "falso"]:
+        answer["text"] = "Falso"
+        if current_text.lower() == "false":
+          translated = True
+      
+      # Then, check for wrong answers and flip if needed
       note = answer.get("note", "")
       if "risposta sbagliata" in note.lower():
         # Flip the True/False value
-        current_text = answer.get("text", "")
-        if current_text.lower() == "vero":
+        if answer["text"] == "Vero":
           answer["text"] = "Falso"
-        elif current_text.lower() == "falso":
+        elif answer["text"] == "Falso":
           answer["text"] = "Vero"
-
         modified = True
 
-      del answer["note"]
+      # Remove note field
+      if "note" in answer:
+        del answer["note"]
 
+  if translated:
+    print(f"  Post-processed true_false question: translated English to Italian")
   if modified:
     print(f"  Post-processed true_false question: flipped wrong answers")
 
@@ -133,6 +152,111 @@ def post_process_multiple_choice_check(json_data):
   if modified:
     print(f"  Post-processed multiple_choice_check question: fixed wrong answers")
 
+  return json_data
+
+
+def normalize_answers(json_data):
+  """
+  Normalize answer structures for consistent evaluation.
+  
+  This function standardizes answer formats across different question types:
+  - Normalizes IDs to UPPERCASE
+  - Normalizes text content to lowercase
+  - Standardizes field names to 'text' for all text-based comparisons
+  - Generates alphabetical IDs (A, B, C, ...) where missing
+  
+  Args:
+      json_data: Question data dictionary
+      
+  Returns:
+      Modified json_data with normalized answers
+  """
+  question_type = json_data.get("type")
+  answers = json_data.get("answers", [])
+  
+  if not answers:
+    return json_data
+  
+  # Helper function to generate alphabetical IDs
+  def get_alpha_id(index):
+    """Convert index to alphabetical ID (0->A, 1->B, ..., 25->Z, 26->AA, ...)"""
+    result = ""
+    while index >= 0:
+      result = chr(65 + (index % 26)) + result
+      index = index // 26 - 1
+    return result
+  
+  # Normalize IDs to uppercase for ID-based questions
+  # Remove description/text fields as they're not needed for evaluation
+  if question_type in ["multiple_choice_radio", "multiple_choice_check"]:
+    for answer in answers:
+      if isinstance(answer, dict) and 'id' in answer:
+        answer['id'] = answer['id'].strip().upper()
+        # Remove text/description fields - only ID matters for these types
+        answer.pop('text', None)
+        answer.pop('description', None)
+  
+  # Normalize ID+text for text-based questions with existing IDs
+  elif question_type in ["completion_closed", "positioning"]:
+    for answer in answers:
+      if isinstance(answer, dict):
+        if 'id' in answer:
+          answer['id'] = answer['id'].strip().upper()
+        if 'description' in answer:
+          # Standardize to 'text' field and normalize to lowercase
+          answer['text'] = answer['description'].strip().lower()
+          # Remove description field - only 'text' should remain
+          del answer['description']
+  
+  elif question_type == "true_false":
+    for answer in answers:
+      if isinstance(answer, dict):
+        if 'id' in answer:
+          answer['id'] = answer['id'].strip().upper()
+        if 'text' in answer:
+          # Keep Italian text as-is (Vero/Falso), just strip whitespace
+          # Don't convert to lowercase to preserve proper Italian capitalization
+          answer['text'] = answer['text'].strip()
+        # Remove description field if present
+        answer.pop('description', None)
+  
+  elif question_type == "select_errors":
+    # Transform from {correct, error} to {id, text} format
+    # Generate alphabetical IDs (A, B, C, ...)
+    normalized = []
+    for idx, answer in enumerate(answers):
+      if isinstance(answer, dict):
+        normalized.append({
+            'id': get_alpha_id(idx),
+            'text': answer.get('error', '').strip().lower()
+        })
+    json_data['answers'] = normalized
+    print(f"  Normalized select_errors: generated {len(normalized)} alphabetical IDs")
+  
+  elif question_type == "completion_open":
+    # Transform from list of strings to list of {id, text} dicts
+    # Extract IDs from question_text placeholders [A], [B], [C], etc.
+    question_text = json_data.get("question_text", "")
+    
+    # Find all placeholders like [A], [B], [C] in order
+    placeholders = re.findall(r'\[([A-Z]+)\]', question_text)
+    
+    if isinstance(answers[0], str):
+      normalized = []
+      for idx, answer_text in enumerate(answers):
+        # Use placeholder ID if available, otherwise generate alphabetical ID
+        if idx < len(placeholders):
+          answer_id = placeholders[idx].strip().upper()
+        else:
+          answer_id = get_alpha_id(idx)
+        
+        normalized.append({
+            'id': answer_id,
+            'text': answer_text.strip().lower()
+        })
+      json_data['answers'] = normalized
+      print(f"  Normalized completion_open: extracted {len(placeholders)} IDs from placeholders, generated {len(normalized)} total")
+  
   return json_data
 
 
@@ -235,8 +359,8 @@ def extract_question_data(json_data):
 def get_question_type_text(question_type):
   """Get the instruction text based on question type."""
   type_texts = {
-      "multiple_choice": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli le risposta esatte tra quelle proposte",
-      # "multiple_choice_check": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli tutte le risposte esatta tra quelle proposte",
+      "multiple_choice_radio": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli la risposta esatte tra quelle proposte",
+      "multiple_choice_check": "SCELTA MULTIPLA\n**Cosa devi fare:** scegli tutte le risposte esatta tra quelle proposte",
       "true_false": "VERO O FALSO\n**Cosa devi fare:** vero o falso? Scegli la risposta esatta",
       "completion_open": "COMPLETAMENTO APERTO\n**Cosa devi fare**: completa l'esercizio con le risposte che ti sembrano esatte",
       "positioning": "POSIZIONAMENTO\n**Cosa devi fare**: completa le parti mancanti dell'esercizio con le alternative proposte",

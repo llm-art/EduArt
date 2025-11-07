@@ -11,7 +11,7 @@ class GoogleProvider(LLMProvider):
     """Google Gemini LLM provider using LangChain."""
     
     def __init__(self, model_name: str, api_key: Optional[str] = None,
-                 temperature: float = 0.1, max_tokens: int = 2048):
+                 temperature: float = 0.0, max_tokens: int = 2048):
         """
         Initialize Google provider.
         
@@ -58,12 +58,13 @@ class GoogleProvider(LLMProvider):
             except ImportError as e:
                 raise ProcessingError(f"Google Gemini dependencies not available: {e}")
     
-    def query(self, prompt: str, image_path: Optional[str] = None, image_paths: Optional[list] = None) -> str:
+    def query(self, prompt: str, system_prompt: str = None, image_path: Optional[str] = None, image_paths: Optional[list] = None) -> str:
         """
         Query Google Gemini model with a prompt and optional image(s).
         
         Args:
             prompt: Input prompt
+            system_prompt: Optional system prompt to set context
             image_path: Optional path to single image file (for backward compatibility)
             image_paths: Optional list of paths to image files
             
@@ -88,11 +89,16 @@ class GoogleProvider(LLMProvider):
             
             if images_to_process:
                 # For vision queries, we need to use a different approach
-                from langchain.schema import HumanMessage
-                from langchain_core.messages import HumanMessage
+                from langchain.schema import HumanMessage, SystemMessage
+                from langchain_core.messages import HumanMessage, SystemMessage
+                
+                # Combine system prompt with user prompt if provided
+                full_prompt = prompt
+                if system_prompt:
+                    full_prompt = f"{system_prompt}\n\n{prompt}"
                 
                 # Create message with text and images
-                message_content = [{"type": "text", "text": prompt}]
+                message_content = [{"type": "text", "text": full_prompt}]
                 
                 # Add all images to the message
                 for img_path in images_to_process:
@@ -118,7 +124,12 @@ class GoogleProvider(LLMProvider):
                 response = self._model.invoke([message])
             else:
                 # Text-only query
-                response = self._model.invoke([self._human_message(content=prompt)])
+                messages = []
+                if system_prompt:
+                    from langchain_core.messages import SystemMessage
+                    messages.append(SystemMessage(content=system_prompt))
+                messages.append(self._human_message(content=prompt))
+                response = self._model.invoke(messages)
             
             return response.content.strip()
         except Exception as e:

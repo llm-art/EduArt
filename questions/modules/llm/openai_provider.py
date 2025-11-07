@@ -9,8 +9,8 @@ from ..core.exceptions import ProcessingError
 class OpenAIProvider(LLMProvider):
     """OpenAI LLM provider using LangChain."""
     
-    def __init__(self, model_name: str, api_key: Optional[str] = None, 
-                 temperature: float = 0.1, max_tokens: int = 512, timeout: int = 30):
+    def __init__(self, model_name: str, api_key: Optional[str] = None,
+                 temperature: float = 0.0, max_tokens: int = 512, timeout: int = 30):
         """
         Initialize OpenAI provider.
         

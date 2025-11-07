@@ -390,7 +390,7 @@ class VisionModelService:
             print(f"JSON parsing failed: {e}")
             return {"type": "unknown", "parsing_error": "failed_json_decode"}
     
-    def process_question_with_detected_type(self, image_path: Path, ocr_text: str, html_text: str,
+    def process_question_with_detected_type(self, image_path: str, ocr_text: str, html_text: str,
                         question_type: str, exercise: int, question: int, track_metadata: bool = True) -> QuestionData:
         """
         Complete question processing pipeline with pre-detected question type.
@@ -425,7 +425,10 @@ class VisionModelService:
                 image_path, question_type, ocr_text, html_text
             )
 
-            question_image = Path(str(image_path).replace(".png", ".jpg").replace("raw", "imgs"))
+            if 'radio' in text_data['type'] or 'check' in text_data['type']:
+              question_type = text_data['type']
+
+            question_image = Path(str(image_path).replace(".png", ".jpg").replace("raw", "imgs").replace('screenshot/', ''))
             
             # Step 3: Combine data into QuestionData object
             combined_data = {**type_data, **text_data}

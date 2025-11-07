@@ -111,9 +111,8 @@ class QuestionProcessor:
                 question_type=type_data.get('type', 'unknown'),
                 exercise=exercise,
                 question=question,
-                track_metadata=self.config.metadata_ai
+                track_metadata=self.config.metadata_ai,
             )
-
             
             # Step 6: Save results
             print("Step 5: Saving results...")

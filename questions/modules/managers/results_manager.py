@@ -141,7 +141,6 @@ class ResultsManager:
             'output_tokens': output_tokens,
             # Enhanced metrics
             'metrics': evaluation.get('metrics', {}),
-            'confidence_level': evaluation.get('confidence_level', 'unknown'),
             'error_analysis': evaluation.get('error_analysis', {})
         }
         
@@ -229,10 +228,6 @@ class ResultsManager:
             if 'metrics' in result and result['metrics']:
                 evaluation_data['metrics'] = result['metrics']
             
-            # Add confidence level if available
-            if 'confidence_level' in result and result['confidence_level']:
-                evaluation_data['confidence_level'] = result['confidence_level']
-            
             # Add error analysis if available
             if 'error_analysis' in result and result['error_analysis']:
                 evaluation_data['error_analysis'] = result['error_analysis']
@@ -290,9 +285,8 @@ class ResultsManager:
         """
         if not results_subset:
             return {
-                'precision': 0.0, 'recall': 0.0, 'f1_score': 0.0, 'accuracy': 0.0, 'jaccard': 0.0,
-                'exact_match_rate': 0.0, 'total_samples': 0,
-                'confidence_distribution': {'high': 0, 'medium': 0, 'low': 0, 'manual_review': 0}
+                'precision': 0.0, 'recall': 0.0, 'f1': 0.0,
+                'exact_match_rate': 0.0, 'total_samples': 0
             }
         
         # Filter out results without ground truth (None values)
@@ -300,19 +294,15 @@ class ResultsManager:
         
         if not valid_results:
             return {
-                'precision': 0.0, 'recall': 0.0, 'f1_score': 0.0, 'accuracy': 0.0, 'jaccard': 0.0,
-                'exact_match_rate': 0.0, 'total_samples': 0,
-                'confidence_distribution': {'high': 0, 'medium': 0, 'low': 0, 'manual_review': 0}
+                'precision': 0.0, 'recall': 0.0, 'f1': 0.0,
+                'exact_match_rate': 0.0, 'total_samples': 0
             }
         
         # Aggregate metrics from individual results
         total_precision = 0.0
         total_recall = 0.0
         total_f1 = 0.0
-        total_accuracy = 0.0
-        total_jaccard = 0.0
         exact_matches = 0
-        confidence_counts = {'high': 0, 'medium': 0, 'low': 0, 'manual_review': 0}
         
         for result in valid_results:
             # Use enhanced metrics if available, otherwise fall back to legacy calculation
@@ -320,10 +310,8 @@ class ResultsManager:
                 metrics = result['metrics']
                 total_precision += metrics.get('precision', 0.0)
                 total_recall += metrics.get('recall', 0.0)
-                total_f1 += metrics.get('f1_score', 0.0)
-                total_accuracy += metrics.get('accuracy', 0.0)
-                total_jaccard += metrics.get('jaccard', 0.0)
-                if metrics.get('exact_match', False):
+                total_f1 += metrics.get('f1', 0.0)
+                if metrics.get('exact_match', 0.0) == 1.0:
                     exact_matches += 1
             else:
                 # Legacy fallback: use is_correct for all metrics
@@ -331,29 +319,17 @@ class ResultsManager:
                 total_precision += score
                 total_recall += score
                 total_f1 += score
-                total_accuracy += score
-                total_jaccard += score
                 if result['is_correct']:
                     exact_matches += 1
-            
-            # Count confidence levels
-            confidence = result.get('confidence_level', 'unknown')
-            if confidence in confidence_counts:
-                confidence_counts[confidence] += 1
-            else:
-                confidence_counts['low'] += 1  # Default unknown to low
         
         total_samples = len(valid_results)
         
         return {
             'precision': total_precision / total_samples,
             'recall': total_recall / total_samples,
-            'f1_score': total_f1 / total_samples,
-            'accuracy': total_accuracy / total_samples,
-            'jaccard': total_jaccard / total_samples,
+            'f1': total_f1 / total_samples,
             'exact_match_rate': exact_matches / total_samples,
-            'total_samples': total_samples,
-            'confidence_distribution': confidence_counts
+            'total_samples': total_samples
         }
     
     def generate_summary(self) -> Dict[str, Any]:
@@ -433,44 +409,27 @@ class ResultsManager:
         # Overall metrics
         overall = summary.get('overall_metrics', {})
         print(f"\nOVERALL PERFORMANCE:")
-        print(f"  Accuracy:       {overall.get('accuracy', 0):.3f}")
         print(f"  Precision:      {overall.get('precision', 0):.3f}")
         print(f"  Recall:         {overall.get('recall', 0):.3f}")
-        print(f"  F1 Score:       {overall.get('f1_score', 0):.3f}")
-        print(f"  Jaccard:        {overall.get('jaccard', 0):.3f}")
+        print(f"  F1 Score:       {overall.get('f1', 0):.3f}")
         print(f"  Exact Match:    {overall.get('exact_match_rate', 0):.3f}")
         print(f"  Samples:        {overall.get('total_samples', 0)}")
         
-        # Confidence distribution
-        confidence_dist = overall.get('confidence_distribution', {})
-        if confidence_dist:
-            print(f"\nCONFIDENCE DISTRIBUTION:")
-            print(f"  High:           {confidence_dist.get('high', 0)}")
-            print(f"  Medium:         {confidence_dist.get('medium', 0)}")
-            print(f"  Low:            {confidence_dist.get('low', 0)}")
-            print(f"  Manual Review:  {confidence_dist.get('manual_review', 0)}")
-        
         # Metrics by model
         print(f"\nPERFORMANCE BY MODEL:")
-        print(f"{'Model':<35} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Jacc':<6} {'ExM':<6} {'Conf':<12} {'Samples':<8}")
-        print("-" * 100)
+        print(f"{'Model':<35} {'Prec':<6} {'Rec':<6} {'F1':<6} {'ExM':<6} {'Samples':<8}")
+        print("-" * 80)
         for model, metrics in summary.get('metrics_by_model', {}).items():
-            conf_dist = metrics.get('confidence_distribution', {})
-            conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
-            print(f"{model:<35} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
-                  f"{metrics.get('recall', 0):.3f}  {metrics.get('f1_score', 0):.3f}  {metrics.get('jaccard', 0):.3f}  "
-                  f"{metrics.get('exact_match_rate', 0):.3f}  {conf_summary:<12} {metrics.get('total_samples', 0):<8}")
+            print(f"{model:<35} {metrics.get('precision', 0):.3f}  {metrics.get('recall', 0):.3f}  "
+                  f"{metrics.get('f1', 0):.3f}  {metrics.get('exact_match_rate', 0):.3f}  {metrics.get('total_samples', 0):<8}")
         
         # Metrics by question type
         print(f"\nPERFORMANCE BY QUESTION TYPE:")
-        print(f"{'Question Type':<25} {'Acc':<6} {'Prec':<6} {'Rec':<6} {'F1':<6} {'Jacc':<6} {'ExM':<6} {'Conf':<12} {'Samples':<8}")
-        print("-" * 100)
+        print(f"{'Question Type':<25} {'Prec':<6} {'Rec':<6} {'F1':<6} {'ExM':<6} {'Samples':<8}")
+        print("-" * 70)
         for qtype, metrics in summary.get('metrics_by_type', {}).items():
-            conf_dist = metrics.get('confidence_distribution', {})
-            conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
-            print(f"{qtype:<25} {metrics.get('accuracy', 0):.3f}  {metrics.get('precision', 0):.3f}  "
-                  f"{metrics.get('recall', 0):.3f}  {metrics.get('f1_score', 0):.3f}  {metrics.get('jaccard', 0):.3f}  "
-                  f"{metrics.get('exact_match_rate', 0):.3f}  {conf_summary:<12} {metrics.get('total_samples', 0):<8}")
+            print(f"{qtype:<25} {metrics.get('precision', 0):.3f}  {metrics.get('recall', 0):.3f}  "
+                  f"{metrics.get('f1', 0):.3f}  {metrics.get('exact_match_rate', 0):.3f}  {metrics.get('total_samples', 0):<8}")
     
     def save_summary_json(self, filepath: Optional[str] = None):
         """
@@ -707,22 +666,16 @@ class ResultsManager:
                     'correctly_answered_questions': correctly_answered,
                     'precision': type_metrics.get('precision', 0),
                     'recall': type_metrics.get('recall', 0),
-                    'f1_score': type_metrics.get('f1_score', 0),
-                    'f1': type_metrics.get('f1_score', 0),  # Legacy compatibility
-                    'jaccard': type_metrics.get('jaccard', 0),
-                    'exact_match_rate': type_metrics.get('exact_match_rate', 0),
-                    'confidence_distribution': type_metrics.get('confidence_distribution', {})
+                    'f1': type_metrics.get('f1', 0),
+                    'exact_match_rate': type_metrics.get('exact_match_rate', 0)
                 })
             
             models.append({
                 'model_name': model_name,
                 'precision': model_metrics.get('precision', 0),
                 'recall': model_metrics.get('recall', 0),
-                'f1_score': model_metrics.get('f1_score', 0),
-                'f1': model_metrics.get('f1_score', 0),  # Legacy compatibility
-                'jaccard': model_metrics.get('jaccard', 0),
+                'f1': model_metrics.get('f1', 0),
                 'exact_match_rate': model_metrics.get('exact_match_rate', 0),
-                'confidence_distribution': model_metrics.get('confidence_distribution', {}),
                 'input_cost_per_million_tokens': input_cost_per_million,
                 'output_cost_per_million_tokens': output_cost_per_million,
                 'ai_calls': [{
@@ -812,8 +765,8 @@ answers/
         readme_content += "\n## Model Performance Summary\n\n"
         
         # Enhanced performance table with comprehensive metrics
-        readme_content += "| Model | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence | Input Tokens | Output Tokens | Actual Cost |\n"
-        readme_content += "|-------|-----------|--------|----------|---------|-------------|------------|--------------|---------------|-------------|\n"
+        readme_content += "| Model | Precision | Recall | F1 Score | Exact Match | Input Tokens | Output Tokens | Actual Cost |\n"
+        readme_content += "|-------|-----------|--------|----------|-------------|--------------|---------------|-------------|\n"
         
         # Sort models with Gemini models in specific order
         models = metadata.get('models', [])
@@ -834,13 +787,8 @@ answers/
             model_name = model.get('model_name', 'Unknown')
             precision = model.get('precision', 0)
             recall = model.get('recall', 0)
-            f1 = model.get('f1_score', model.get('f1', 0))  # Support both new and legacy keys
-            jaccard = model.get('jaccard', 0)
+            f1 = model.get('f1', 0)
             exact_match = model.get('exact_match_rate', 0)
-            
-            # Confidence distribution summary
-            conf_dist = model.get('confidence_distribution', {})
-            conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
             
             # Get token usage and calculate actual cost
             ai_calls = model.get('ai_calls', [])
@@ -854,42 +802,32 @@ answers/
                 
                 actual_cost = (input_tokens * input_cost_per_million / 1_000_000) + (output_tokens * output_cost_per_million / 1_000_000)
                 
-                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {jaccard:.3f} | {exact_match:.3f} | {conf_summary} | {input_tokens:,} | {output_tokens:,} | ${actual_cost:.4f} |\n"
+                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {exact_match:.3f} | {input_tokens:,} | {output_tokens:,} | ${actual_cost:.4f} |\n"
             else:
-                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {jaccard:.3f} | {exact_match:.3f} | {conf_summary} | 0 | 0 | $0.0000 |\n"
+                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {exact_match:.3f} | 0 | 0 | $0.0000 |\n"
         
-        readme_content += "\n## Performance by Question Type\n\n"
+        readme_content += "\n## Performance by Model and Question Type\n\n"
         
-        # Get all unique question types across all models
-        all_question_types = set()
-        for model in metadata.get('models', []):
-            for qt in model.get('question_type', []):
-                all_question_types.add(qt['type'])
-        
-        for qtype in sorted(all_question_types):
-            readme_content += f"### {qtype}\n\n"
-            readme_content += "| Model | Questions | With Images | Correct | Precision | Recall | F1 Score | Jaccard | Exact Match | Confidence |\n"
-            readme_content += "|-------|-----------|-------------|---------|-----------|--------|----------|---------|-------------|------------|\n"
+        # Create one table per model
+        for model in sorted_models:
+            model_name = model.get('model_name', 'Unknown')
+            readme_content += f"### {model_name}\n\n"
+            readme_content += "| Question Type | Questions | With Images | Correct | Precision | Recall | F1 Score |\n"
+            readme_content += "|---------------|-----------|-------------|---------|-----------|--------|----------|\n"
             
-            for model in sorted_models:
-                model_name = model.get('model_name', 'Unknown')
-                type_data = next((qt for qt in model.get('question_type', []) if qt['type'] == qtype), None)
+            # Sort question types alphabetically
+            question_types = sorted(model.get('question_type', []), key=lambda x: x.get('type', ''))
+            
+            for type_data in question_types:
+                qtype = type_data.get('type', 'Unknown')
+                questions = type_data.get('number_of_questions', 0)
+                with_images = type_data.get('questions_with_images', 0)
+                correct = type_data.get('correctly_answered_questions', 0)
+                precision = type_data.get('precision', 0)
+                recall = type_data.get('recall', 0)
+                f1 = type_data.get('f1_score', type_data.get('f1', 0))  # Support both keys
                 
-                if type_data:
-                    questions = type_data.get('number_of_questions', 0)
-                    with_images = type_data.get('questions_with_images', 0)
-                    correct = type_data.get('correctly_answered_questions', 0)
-                    precision = type_data.get('precision', 0)
-                    recall = type_data.get('recall', 0)
-                    f1 = type_data.get('f1_score', type_data.get('f1', 0))  # Support both keys
-                    jaccard = type_data.get('jaccard', 0)
-                    exact_match = type_data.get('exact_match_rate', 0)
-                    
-                    # Confidence distribution for this question type
-                    conf_dist = type_data.get('confidence_distribution', {})
-                    conf_summary = f"H:{conf_dist.get('high', 0)} M:{conf_dist.get('medium', 0)} L:{conf_dist.get('low', 0)}"
-                    
-                    readme_content += f"| {model_name} | {questions} | {with_images} | {correct} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {jaccard:.3f} | {exact_match:.3f} | {conf_summary} |\n"
+                readme_content += f"| {qtype} | {questions} | {with_images} | {correct} | {precision:.3f} | {recall:.3f} | {f1:.3f} |\n"
             
             readme_content += "\n"
         

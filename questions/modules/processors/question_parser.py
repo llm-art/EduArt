@@ -1,6 +1,7 @@
 """Question parser for extracting question data from TXT files and creating prompts."""
 
 import re
+import json
 from typing import Dict, Any, List
 from pathlib import Path
 from ..core.exceptions import ProcessingError
@@ -29,6 +30,15 @@ class QuestionParser:
                 self.prompt_template = f.read().strip()
         except Exception as e:
             raise ProcessingError(f"Failed to load prompt template: {e}")
+    
+    def parse_json_file(self, filepath: str) -> Dict[str, Any]:
+
+      with open(filepath) as json_data:
+        data = json.load(json_data)
+        json_data.close()
+
+      return data
+        
     
     def parse_txt_file(self, filepath: str) -> Dict[str, Any]:
         """
@@ -122,7 +132,7 @@ class QuestionParser:
         Returns:
             Refined question type
         """
-        base_type = question_data['question_type']
+        base_type = question_data['type']
         instructions = question_data['instructions'].lower()
         
         if base_type == "multiple_choice_radio":
@@ -252,7 +262,7 @@ class QuestionParser:
         Returns:
             True if valid, False otherwise
         """
-        required_fields = ['question_type', 'question_text']
+        required_fields = ['type', 'question_text']
         return all(question_data.get(field) for field in required_fields)
     
     def find_screenshot_files(self) -> List[str]:

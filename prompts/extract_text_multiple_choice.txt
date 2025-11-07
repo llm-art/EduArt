@@ -22,6 +22,7 @@ FOR MULTIPLE_CHOICE_RADIO (single choice):
   "type": "multiple_choice_radio",
   "question_title": "clean question title",
   "question_text": "full question text",
+  "question_type:" "{{multiple_choice_check|multiple_choice_radio}}" // IF the picture has radio button is a radio, IF it has check button, it s a check
   "choices": [
     {{"id": "A", "text": "option A text"}},
     {{"id": "B", "text": "option B text"}}

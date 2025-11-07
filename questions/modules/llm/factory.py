@@ -20,7 +20,7 @@ class LLMConfig:
     }
     
     # Processing settings
-    TEMPERATURE = float(os.getenv('TEMPERATURE', '0.1'))
+    TEMPERATURE = float(os.getenv('TEMPERATURE', '0.0'))
     MAX_TOKENS = int(os.getenv('MAX_TOKENS', '512'))
     TIMEOUT = int(os.getenv('TIMEOUT', '30'))
     

@@ -1,11 +1,12 @@
 {
-  "creation_datetime": "2025-10-30 22:49:17",
+  "creation_datetime": "2025-11-07 16:54:44",
   "version": 0.3,
   "exercise_count": 20,
   "question_count": 20,
-  "questions_with_images": 0,
+  "questions_with_images": 14,
   "questions_by_type": {
-    "multiple_choice_radio": 10,
+    "multiple_choice_radio": 4,
+    "multiple_choice_check": 6,
     "true_false": 3,
     "completion_closed": 2,
     "select_errors": 2,
@@ -15,119 +16,81 @@
   "models": [
     {
       "model_name": "google/gemini-2.5-flash-lite",
-      "precision": 0.3789473684210526,
-      "recall": 0.3789473684210526,
-      "f1_score": 0.3789473684210526,
-      "f1": 0.3789473684210526,
-      "jaccard": 0.3789473684210526,
-      "exact_match_rate": 0.21052631578947367,
-      "confidence_distribution": {
-        "high": 6,
-        "medium": 2,
-        "low": 11,
-        "manual_review": 0
-      },
+      "precision": 0.6885964912280701,
+      "recall": 0.5679197994987469,
+      "f1": 0.5859225569751886,
+      "exact_match_rate": 0.10526315789473684,
       "input_cost_per_million_tokens": 0.1,
       "output_cost_per_million_tokens": 0.4,
       "ai_calls": [
         {
           "description": "question_answer",
-          "input_tokens": 3172,
-          "output_tokens": 525,
-          "total_tokens": 3697,
-          "processing_time": 11.069173812866211
+          "input_tokens": 1772,
+          "output_tokens": 1003,
+          "total_tokens": 2775,
+          "processing_time": 19.935048818588257
         }
       ],
       "question_type": [
-        {
-          "type": "positioning",
-          "number_of_questions": 2,
-          "questions_with_images": 0,
-          "correctly_answered_questions": 0,
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1_score": 0.0,
-          "f1": 0.0,
-          "jaccard": 0.0,
-          "exact_match_rate": 0.0,
-          "confidence_distribution": {
-            "high": 0,
-            "medium": 0,
-            "low": 2,
-            "manual_review": 0
-          }
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 3,
-          "questions_with_images": 0,
-          "correctly_answered_questions": 1,
-          "precision": 0.6000000000000001,
-          "recall": 0.6000000000000001,
-          "f1_score": 0.6000000000000001,
-          "f1": 0.6000000000000001,
-          "jaccard": 0.6000000000000001,
-          "exact_match_rate": 0.0,
-          "confidence_distribution": {
-            "high": 1,
-            "medium": 1,
-            "low": 1,
-            "manual_review": 0
-          }
-        },
         {
           "type": "select_errors",
           "number_of_questions": 2,
           "questions_with_images": 0,
           "correctly_answered_questions": 0,
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1_score": 0.0,
-          "f1": 0.0,
-          "jaccard": 0.0,
-          "exact_match_rate": 0.0,
-          "confidence_distribution": {
-            "high": 0,
-            "medium": 0,
-            "low": 2,
-            "manual_review": 0
-          }
+          "precision": 0.5,
+          "recall": 0.08333333333333333,
+          "f1": 0.14285714285714285,
+          "exact_match_rate": 0.0
+        },
+        {
+          "type": "positioning",
+          "number_of_questions": 2,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 1,
+          "precision": 1.0,
+          "recall": 0.6666666666666667,
+          "f1": 0.7878787878787878,
+          "exact_match_rate": 0.0
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 3,
+          "questions_with_images": 3,
+          "correctly_answered_questions": 1,
+          "precision": 1.0,
+          "recall": 0.5333333333333333,
+          "f1": 0.6574074074074074,
+          "exact_match_rate": 0.0
+        },
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 4,
+          "questions_with_images": 4,
+          "correctly_answered_questions": 1,
+          "precision": 0.25,
+          "recall": 0.25,
+          "f1": 0.25,
+          "exact_match_rate": 0.25
         },
         {
           "type": "completion_closed",
           "number_of_questions": 2,
-          "questions_with_images": 0,
-          "correctly_answered_questions": 1,
-          "precision": 0.7,
-          "recall": 0.7,
-          "f1_score": 0.7,
-          "f1": 0.7,
-          "jaccard": 0.7,
-          "exact_match_rate": 0.0,
-          "confidence_distribution": {
-            "high": 1,
-            "medium": 1,
-            "low": 0,
-            "manual_review": 0
-          }
+          "questions_with_images": 1,
+          "correctly_answered_questions": 2,
+          "precision": 1.0,
+          "recall": 0.8452380952380952,
+          "f1": 0.916083916083916,
+          "exact_match_rate": 0.0
         },
         {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 10,
-          "questions_with_images": 0,
-          "correctly_answered_questions": 4,
-          "precision": 0.4,
-          "recall": 0.4,
-          "f1_score": 0.4,
-          "f1": 0.4,
-          "jaccard": 0.4,
-          "exact_match_rate": 0.4,
-          "confidence_distribution": {
-            "high": 4,
-            "medium": 0,
-            "low": 6,
-            "manual_review": 0
-          }
+          "type": "multiple_choice_check",
+          "number_of_questions": 6,
+          "questions_with_images": 6,
+          "correctly_answered_questions": 3,
+          "precision": 0.6805555555555555,
+          "recall": 0.8333333333333334,
+          "f1": 0.7444444444444445,
+          "exact_match_rate": 0.16666666666666666
         },
         {
           "type": "completion_open",
@@ -136,16 +99,8 @@
           "correctly_answered_questions": 0,
           "precision": 0.0,
           "recall": 0.0,
-          "f1_score": 0.0,
           "f1": 0.0,
-          "jaccard": 0.0,
-          "exact_match_rate": 0.0,
-          "confidence_distribution": {
-            "high": 0,
-            "medium": 0,
-            "low": 0,
-            "manual_review": 0
-          }
+          "exact_match_rate": 0.0
         }
       ]
     }
