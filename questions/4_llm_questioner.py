@@ -21,12 +21,6 @@ Usage:
 
 import click
 from pathlib import Path
-from dotenv import load_dotenv
-
-# Load environment variables from questions directory
-questions_dir = Path(__file__).parent
-env_path = questions_dir / '.env'
-load_dotenv(env_path)
 
 # Import modular components
 from modules.questioner import LLMQuestioner
@@ -107,7 +101,7 @@ def main(start, end, types, models, output, verbose):
         print(f"Configuration error: {e}")
         if verbose:
             print("\nTroubleshooting tips:")
-            print("- Check that API keys are set in the .env file")
+            print("- Check that API keys are set in the root .env file")
             print("- Verify that the dataset directory exists and contains question files")
             print("- Ensure required dependencies are installed")
         return 1

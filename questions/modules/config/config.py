@@ -15,6 +15,10 @@ load_dotenv()
 class Config:
     """Configuration class for the exam question processor"""
     
+    # ========================================================================
+    # Question Preprocessing Configuration (Scripts 1-3)
+    # ========================================================================
+    
     # Model Configuration
     MODEL_TYPE: str = os.getenv("MODEL_TYPE", "qwen").lower()
     
@@ -28,6 +32,19 @@ class Config:
     # Processing Configuration
     MAX_NEW_TOKENS: int = int(os.getenv("MAX_NEW_TOKENS", "512"))
     TEMPERATURE: float = float(os.getenv("TEMPERATURE", "0.1"))
+    
+    # ========================================================================
+    # LLM Evaluation Configuration (Script 4)
+    # ========================================================================
+    
+    # LLM API Keys
+    OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
+    ANTHROPIC_API_KEY: Optional[str] = os.getenv("ANTHROPIC_API_KEY")
+    
+    # LLM Processing Configuration
+    MODELS_TO_TEST: Optional[str] = os.getenv("MODELS_TO_TEST")
+    MAX_TOKENS: int = int(os.getenv("MAX_TOKENS", "512"))
+    TIMEOUT: int = int(os.getenv("TIMEOUT", "30"))
     
     # OCR Configuration
     OCR_LANG: str = os.getenv("OCR_LANG", "it")
