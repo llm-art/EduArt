@@ -23,7 +23,7 @@ Thumbs.db
 .env
 
 dataset/
-results/answers/
+answers/
 
 questions/data/
 questions/output/
