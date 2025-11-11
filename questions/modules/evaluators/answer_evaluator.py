@@ -147,7 +147,8 @@ class AnswerEvaluator:
                 'details': f'JSON parsing error: {str(e)}',
                 'parsed_response': [],
                 'metrics': {},
-                'error_analysis': {'parse_error': str(e)}
+                'error_analysis': {'parse_error': str(e)},
+                'llm_answer': llm_response  # Include raw response for debugging
             }
         except Exception as e:
             # Other errors
@@ -157,7 +158,8 @@ class AnswerEvaluator:
                 'details': f'Evaluation error: {str(e)}',
                 'parsed_response': [],
                 'metrics': {},
-                'error_analysis': {'evaluation_error': str(e)}
+                'error_analysis': {'evaluation_error': str(e)},
+                'llm_answer': llm_response if 'llm_response' in locals() else ''  # Include raw response if available
             }
     
     def _evaluate_by_id(self, parsed_response: List, answers: List[Dict], question_type: str) -> Dict[str, Any]:

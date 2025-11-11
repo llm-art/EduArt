@@ -14,9 +14,25 @@ class LLMConfig:
     
     # Model configurations
     MODELS = {
-        'openai': ['gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo'],
-        'google': ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'],
-        'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-haiku-20240307']
+        'openai': [
+          "gpt-4o-2024-08-06",
+          "gpt-4.1-2025-04-14",
+          "gpt-5-2025-08-07",
+          "gpt-5-mini-2025-08-07",
+          "gpt-5-nano-2025-08-07",
+          "o3-2025-04-16",
+        ],
+        'google': [
+            'gemini-2.5-flash-lite',
+            'gemini-2.5-flash',
+            'gemini-2.5-pro',
+            'gemini-2.5-flash-preview-09-2025'
+        ],
+        'anthropic': [
+            'claude-3-5-sonnet-20241022',
+            'claude-3-haiku-20240307',
+            'claude-opus-4-20250514-thinking-16k'
+        ]
     }
     
     # Processing settings
