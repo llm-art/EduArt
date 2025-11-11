@@ -49,16 +49,20 @@ def count_png_files_in_raw(exercise: int) -> int:
 @click.option('--force-ocr', is_flag=True, help='Force OCR processing even if OCR JSON files already exist')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose/debug output')
 @click.option('--exercise', '-e', multiple=True, type=int, help='Exercise number(s) to process (can be used multiple times)')
+@click.option('--all', '-a', is_flag=True, help='Process all exercises from 1 to 57')
 @click.option('--min-question', default=1, help='Minimum question number to process', show_default=True)
 @click.option('--max-question', default=20, help='Maximum question number to process', show_default=True)
 @click.option('--use-langchain', is_flag=True, help='Use LangChain pipeline (for backward compatibility)')
 @click.option('--metadata-ai/--no-metadata-ai', default=True, help='Track AI call metadata including token usage', show_default=True)
-def main(force_ocr, verbose, exercise, min_question, max_question, use_langchain, metadata_ai):
+def main(force_ocr, verbose, exercise, all, min_question, max_question, use_langchain, metadata_ai):
     """Process multiple questions using the new modular architecture."""
     
     try:
+        # Handle --all flag to process exercises 1-57
+        if all:
+            exercise = tuple(range(1, 58))
         # Handle default case when no exercises are specified
-        if not exercise:
+        elif not exercise:
             exercise = (1,)  # Default to exercise 1
         
         print("=== Enhanced Multi-Model Exam Question Processor (Refactored) ===")
