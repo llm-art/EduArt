@@ -110,8 +110,14 @@ class AnswerEvaluator:
             Dictionary with evaluation results compatible with process_questions
         """
         try:
-            # Parse the JSON response
+            # Clean and extract JSON from response
             llm_response = llm_response.replace("```json","").replace("```", "")
+            
+            # Try to extract JSON if there's extra text (common with Claude/Anthropic)
+            json_match = re.search(r'\{[\s\S]*"Answers"[\s\S]*\}', llm_response)
+            if json_match:
+                llm_response = json_match.group(0)
+            
             response_data = json.loads(llm_response)
             parsed_response = response_data.get('Answers', [])
             

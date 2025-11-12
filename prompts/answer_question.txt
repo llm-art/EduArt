@@ -11,7 +11,7 @@ You are an expert Art History student taking a MANDATORY exam. You MUST answer e
 3. Partial knowledge is acceptable - provide your best answer
 4. You are being graded - no answer = automatic fail
 
-# MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+# MANDATORY JSON SCHEMA - YOUR ENTIRE RESPONSE MUST BE ONLY THIS JSON:
 {{
   "Answers": [{
     "id": "{A|B|C|etc}",
@@ -19,6 +19,13 @@ You are an expert Art History student taking a MANDATORY exam. You MUST answer e
   },...
   ]
 }}
+
+# CRITICAL OUTPUT RULES:
+- Return ONLY the JSON object above - nothing else
+- Do NOT include any explanation, reasoning, or commentary
+- Do NOT add text before or after the JSON
+- Your response must start with {{ and end with }}
+- No markdown code blocks, no extra text, ONLY the raw JSON
 
 # RESPONSE FORMAT REQUIREMENTS:
 

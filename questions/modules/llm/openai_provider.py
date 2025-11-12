@@ -36,13 +36,20 @@ class OpenAIProvider(LLMProvider):
                 from langchain_openai import ChatOpenAI
                 from langchain.schema import HumanMessage
                 
-                self._model = ChatOpenAI(
-                    model=self.model_name,
-                    temperature=self.temperature,
-                    max_tokens=self.max_tokens,
-                    timeout=self.timeout,
-                    api_key=self.api_key
-                )
+                # Some models (o1, o3) only support default temperature
+                model_params = {
+                    'model': self.model_name,
+                    'max_tokens': self.max_tokens,
+                    'timeout': self.timeout,
+                    'api_key': self.api_key
+                }
+                
+                # Only add temperature for models that support it
+                # o1 and o3 models only accept temperature=1 (default)
+                if not any(model_prefix in self.model_name.lower() for model_prefix in ['o1', 'o3']):
+                    model_params['temperature'] = self.temperature
+                
+                self._model = ChatOpenAI(**model_params)
                 self._human_message = HumanMessage
             except ImportError as e:
                 raise ProcessingError(f"OpenAI dependencies not available: {e}")

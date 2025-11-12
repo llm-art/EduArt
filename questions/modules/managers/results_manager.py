@@ -107,7 +107,8 @@ class ResultsManager:
     
     def add_result(self, question_id: str, model_name: str, question_type: str,
                    llm_answer: str, correct_answer: str, evaluation: Dict[str, Any],
-                   processing_time: float, error: str = "", question_data: Optional[Dict[str, Any]] = None,
+                   processing_time: float, error: str = "", error_type: str = "",
+                   question_data: Optional[Dict[str, Any]] = None,
                    input_tokens: int = 0, output_tokens: int = 0):
         """
         Add evaluation result with enhanced metrics.
@@ -136,6 +137,7 @@ class ResultsManager:
             'details': evaluation.get('details', ''),
             'processing_time': processing_time,
             'error': error,
+            'error_type': error_type,
             'timestamp': datetime.now().isoformat(),
             'input_tokens': input_tokens,
             'output_tokens': output_tokens,
@@ -221,6 +223,7 @@ class ResultsManager:
                 'details': result['details'],
                 'processing_time': result['processing_time'],
                 'error': result['error'],
+                'error_type': result.get('error_type', ''),
                 'timestamp': result['timestamp']
             }
             

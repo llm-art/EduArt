@@ -15,23 +15,19 @@ class LLMConfig:
     # Model configurations
     MODELS = {
         'openai': [
-          "gpt-4o-2024-08-06",
           "gpt-4.1-2025-04-14",
           "gpt-5-2025-08-07",
-          "gpt-5-mini-2025-08-07",
-          "gpt-5-nano-2025-08-07",
           "o3-2025-04-16",
         ],
         'google': [
             'gemini-2.5-flash-lite',
             'gemini-2.5-flash',
             'gemini-2.5-pro',
-            'gemini-2.5-flash-preview-09-2025'
         ],
         'anthropic': [
-            'claude-3-5-sonnet-20241022',
-            'claude-3-haiku-20240307',
-            'claude-opus-4-20250514-thinking-16k'
+            'claude-sonnet-4-5-20250929',
+            'claude-haiku-4-5-20251001',
+            'claude-opus-4-1-20250805',
         ]
     }
     
@@ -67,6 +63,9 @@ def create_llm_provider(provider_type: str, model_name: str, **kwargs) -> LLMPro
     
     if provider_type == 'openai':
         config['timeout'] = kwargs.get('timeout', LLMConfig.TIMEOUT)
+        # Extend timeout for reasoning-heavy GPT-5 model unless caller provided a higher value
+        if model_name == "gpt-5-2025-08-07" and config['timeout'] < 120:
+            config['timeout'] = 120
         provider = OpenAIProvider(model_name, **config)
     elif provider_type == 'google':
         provider = GoogleProvider(model_name, **config)

@@ -156,8 +156,10 @@ class LLMQuestioner:
                     
                     start_time = time.time()
                     error_msg = ""
+                    error_type = ""
+                    formatted_error = ""
                     llm_response = ""
-                    evaluation = {'is_correct': False, 'score': 0.0, 'details': 'Error occurred'}
+                    evaluation = {'is_correct': False, 'score': 0.0, 'details': 'Error occurred', 'llm_answer': ''}
                     
                     try:
                         # Query LLM with retry logic
@@ -173,8 +175,10 @@ class LLMQuestioner:
                         successful_operations += 1
                     
                     except Exception as e:
+                        error_type = e.__class__.__name__
                         error_msg = str(e)
-                        print(f"ERROR: {error_msg}")
+                        formatted_error = f"{error_type}: {error_msg}" if error_msg else error_type
+                        print(f"ERROR: {formatted_error}")
                         failed_operations += 1
                     
                     processing_time = time.time() - start_time
@@ -191,11 +195,12 @@ class LLMQuestioner:
                         question_id=question_id,
                         model_name=model_name,
                         question_type=question_type,
-                        llm_answer=str(evaluation["llm_answer"]),
+                        llm_answer=str(evaluation.get("llm_answer", llm_response)),
                         correct_answer=correct_answer_str,
                         evaluation=evaluation,
                         processing_time=processing_time,
-                        error=error_msg,
+                        error=formatted_error,
+                        error_type=error_type,
                         question_data={
                             'question_text': question_data.get('question_text', ''),
                             'question_type': question_type,
