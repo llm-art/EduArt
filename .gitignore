@@ -22,8 +22,5 @@ Thumbs.db
 
 .env
 
-dataset/
-answers/
-
-questions/data/
-questions/output/
+raw/
+structured/

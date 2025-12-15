@@ -72,7 +72,7 @@ class AnswerConfig:
     max_question: int = 20
     submission_url: Optional[str] = None
     enable_submission: bool = False
-    base_path: str = "output"
+    base_path: str = "structured"
     
     def validate(self) -> None:
         """Validate answer configuration."""

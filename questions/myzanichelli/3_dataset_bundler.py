@@ -49,12 +49,12 @@ def find_json_files(base_path="output"):
   json_files = []
 
   # Check if we're in the questions directory or parent directory
-  if os.path.exists("questions/output"):
-    base_path = "questions/output"
-  elif os.path.exists("output"):
-    base_path = "output"
+  if os.path.exists("questions/myzanichelli/structured"):
+    base_path = "questions/myzanichelli/structured"
+  elif os.path.exists("structured"):
+    base_path = "structured"
   else:
-    print(f"Warning: Neither 'output' nor 'questions/output' directory found")
+    print(f"Warning: Neither 'structured' nor 'questions/myzanichelli/structured' directory found")
     return []
 
   pattern = os.path.join(base_path, "*/json/*.json")
@@ -291,9 +291,9 @@ def find_associated_image(json_file, json_data=None):
   image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp']
 
   # Determine the correct data path
-  data_base = "data"
-  if os.path.exists("questions/data"):
-    data_base = "questions/data"
+  data_base = "raw"
+  if os.path.exists("questions/myzanichelli/raw"):
+    data_base = "questions/myzanichelli/raw"
 
   # Check imgs folder first (processed images)
   imgs_folder = os.path.join(data_base, exercise_num, "imgs")
@@ -303,11 +303,11 @@ def find_associated_image(json_file, json_data=None):
       if os.path.exists(fallback_path):
         return fallback_path
 
-  # Check raw folder as fallback
-  raw_folder = os.path.join(data_base, exercise_num, "raw")
-  if os.path.exists(raw_folder):
+  # Check screenshot folder as fallback
+  screenshot_folder = os.path.join(data_base, exercise_num, "screenshot")
+  if os.path.exists(screenshot_folder):
     for ext in image_extensions:
-      fallback_path = os.path.join(raw_folder, f"{question_num}{ext}")
+      fallback_path = os.path.join(screenshot_folder, f"{question_num}{ext}")
       if os.path.exists(fallback_path):
         return fallback_path
 
@@ -725,9 +725,9 @@ def copy_preprocessed_images(dataset_dir, processed_metadata_files):
   to dataset/raw/ with sequential IDs matching the main dataset processing.
   """
   # Determine the correct data path
-  data_base = "data"
-  if os.path.exists("questions/data"):
-    data_base = "questions/data"
+  data_base = "raw"
+  if os.path.exists("questions/myzanichelli/raw"):
+    data_base = "questions/myzanichelli/raw"
 
   if not os.path.exists(data_base):
     print(f"Warning: Data directory '{data_base}' not found")
@@ -758,15 +758,15 @@ def copy_preprocessed_images(dataset_dir, processed_metadata_files):
       if exercise_num is None or question_num is None:
         continue
 
-      # Look for preprocessed image in raw folder
-      raw_folder = os.path.join(data_base, str(exercise_num), "raw")
-      if not os.path.exists(raw_folder):
+      # Look for preprocessed image in screenshot folder
+      screenshot_folder = os.path.join(data_base, str(exercise_num), "screenshot")
+      if not os.path.exists(screenshot_folder):
         continue
 
       # Try to find the preprocessed image
       found_image = None
       for ext in image_extensions:
-        pre_image_path = os.path.join(raw_folder, f"pre_{question_num}{ext}")
+        pre_image_path = os.path.join(screenshot_folder, f"pre_{question_num}{ext}")
         if os.path.exists(pre_image_path):
           found_image = pre_image_path
           break

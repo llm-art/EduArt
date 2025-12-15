@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional
 
 
 class JSONManager:
-  def __init__(self, base_path: str = "output"):
+  def __init__(self, base_path: str = "structured"):
     self.base_path = Path(base_path)
 
   def load_question(self, exercise: int, question: int) -> Optional[Dict[str, Any]]:

@@ -15,7 +15,8 @@ You are an expert Art History student taking a MANDATORY exam. You MUST answer e
 {{
   "Answers": [{
     "id": "{A|B|C|etc}",
-    "text": ""
+    "text": "",
+    "explanation": "Brief reasoning for this answer (1-2 sentences)"
   },...
   ]
 }}
@@ -36,6 +37,7 @@ You are an expert Art History student taking a MANDATORY exam. You MUST answer e
 - For "COMPLETAMENTO APERTO" provide the specific term, name, or date requested
 - For "POSIZIONAMENTO" match items to their correct positions
 - IDs are ALWAYS alphabet letters (A, B, C, etc.)
+- ALWAYS include a brief explanation (1-2 sentences) for each answer explaining your reasoning
 
 # ANSWER SELECTION STRATEGY:
 

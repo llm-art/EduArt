@@ -41,8 +41,8 @@ class QuestionProcessor:
         
         # Paths
         self.base_path = Path(__file__).parent.parent.parent
-        self.data_path = self.base_path / "data"
-        self.output_path = self.base_path / "output"
+        self.data_path = self.base_path / "raw"
+        self.output_path = self.base_path / "structured"
     
     def process_single_question(self, exercise: int, question: int) -> ProcessingResult:
         """
@@ -414,7 +414,7 @@ class QuestionProcessor:
     def _ocr_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """OCR step for LangChain pipeline."""
         try:
-            image_path = data["base_path"] / f"{data['exercise']}/raw/{data['question']}.png"
+            image_path = data["base_path"] / f"{data['exercise']}/screenshot/{data['question']}.png"
             ocr_cache_path = data["output_path"] / f"{data['exercise']}/ocr/{data['question']}.json"
             
             ocr_text = self.ocr_service.process_with_cache(

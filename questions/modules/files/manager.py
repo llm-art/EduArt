@@ -25,7 +25,7 @@ class FileManager:
         else:
             self.base_dir = Path(base_dir).resolve()
         
-        self.data_dir = self.base_dir / "data"
+        self.data_dir = self.base_dir / "raw"
     
     def create_exercise_directories(self, exercise_number: int) -> Dict[str, Path]:
         """
@@ -39,28 +39,29 @@ class FileManager:
         """
         exercise_dir = self.data_dir / str(exercise_number)
         imgs_dir = exercise_dir / "imgs"
-        raw_dir = exercise_dir / "raw"
+        logs_dir = exercise_dir / "logs"
         
-        # Create subdirectories under raw/
-        raw_screenshot_dir = raw_dir / "screenshot"
-        raw_html_dir = raw_dir / "html"
-        raw_txt_dir = raw_dir / "txt"
+        # Create subdirectories directly under exercise directory
+        screenshot_dir = exercise_dir / "screenshot"
+        html_dir = exercise_dir / "html"
+        txt_dir = exercise_dir / "txt"
         
         # Create all directories
         imgs_dir.mkdir(parents=True, exist_ok=True)
-        raw_screenshot_dir.mkdir(parents=True, exist_ok=True)
-        raw_html_dir.mkdir(parents=True, exist_ok=True)
-        raw_txt_dir.mkdir(parents=True, exist_ok=True)
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+        html_dir.mkdir(parents=True, exist_ok=True)
+        txt_dir.mkdir(parents=True, exist_ok=True)
         
         print(f"✓ Created directories for exercise {exercise_number}")
         
         return {
             'exercise': exercise_dir,
             'imgs': imgs_dir,
-            'raw': raw_dir,
-            'raw_screenshot': raw_screenshot_dir,
-            'raw_html': raw_html_dir,
-            'raw_txt': raw_txt_dir
+            'logs': logs_dir,
+            'screenshot': screenshot_dir,
+            'html': html_dir,
+            'txt': txt_dir
         }
     
     def get_exercise_directories(self, exercise_number: int) -> Dict[str, Path]:
@@ -75,18 +76,18 @@ class FileManager:
         """
         exercise_dir = self.data_dir / str(exercise_number)
         imgs_dir = exercise_dir / "imgs"
-        raw_dir = exercise_dir / "raw"
-        raw_screenshot_dir = raw_dir / "screenshot"
-        raw_html_dir = raw_dir / "html"
-        raw_txt_dir = raw_dir / "txt"
+        logs_dir = exercise_dir / "logs"
+        screenshot_dir = exercise_dir / "screenshot"
+        html_dir = exercise_dir / "html"
+        txt_dir = exercise_dir / "txt"
         
         return {
             'exercise': exercise_dir,
             'imgs': imgs_dir,
-            'raw': raw_dir,
-            'raw_screenshot': raw_screenshot_dir,
-            'raw_html': raw_html_dir,
-            'raw_txt': raw_txt_dir
+            'logs': logs_dir,
+            'screenshot': screenshot_dir,
+            'html': html_dir,
+            'txt': txt_dir
         }
     
     def save_html_content(
@@ -109,7 +110,7 @@ class FileManager:
             Path to the saved file
         """
         dirs = self.create_exercise_directories(exercise_number)
-        html_file = dirs['raw_html'] / f"{question_number}.html"
+        html_file = dirs['html'] / f"{question_number}.html"
         
         # Create full HTML document
         html_document = self._create_html_document(content, question_number, title)
@@ -141,7 +142,7 @@ class FileManager:
             Path to the saved file
         """
         dirs = self.create_exercise_directories(exercise_number)
-        txt_file = dirs['raw_txt'] / f"{question_number}.txt"
+        txt_file = dirs['txt'] / f"{question_number}.txt"
         
         try:
             with open(txt_file, 'w', encoding='utf-8') as f:
@@ -230,7 +231,7 @@ class FileManager:
             Path for the screenshot
         """
         dirs = self.get_exercise_directories(exercise_number)
-        return dirs['raw_screenshot'] / f"{question_number}.png"
+        return dirs['screenshot'] / f"{question_number}.png"
     
     def get_pre_screenshot_path(self, question_number: int, exercise_number: int) -> Path:
         """
@@ -244,7 +245,7 @@ class FileManager:
             Path for the pre-interaction screenshot
         """
         dirs = self.get_exercise_directories(exercise_number)
-        return dirs['raw_screenshot'] / f"{question_number}-pre.png"
+        return dirs['screenshot'] / f"{question_number}-pre.png"
     
     def get_image_path(
         self, 
@@ -319,9 +320,9 @@ class FileManager:
             'html': []
         }
         
-        # List screenshots (PNG files in raw/)
-        if dirs['raw'].exists():
-            result['screenshots'] = list(dirs['raw'].glob('*.png'))
+        # List screenshots (PNG files in screenshot/)
+        if dirs['screenshot'].exists():
+            result['screenshots'] = list(dirs['screenshot'].glob('*.png'))
         
         # List images (various formats in imgs/)
         if dirs['imgs'].exists():
@@ -329,9 +330,9 @@ class FileManager:
             for ext in image_extensions:
                 result['images'].extend(dirs['imgs'].glob(ext))
         
-        # List HTML files (in raw/)
-        if dirs['raw'].exists():
-            result['html'] = list(dirs['raw'].glob('*.html'))
+        # List HTML files (in html/)
+        if dirs['html'].exists():
+            result['html'] = list(dirs['html'].glob('*.html'))
         
         return result
     
@@ -353,7 +354,10 @@ class FileManager:
             'directories': {
                 'exercise': str(dirs['exercise']),
                 'imgs': str(dirs['imgs']),
-                'raw': str(dirs['raw'])
+                'logs': str(dirs['logs']),
+                'screenshot': str(dirs['screenshot']),
+                'html': str(dirs['html']),
+                'txt': str(dirs['txt'])
             },
             'file_counts': {
                 'screenshots': len(files['screenshots']),

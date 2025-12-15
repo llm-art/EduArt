@@ -22,6 +22,10 @@ REQUIREMENTS:
 
 import click
 from pathlib import Path
+import sys
+
+# Add parent directory to path for shared modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.core.config import ProcessorConfig
 from modules.core.exceptions import ProcessingError, ConfigurationError
@@ -31,8 +35,8 @@ from modules.config import Config
 
 def count_png_files_in_raw(exercise: int) -> int:
     """Count the number of PNG files in the raw folder for the given exercise."""
-    base_path = Path(__file__).parent / "data"
-    raw_path = base_path / f"{exercise}/raw/screenshot/"
+    base_path = Path(__file__).parent / "raw"
+    raw_path = base_path / f"{exercise}/screenshot/"
     
     if not raw_path.exists():
         print(f"Warning: Raw folder does not exist: {raw_path}")
@@ -132,7 +136,7 @@ def main(force_ocr, verbose, exercise, all, min_question, max_question, use_lang
                             print(f"  Question {result.question}: {'; '.join(result.errors)}")
                 
                 print(f"\n✅ Exercise {current_exercise} completed successfully!")
-                print(f"Results saved to: questions/output/{current_exercise}/json/")
+                print(f"Results saved to: questions/myzanichelli/structured/{current_exercise}/json/")
                 successful_exercises += 1
                 
             except Exception as e:

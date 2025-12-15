@@ -30,6 +30,9 @@ import click
 from pathlib import Path
 
 # Import the refactored modular automator
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from modules import ZanichelliExerciseAutomator
 
 
@@ -42,9 +45,13 @@ from modules import ZanichelliExerciseAutomator
 @click.option('--validate-content', is_flag=True, default=True, help='Validate extracted content quality (only for questions mode)')
 @click.option('--no-interaction', is_flag=True, help='Disable question interaction system (legacy mode)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output for detailed logging')
-@click.option('--config', '-c', default='config.json', help='Configuration file path', show_default=True)
+@click.option('--config', '-c', default=None, help='Configuration file path (defaults to config.json in script directory)', show_default=False)
 def main(exercise, all, url, no_login, headless, validate_content, no_interaction, verbose, config):
     """Zanichelli Exercise Automation - Unified Processing."""
+    
+    # If config path not specified, use the one in the script's directory
+    if config is None:
+        config = str(Path(__file__).parent / 'config.json')
     
     # Only show header if verbose or if no exercise specified
     if verbose or not (exercise or all):
@@ -127,10 +134,11 @@ def main(exercise, all, url, no_login, headless, validate_content, no_interactio
                         # Display file locations
                         base_dir = automator.file_manager.get_base_dir()
                         click.echo(f"\nFiles saved in:")
-                        click.echo(f"- Screenshots (with answers): {base_dir}/data/[exercise_number]/raw/")
-                        click.echo(f"- Images: {base_dir}/data/[exercise_number]/imgs/")
-                        click.echo(f"- HTML content (with answers): {base_dir}/data/[exercise_number]/raw/")
-                        click.echo(f"- Processing logs: {base_dir}/data/[exercise_number]/logs/")
+                        click.echo(f"- Screenshots (with answers): {base_dir}/raw/[exercise_number]/screenshot/")
+                        click.echo(f"- Images: {base_dir}/raw/[exercise_number]/imgs/")
+                        click.echo(f"- HTML content (with answers): {base_dir}/raw/[exercise_number]/html/")
+                        click.echo(f"- Text content: {base_dir}/raw/[exercise_number]/txt/")
+                        click.echo(f"- Processing logs: {base_dir}/raw/[exercise_number]/logs/")
                         
                         # Display warnings/errors if any
                         if results['errors']:
