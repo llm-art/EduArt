@@ -13,10 +13,12 @@ class PromptManager:
         Initialize prompt manager.
         
         Args:
-            prompts_dir: Directory containing prompt template files
+            prompts_dir: Directory containing prompt template files.
+                        Should be passed from calling script. Defaults to None for backward compatibility.
         """
         if prompts_dir is None:
-            # Default to prompts directory in project root
+            # Backward compatibility: default to project root prompts directory
+            # In production, this should be passed from the calling script
             prompts_dir = Path(__file__).parent.parent.parent.parent / "prompts"
         
         self.prompts_dir = Path(prompts_dir)

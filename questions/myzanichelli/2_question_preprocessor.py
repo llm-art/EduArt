@@ -114,8 +114,12 @@ def main(force_ocr, verbose, exercise, all, min_question, max_question, use_lang
                 metadata_ai=metadata_ai
             )
             
-            # Create processor
-            processor = QuestionProcessor(config)
+            # Set base and prompts directories
+            base_dir = Path(__file__).parent  # myzanichelli directory
+            prompts_dir = Path(__file__).parent.parent / "prompts"  # datasets/prompts
+            
+            # Create processor with path configuration
+            processor = QuestionProcessor(config, base_dir=base_dir, prompts_dir=prompts_dir)
             
             # Create question range
             question_range = range(min_question, effective_max_question + 1)

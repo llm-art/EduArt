@@ -5,39 +5,69 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python Debugger: Question Downloader",
+      "name": "My_Zanichelli - Question downloader",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/questions/question_downloader.py",
-      "console": "integratedTerminal",
-      "args": ["--all"]
-    },
-    {
-      "name": "[2] Question preprocessor",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/questions/2_question_preprocessor.py",
+      "program": "${workspaceFolder}/questions/myzanichelli/1_question_downloader.py",
       "console": "integratedTerminal",
       "args": [
         "--exercise", "1",
-        "--min-question", "1",
-        "--max-question", "20",
-        //"--force-ocr",
-        "--verbose"
+        "--headless",
+        //"--no-interaction"
       ]
     },
     {
-      "name": "[3] Question answerer",
+      "name": "My_Zanichelli -  Question preprocessor",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/questions/3_question_answerer.py",
+      "program": "${workspaceFolder}/questions/myzanichelli/2_question_preprocessor.py",
       "console": "integratedTerminal",
       "args": [
-        "--exercises", "1",
-        "--min-question", "1",
-        "--max-question", "1",
-        "-u", "https://esercizi.zanichelli.it/argomento/Pittura-rinascimentale/x2rnbu-x2rnih-hv05y",
-        //"--headless"
+        "--exercise", "1",
+        //"--max-question", "1"
+        //"--force-ocr",
+        //"--verbose"
+      ]
+    },
+    {
+      "name": "[3] Dataset bundler",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/3_dataset_bundler.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--copy-preprocessed"
+      ]
+    },
+        {
+      "name": "[4] LLM Questioner",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/4_llm_questioner.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--start", "1",
+        "--end", "50",
+        // OpenAI models
+        //"--models", "openai/gpt-4.1-2025-04-14",
+        //"--models", "openai/gpt-5-2025-08-07",
+        //"--models", "openai/o3-2025-04-16",
+
+        // Google models
+        "--models", "google/gemini-2.5-pro",
+        //"--models", "google/gemini-2.5-flash",
+        //"--models", "google/gemini-2.5-flash-lite",
+
+        // Anthropic models
+        //"--models", "anthropic/claude-haiku-4-5-20251001",
+        //"--models", "anthropic/claude-sonnet-4-5-20250929",
+        //"--models", "anthropic/claude-opus-4-1-20250805",
+
+        //"--models", "anthropic/claude-3-5-sonnet-20241022",
+        //"--models", "anthropic/claude-3-haiku-20240307",
+        //"--models", "anthropic/claude-opus-4-20250514-thinking-16k",
+        "--verbose",
+        //"--question-mode", "text"
       ]
     }
   ]

@@ -80,7 +80,9 @@ def main(exercise, all, url, no_login, headless, validate_content, no_interactio
     
     async def run_automation():
         """Run the unified automation process."""
-        async with ZanichelliExerciseAutomator(config_path=config, verbose=verbose) as automator:
+        # Set base directory to the myzanichelli directory
+        base_dir = Path(__file__).parent
+        async with ZanichelliExerciseAutomator(config_path=config, base_dir=base_dir, verbose=verbose) as automator:
             try:
                 # Initialize browser and components
                 if verbose:
@@ -138,6 +140,7 @@ def main(exercise, all, url, no_login, headless, validate_content, no_interactio
                         click.echo(f"- Images: {base_dir}/raw/[exercise_number]/imgs/")
                         click.echo(f"- HTML content (with answers): {base_dir}/raw/[exercise_number]/html/")
                         click.echo(f"- Text content: {base_dir}/raw/[exercise_number]/txt/")
+                        click.echo(f"- Metadata (question info): {base_dir}/raw/[exercise_number]/metadata/")
                         click.echo(f"- Processing logs: {base_dir}/raw/[exercise_number]/logs/")
                         
                         # Display warnings/errors if any

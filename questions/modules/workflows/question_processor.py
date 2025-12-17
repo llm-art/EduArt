@@ -76,15 +76,9 @@ class QuestionProcessorWorkflow:
             content = await self.extractor.extract_question_content(question_number)
             results['content'] = content
             
-            # Step 2: Take pre-interaction screenshot
-            print(f"Step 2: Taking pre-interaction screenshot for question {question_number}...")
-            pre_screenshot_path = await self._take_pre_question_screenshot(question_number, exercise_number)
-            if pre_screenshot_path:
-                results['files_created'].append(str(pre_screenshot_path))
-            
-            # Step 3: Perform question interaction (NEW) - only if enabled
+            # Step 2: Perform question interaction (NEW) - only if enabled
             if enable_interaction:
-                print(f"Step 3: Performing question interaction for question {question_number}...")
+                print(f"Step 2: Performing question interaction for question {question_number}...")
                 interaction_results = await self.interaction_handler.process_question_interaction(content)
                 results['interaction_results'] = interaction_results
                 
@@ -92,7 +86,7 @@ class QuestionProcessorWorkflow:
                 if interaction_results.get('errors'):
                     results['errors'].extend([f"Interaction: {error}" for error in interaction_results['errors']])
             else:
-                print(f"Step 3: Skipping question interaction (disabled) for question {question_number}...")
+                print(f"Step 2: Skipping question interaction (disabled) for question {question_number}...")
                 results['interaction_results'] = {
                     'success': True,
                     'question_type': 'interaction_disabled',
@@ -101,22 +95,22 @@ class QuestionProcessorWorkflow:
                     'errors': []
                 }
             
-            # Step 4: Take post-interaction screenshot (with or without interaction results)
+            # Step 3: Take post-interaction screenshot (with or without interaction results)
             screenshot_description = "with results" if enable_interaction else "without interaction"
-            print(f"Step 4: Taking post-interaction screenshot {screenshot_description} for question {question_number}...")
+            print(f"Step 3: Taking post-interaction screenshot {screenshot_description} for question {question_number}...")
             screenshot_path = await self._take_question_screenshot(question_number, exercise_number)
             if screenshot_path:
                 results['files_created'].append(str(screenshot_path))
             
-            # Step 5: Extract final content (with answers revealed)
-            print(f"Step 5: Extracting final content with answers for question {question_number}...")
+            # Step 4: Extract final content (with answers revealed)
+            print(f"Step 4: Extracting final content with answers for question {question_number}...")
             final_content = await self.extractor.extract_question_content(question_number)
             results['final_content'] = final_content
             
             # Use final content for validation and saving
             content_to_use = final_content if final_content.get('html') else content
             
-            # Step 6: Validate content if requested
+            # Step 5: Validate content if requested
             if validate_content:
                 validation = self.validator.validate_question_content(content_to_use)
                 results['validation'] = validation
@@ -126,23 +120,39 @@ class QuestionProcessorWorkflow:
                     for issue in validation['issues']:
                         results['errors'].append(f"Validation: {issue}")
             
-            # Step 7: Save HTML content (with answers)
+            # Step 6: Save HTML content (with answers)
             html_file = await self._save_question_content(content_to_use, question_number, exercise_number)
             if html_file:
                 results['files_created'].append(str(html_file))
             
-            # Step 7b: Save text-only content
+            # Step 6b: Save text-only content
             txt_file = await self._save_question_text(content_to_use, question_number, exercise_number)
             if txt_file:
                 results['files_created'].append(str(txt_file))
             
-            # Step 8: Process and download images
+            # Step 7: Process and download images
             images_downloaded = await self._process_question_images(question_number, exercise_number)
             results['images_downloaded'] = images_downloaded
             
             # Add image file paths to files_created
             for img_info in images_downloaded:
                 results['files_created'].append(str(img_info['path']))
+            
+            # Step 8: Save metadata
+            print(f"Step 8: Saving metadata for question {question_number}...")
+            metadata = await self._create_question_metadata(
+                question_number,
+                exercise_number,
+                results['interaction_results'].get('question_type', 'unknown'),
+                images_downloaded
+            )
+            metadata_file = self.file_manager.save_question_metadata(
+                question_number,
+                exercise_number,
+                metadata
+            )
+            if metadata_file:
+                results['files_created'].append(str(metadata_file))
             
             results['success'] = True
             print(f"✓ Successfully processed question {question_number} with interaction")
@@ -284,14 +294,6 @@ class QuestionProcessorWorkflow:
             print(f"❌ Error taking screenshot for question {question_number}: {e}")
             return None
     
-    async def _take_pre_question_screenshot(self, question_number: int, exercise_number: int) -> Optional[Path]:
-        """Take a pre-interaction screenshot of the current question."""
-        try:
-            pre_screenshot_path = self.file_manager.get_pre_screenshot_path(question_number, exercise_number)
-            return await self.browser_manager.take_screenshot(str(pre_screenshot_path), full_page=True)
-        except Exception as e:
-            print(f"❌ Error taking pre-interaction screenshot for question {question_number}: {e}")
-            return None
     
     async def _save_question_content(
         self,
@@ -375,6 +377,42 @@ class QuestionProcessorWorkflow:
         except Exception as e:
             print(f"❌ Error processing images for question {question_number}: {e}")
             return []
+    
+    async def _create_question_metadata(
+        self,
+        question_number: int,
+        exercise_number: int,
+        question_type: str,
+        images_downloaded: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Create metadata for a question.
+        
+        Args:
+            question_number: Question number
+            exercise_number: Exercise number
+            question_type: Detected question type
+            images_downloaded: List of downloaded images with their info
+            
+        Returns:
+            Metadata dictionary
+        """
+        from datetime import datetime
+        
+        # Extract original image URLs from downloaded images
+        # The 'url' key contains the original source URL from the HTML
+        image_urls = [img.get('url', '') for img in images_downloaded if img.get('url')]
+        
+        metadata = {
+            'download_time': datetime.now().isoformat(),
+            'question_number': question_number,
+            'exercise_number': exercise_number,
+            'question_type': question_type,
+            'image_urls': image_urls,
+            'image_count': len(image_urls)
+        }
+        
+        return metadata
     
     def _generate_processing_summary(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate a summary of processing results."""

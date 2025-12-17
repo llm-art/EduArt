@@ -42,19 +42,23 @@ def retry_with_backoff(func, max_retries: int = 3, base_delay: float = 1.0):
 class LLMQuestioner:
     """Main orchestrator for LLM question evaluation."""
     
-    def __init__(self, models_to_test: Optional[List[str]] = None, question_mode: str = 'text'):
+    def __init__(self, models_to_test: Optional[List[str]] = None, question_mode: str = 'text',
+                 base_dir: Optional[Path] = None, prompts_dir: Optional[Path] = None):
         """
         Initialize LLM questioner.
         
         Args:
             models_to_test: List of model specifications to test
             question_mode: Question mode - 'text' or 'screenshot'
+            base_dir: Base directory for dataset operations (defaults to project root)
+            prompts_dir: Directory containing prompt templates (defaults to project prompts)
             
         Raises:
             ConfigurationError: If configuration is invalid
         """
-        self.config = QuestionerConfig()
+        self.config = QuestionerConfig(base_dir=base_dir)
         self.question_mode = question_mode
+        self.prompts_dir = Path(prompts_dir) if prompts_dir else None
         
         # Validate configuration
         errors = self.config.validate_configuration()
@@ -64,8 +68,9 @@ class LLMQuestioner:
         # Initialize components
         try:
             self.providers = create_providers_from_config(models_to_test)
-            self.question_parser = QuestionParser(question_mode=question_mode)
-            self.results_manager = ResultsManager(str(self.config.results_dir), question_mode=question_mode)
+            self.question_parser = QuestionParser(question_mode=question_mode, prompts_dir=prompts_dir)
+            self.results_manager = ResultsManager(str(self.config.results_dir), question_mode=question_mode,
+                                                 answers_base_dir=base_dir)
         except Exception as e:
             raise ConfigurationError(f"Failed to initialize components: {e}")
     
@@ -88,7 +93,11 @@ class LLMQuestioner:
             ProcessingError: If processing fails
         """
         # Load system prompt
-        system_prompt_path = Path(__file__).parent.parent.parent.parent / 'prompts' / 'answer_question.txt'
+        if self.prompts_dir:
+            system_prompt_path = self.prompts_dir / 'answer_question.txt'
+        else:
+            system_prompt_path = Path(__file__).parent.parent.parent.parent / 'prompts' / 'answer_question.txt'
+        
         try:
             with open(system_prompt_path, 'r') as f:
                 system_prompt = f.read().strip()

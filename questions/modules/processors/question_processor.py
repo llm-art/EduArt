@@ -20,12 +20,14 @@ from ..config import Config
 class QuestionProcessor:
     """Main orchestrator for question processing using OCR and vision models."""
     
-    def __init__(self, config: ProcessorConfig):
+    def __init__(self, config: ProcessorConfig, base_dir: Optional[Path] = None, prompts_dir: Optional[Path] = None):
         """
         Initialize question processor.
         
         Args:
             config: Processing configuration
+            base_dir: Base directory for data operations (defaults to myzanichelli)
+            prompts_dir: Directory containing prompt templates (defaults to project prompts)
         """
         self.config = config
         
@@ -33,14 +35,23 @@ class QuestionProcessor:
         self.ocr_service = OCRService()
         self.vision_service = VisionModelService()
         self.html_service = HTMLService()
-        self.prompt_manager = PromptManager()
-        self.json_manager = JSONManager()
+        
+        # Initialize managers with configurable paths
+        self.prompt_manager = PromptManager(prompts_dir=prompts_dir)
+        
+        # Determine base directory
+        if base_dir is None:
+            base_dir = Path(__file__).parent.parent.parent / "myzanichelli"
+        else:
+            base_dir = Path(base_dir)
+        
+        self.json_manager = JSONManager(base_path=str(base_dir / "structured"))
         
         # Set up service dependencies
         self.vision_service.set_prompt_manager(self.prompt_manager)
         
-        # Paths
-        self.base_path = Path(__file__).parent.parent.parent
+        # Paths - now configurable
+        self.base_path = base_dir
         self.data_path = self.base_path / "raw"
         self.output_path = self.base_path / "structured"
     
@@ -62,9 +73,9 @@ class QuestionProcessor:
             print(f"\n=== Processing Question {exercise}/{question} ===")
             
             # Step 1: Validate input files
-            image_path = self.data_path / f"{exercise}/raw/screenshot/{question}.png"
-            html_path = self.data_path / f"{exercise}/raw/html/{question}.html"
-            txt_path = self.data_path / f"{exercise}/raw/txt/{question}.txt"
+            image_path = self.data_path / f"{exercise}/screenshot/{question}.png"
+            html_path = self.data_path / f"{exercise}/html/{question}.html"
+            txt_path = self.data_path / f"{exercise}/txt/{question}.txt"
             
             if not image_path.exists():
                 raise FileOperationError(f"Image file not found: {image_path}")
@@ -431,8 +442,8 @@ class QuestionProcessor:
     def _extract_question_type_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Question type extraction step for LangChain pipeline."""
         try:
-            image_path = data["base_path"] / f"{data['exercise']}/raw/{data['question']}.png"
-            html_path = data["base_path"] / f"{data['exercise']}/raw/{data['question']}.html"
+            image_path = data["base_path"] / f"{data['exercise']}/screenshot/{data['question']}.png"
+            html_path = data["base_path"] / f"{data['exercise']}/html/{data['question']}.html"
             
             with open(html_path, 'r', encoding='utf-8') as f:
                 html_text = f.read()
@@ -451,8 +462,8 @@ class QuestionProcessor:
     def _extract_question_text_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Question text extraction step for LangChain pipeline."""
         try:
-            image_path = data["base_path"] / f"{data['exercise']}/raw/{data['question']}.png"
-            html_path = data["base_path"] / f"{data['exercise']}/raw/{data['question']}.html"
+            image_path = data["base_path"] / f"{data['exercise']}/screenshot/{data['question']}.png"
+            html_path = data["base_path"] / f"{data['exercise']}/html/{data['question']}.html"
             
             with open(html_path, 'r', encoding='utf-8') as f:
                 html_text = f.read()

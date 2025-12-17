@@ -13,19 +13,21 @@ from datetime import datetime
 class FileManager:
     """Manages file operations and directory structure."""
     
-    def __init__(self, base_dir: Optional[Path] = None):
+    def __init__(self, base_dir: Optional[Path] = None, data_subdir: str = "raw"):
         """
         Initialize FileManager.
         
         Args:
-            base_dir: Base directory for file operations. Defaults to script directory.
+            base_dir: Base directory for file operations. Defaults to myzanichelli directory.
+            data_subdir: Subdirectory name for data storage (default: "raw")
         """
         if base_dir is None:
-            self.base_dir = Path(__file__).parent.parent.parent.resolve()
+            # Default to myzanichelli directory
+            self.base_dir = Path(__file__).parent.parent.parent.resolve() / "myzanichelli"
         else:
             self.base_dir = Path(base_dir).resolve()
         
-        self.data_dir = self.base_dir / "raw"
+        self.data_dir = self.base_dir / data_subdir
     
     def create_exercise_directories(self, exercise_number: int) -> Dict[str, Path]:
         """
@@ -40,6 +42,7 @@ class FileManager:
         exercise_dir = self.data_dir / str(exercise_number)
         imgs_dir = exercise_dir / "imgs"
         logs_dir = exercise_dir / "logs"
+        metadata_dir = exercise_dir / "metadata"
         
         # Create subdirectories directly under exercise directory
         screenshot_dir = exercise_dir / "screenshot"
@@ -49,6 +52,7 @@ class FileManager:
         # Create all directories
         imgs_dir.mkdir(parents=True, exist_ok=True)
         logs_dir.mkdir(parents=True, exist_ok=True)
+        metadata_dir.mkdir(parents=True, exist_ok=True)
         screenshot_dir.mkdir(parents=True, exist_ok=True)
         html_dir.mkdir(parents=True, exist_ok=True)
         txt_dir.mkdir(parents=True, exist_ok=True)
@@ -59,6 +63,7 @@ class FileManager:
             'exercise': exercise_dir,
             'imgs': imgs_dir,
             'logs': logs_dir,
+            'metadata': metadata_dir,
             'screenshot': screenshot_dir,
             'html': html_dir,
             'txt': txt_dir
@@ -77,6 +82,7 @@ class FileManager:
         exercise_dir = self.data_dir / str(exercise_number)
         imgs_dir = exercise_dir / "imgs"
         logs_dir = exercise_dir / "logs"
+        metadata_dir = exercise_dir / "metadata"
         screenshot_dir = exercise_dir / "screenshot"
         html_dir = exercise_dir / "html"
         txt_dir = exercise_dir / "txt"
@@ -85,6 +91,7 @@ class FileManager:
             'exercise': exercise_dir,
             'imgs': imgs_dir,
             'logs': logs_dir,
+            'metadata': metadata_dir,
             'screenshot': screenshot_dir,
             'html': html_dir,
             'txt': txt_dir
@@ -233,19 +240,6 @@ class FileManager:
         dirs = self.get_exercise_directories(exercise_number)
         return dirs['screenshot'] / f"{question_number}.png"
     
-    def get_pre_screenshot_path(self, question_number: int, exercise_number: int) -> Path:
-        """
-        Get the path for a pre-interaction question screenshot in raw/screenshot/ directory.
-        
-        Args:
-            question_number: Question number
-            exercise_number: Exercise number
-            
-        Returns:
-            Path for the pre-interaction screenshot
-        """
-        dirs = self.get_exercise_directories(exercise_number)
-        return dirs['screenshot'] / f"{question_number}-pre.png"
     
     def get_image_path(
         self, 
@@ -355,6 +349,7 @@ class FileManager:
                 'exercise': str(dirs['exercise']),
                 'imgs': str(dirs['imgs']),
                 'logs': str(dirs['logs']),
+                'metadata': str(dirs['metadata']),
                 'screenshot': str(dirs['screenshot']),
                 'html': str(dirs['html']),
                 'txt': str(dirs['txt'])
@@ -383,3 +378,51 @@ class FileManager:
     def get_data_dir(self) -> Path:
         """Get the data directory."""
         return self.data_dir
+    
+    def save_question_metadata(
+        self,
+        question_number: int,
+        exercise_number: int,
+        metadata: Dict[str, Any]
+    ) -> Path:
+        """
+        Save question metadata to a JSON file.
+        
+        Args:
+            question_number: Question number
+            exercise_number: Exercise number
+            metadata: Metadata dictionary containing:
+                - download_time: ISO timestamp
+                - question_type: Type of question (multiple_choice, true_false, etc.)
+                - image_urls: List of image URLs
+            
+        Returns:
+            Path to the saved metadata file
+        """
+        import json
+        
+        dirs = self.create_exercise_directories(exercise_number)
+        metadata_file = dirs['metadata'] / f"{question_number}.json"
+        
+        try:
+            with open(metadata_file, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+            print(f"✓ Metadata saved: {metadata_file}")
+            return metadata_file
+        except Exception as e:
+            print(f"❌ Error saving metadata: {e}")
+            raise
+    
+    def get_metadata_path(self, question_number: int, exercise_number: int) -> Path:
+        """
+        Get the path for a question metadata file.
+        
+        Args:
+            question_number: Question number
+            exercise_number: Exercise number
+            
+        Returns:
+            Path for the metadata file
+        """
+        dirs = self.get_exercise_directories(exercise_number)
+        return dirs['metadata'] / f"{question_number}.json"

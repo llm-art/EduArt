@@ -64,7 +64,11 @@ def main(start, end, types, models, output, verbose):
         if verbose:
             print("\nInitializing LLM Questioner...")
         
-        questioner = LLMQuestioner(models_to_test=models_to_test)
+        # Set base and prompts directories
+        base_dir = Path(__file__).parent.parent  # datasets directory
+        prompts_dir = base_dir / "prompts"  # datasets/prompts
+        
+        questioner = LLMQuestioner(models_to_test=models_to_test, base_dir=base_dir, prompts_dir=prompts_dir)
         
         if verbose:
             questioner.print_status()

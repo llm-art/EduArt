@@ -30,13 +30,20 @@ class ZanichelliExerciseAutomator:
     Initialize the automator with all required components.
 
     Args:
-        config_path: Path to configuration file
-        base_dir: Base directory for file operations
+        config_path: Path to configuration file (relative to base_dir or absolute)
+        base_dir: Base directory for file operations (defaults to myzanichelli directory)
         verbose: Enable verbose output
     """
-    # Initialize core managers
-    self.config_manager = ConfigManager(config_path)
-    self.file_manager = FileManager(base_dir)
+    # Determine base directory
+    if base_dir is None:
+        # Default to myzanichelli directory
+        base_dir = Path(__file__).parent.parent / "myzanichelli"
+    else:
+        base_dir = Path(base_dir)
+    
+    # Initialize core managers with base_dir
+    self.config_manager = ConfigManager(config_path, base_dir=base_dir)
+    self.file_manager = FileManager(base_dir=base_dir)
     self.browser_manager = BrowserManager()
     self.verbose = verbose
 
@@ -593,10 +600,9 @@ class ZanichelliExerciseAutomator:
     """Create a log file for an exercise."""
     import datetime
 
-    # Create logs directory
-    logs_dir = self.file_manager.get_base_dir() / "data" / \
-        str(exercise_number) / "logs"
-    logs_dir.mkdir(parents=True, exist_ok=True)
+    # Get logs directory using file manager (creates if needed)
+    dirs = self.file_manager.create_exercise_directories(exercise_number)
+    logs_dir = dirs['logs']
 
     # Create log file with timestamp
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")

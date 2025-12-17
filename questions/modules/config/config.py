@@ -82,10 +82,14 @@ class Config:
 class ConfigManager:
     """Manages configuration loading and validation."""
     
-    def __init__(self, config_path: str = "config.json"):
+    def __init__(self, config_path: str = "config.json", base_dir: Optional[Path] = None):
         self.config_path = config_path
         self.config: Optional[dict] = None
-        self.script_dir = Path(__file__).parent.parent.parent.resolve()
+        # Allow base_dir to be passed; defaults to myzanichelli directory for backward compatibility
+        if base_dir is None:
+            self.script_dir = Path(__file__).parent.parent.parent.resolve() / "myzanichelli"
+        else:
+            self.script_dir = Path(base_dir).resolve()
     
     def load_config(self) -> bool:
         """
@@ -97,8 +101,11 @@ class ConfigManager:
         try:
             import json
             
-            # Always resolve config path relative to the script's directory
-            config_file = self.script_dir / self.config_path
+            # Resolve config path relative to the script's directory
+            if Path(self.config_path).is_absolute():
+                config_file = Path(self.config_path)
+            else:
+                config_file = self.script_dir / self.config_path
             
             if not config_file.exists():
                 raise FileNotFoundError(f"Config file not found: {config_file}")

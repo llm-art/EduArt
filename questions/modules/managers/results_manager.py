@@ -50,27 +50,34 @@ MODEL_COSTS = {
 class ResultsManager:
     """Manager for storing and exporting evaluation results."""
     
-    def __init__(self, results_dir: Optional[str] = None, question_mode: str = 'text'):
+    def __init__(self, results_dir: Optional[str] = None, question_mode: str = 'text', answers_base_dir: Optional[Path] = None):
         """
         Initialize results manager.
         
         Args:
             results_dir: Directory to store results (not used, kept for compatibility)
             question_mode: Question mode - 'text' or 'screenshot'
+            answers_base_dir: Base directory for answers folder. Should be passed from calling script.
+                            Defaults to None for backward compatibility (uses project root).
         """
         # Don't create results directory - we only use answers directory
         self.results: List[Dict[str, Any]] = []
         self.question_mode = question_mode
         
-        # Create answers directory structure at project root level (same level as questions/)
-        questions_dir = Path(__file__).parent.parent.parent
-        project_root = questions_dir.parent  # Go up one level from questions/ to project root
+        # Determine answers directory location
+        if answers_base_dir is None:
+            # Backward compatibility: default to project root
+            questions_dir = Path(__file__).parent.parent.parent
+            project_root = questions_dir.parent  # Go up one level from questions/ to project root
+            answers_base = project_root / 'answers'
+        else:
+            answers_base = Path(answers_base_dir) / 'answers'
         
         # Create mode-specific answers directory
         if question_mode == 'screenshot':
-            self.answers_dir = project_root / 'answers' / 'screenshot'
+            self.answers_dir = answers_base / 'screenshot'
         else:
-            self.answers_dir = project_root / 'answers' / 'text'
+            self.answers_dir = answers_base / 'text'
             
         self.answers_dir.mkdir(parents=True, exist_ok=True)
         self.answers_data_dir = self.answers_dir / 'data'

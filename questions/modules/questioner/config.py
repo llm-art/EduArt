@@ -10,15 +10,24 @@ from ..core.exceptions import ConfigurationError
 class QuestionerConfig:
     """Configuration for the LLM questioner."""
     
-    def __init__(self):
-        """Initialize configuration with environment variables."""
-        # Get the questions directory (parent of modules)
-        questions_dir = Path(__file__).parent.parent.parent.parent
+    def __init__(self, base_dir: Optional[Path] = None):
+        """
+        Initialize configuration with environment variables.
         
-        # Dataset paths relative to questions directory
-        # /home/vitadmin/gspinaci/datasets/dataset
-        self.dataset_dir = questions_dir / 'dataset' / 'data'
-        self.results_dir = questions_dir / 'results'
+        Args:
+            base_dir: Base directory for dataset operations (defaults to project root)
+        """
+        # Determine base directory
+        if base_dir is None:
+            # Default to project root (datasets directory)
+            questions_dir = Path(__file__).parent.parent.parent.parent
+            base_dir = questions_dir
+        else:
+            base_dir = Path(base_dir)
+        
+        # Dataset paths relative to base directory
+        self.dataset_dir = base_dir / 'dataset' / 'data'
+        self.results_dir = base_dir / 'results'
         
         # Ensure directories exist
         self.results_dir.mkdir(parents=True, exist_ok=True)

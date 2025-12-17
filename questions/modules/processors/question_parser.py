@@ -10,21 +10,33 @@ from ..core.exceptions import ProcessingError
 class QuestionParser:
     """Parser for extracting question data from TXT files."""
     
-    def __init__(self, question_mode: str = 'text'):
-        """Initialize the parser and load the appropriate prompt template."""
+    def __init__(self, question_mode: str = 'text', prompts_dir: Path = None):
+        """
+        Initialize the parser and load the appropriate prompt template.
+        
+        Args:
+            question_mode: Question mode - 'text' or 'screenshot'
+            prompts_dir: Directory containing prompt templates (defaults to project prompts)
+        """
         self.question_mode = question_mode
+        self.prompts_dir = Path(prompts_dir) if prompts_dir else None
         self._load_prompt_template()
     
     def _load_prompt_template(self):
         """Load the appropriate prompt template from the prompts directory."""
         try:
-            # Get the prompts directory relative to the questions directory
-            current_dir = Path(__file__).parent.parent.parent.parent  # Go up to datasets root
+            # Determine prompts directory
+            if self.prompts_dir:
+                prompts_dir = self.prompts_dir
+            else:
+                # Default: go up to datasets root
+                current_dir = Path(__file__).parent.parent.parent.parent
+                prompts_dir = current_dir / 'prompts'
             
             if self.question_mode == 'screenshot':
-                prompt_file = current_dir / 'prompts' / 'answer_question_screenshot.txt'
+                prompt_file = prompts_dir / 'answer_question_screenshot.txt'
             else:
-                prompt_file = current_dir / 'prompts' / 'answer_question.txt'
+                prompt_file = prompts_dir / 'answer_question.txt'
             
             with open(prompt_file, 'r', encoding='utf-8') as f:
                 self.prompt_template = f.read().strip()
@@ -273,7 +285,7 @@ class QuestionParser:
             List of PNG file paths
         """
         try:
-            # Get the dataset/raw directory
+            # Get the dataset/raw directory (use default path for backward compatibility)
             current_dir = Path(__file__).parent.parent.parent.parent  # Go up to datasets root
             raw_dir = current_dir / 'dataset' / 'raw'
             
@@ -322,7 +334,7 @@ class QuestionParser:
             List of additional image paths
         """
         try:
-            # Get the dataset/imgs directory
+            # Get the dataset/imgs directory (use default path for backward compatibility)
             current_dir = Path(__file__).parent.parent.parent.parent  # Go up to datasets root
             imgs_dir = current_dir / 'dataset' / 'imgs'
             
