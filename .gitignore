@@ -9,6 +9,7 @@ __pycache__/
 *.pyd
 .Python
 
+dataset/
 
 # IDE files
 .idea/

@@ -30,14 +30,12 @@
       ]
     },
     {
-      "name": "[3] Dataset bundler",
+      "name": "My_Zanichelli -  Dataset bundler",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/questions/3_dataset_bundler.py",
+      "program": "${workspaceFolder}/questions/myzanichelli/3_dataset_bundler.py",
       "console": "integratedTerminal",
-      "args": [
-        "--copy-preprocessed"
-      ]
+      "args": []
     },
         {
       "name": "[4] LLM Questioner",

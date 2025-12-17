@@ -2,8 +2,8 @@
 """
 Dataset Bundler Script
 
-This script reads JSON files from output/{exercise_number}/json/ directories,
-extracts question data to create TXT files, copies JSON files to metadata/, 
+This script reads JSON files from structured/{exercise_number}/json/ directories,
+extracts question data to create TXT files, copies JSON files to metadata/,
 and copies associated images to imgs/ folder with consistent naming.
 """
 
@@ -30,7 +30,6 @@ REPORT_CONFIG = {
         'version',
         'exercise_count',
         'question_count',
-        'questions_with_images',
         'questions_by_type',
         'ai_calls_summary',
         'cost_analysis'
@@ -260,57 +259,26 @@ def normalize_answers(json_data):
   return json_data
 
 
-def find_associated_image(json_file, json_data=None):
-  """Find associated image file for a JSON file by checking has_image field."""
-  # If json_data is not provided, read it from the file
-  if json_data is None:
-    try:
-      with open(json_file, 'r', encoding='utf-8') as f:
-        json_data = json.load(f)
-    except Exception as e:
-      print(f"Warning: Could not read JSON file {json_file}: {e}")
-      return None
-
-  # Check if the question has an image
-  has_image = json_data.get("has_image", False)
-  if not has_image:
+def find_associated_image(exercise_num, question_num):
+  """
+  Find associated image file for a question.
+  
+  Args:
+      exercise_num: Exercise number
+      question_num: Question number
+      
+  Returns:
+      Path to image file if found, None otherwise
+  """
+  if exercise_num is None or question_num is None:
     return None
-
-  # Get the image path from the JSON data
-  image_path = json_data.get("image", "")
-  if image_path and os.path.exists(image_path):
+  
+  # Look for image at the specific path
+  image_path = f"/home/vitadmin/gspinaci/datasets/questions/myzanichelli/raw/{exercise_num}/imgs/{question_num}.jpg"
+  
+  if os.path.exists(image_path):
     return image_path
-
-  # Fallback: try to find image using the old method if image path doesn't exist
-  path_parts = json_file.split(os.sep)
-  exercise_num = path_parts[-3]  # exercise number
-  # question number without .json
-  question_num = os.path.splitext(path_parts[-1])[0]
-
-  # Look for images in data/{exercise_num}/raw/ and data/{exercise_num}/imgs/
-  image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp']
-
-  # Determine the correct data path
-  data_base = "raw"
-  if os.path.exists("questions/myzanichelli/raw"):
-    data_base = "questions/myzanichelli/raw"
-
-  # Check imgs folder first (processed images)
-  imgs_folder = os.path.join(data_base, exercise_num, "imgs")
-  if os.path.exists(imgs_folder):
-    for ext in image_extensions:
-      fallback_path = os.path.join(imgs_folder, f"{question_num}{ext}")
-      if os.path.exists(fallback_path):
-        return fallback_path
-
-  # Check screenshot folder as fallback
-  screenshot_folder = os.path.join(data_base, exercise_num, "screenshot")
-  if os.path.exists(screenshot_folder):
-    for ext in image_extensions:
-      fallback_path = os.path.join(screenshot_folder, f"{question_num}{ext}")
-      if os.path.exists(fallback_path):
-        return fallback_path
-
+  
   return None
 
 
@@ -494,20 +462,14 @@ def get_previous_version(dataset_dir):
   return None
 
 
-def collect_statistics_from_metadata(metadata_files, imgs_dir):
+def collect_statistics_from_metadata(metadata_files):
   """Collect statistics about the dataset from processed metadata files."""
   stats = {
       'exercises': set(),
       'total_questions': len(metadata_files),
-      'questions_with_images': 0,
       'questions_by_type': defaultdict(int),
       'ai_calls': {}
   }
-
-  # Count questions with images
-  if os.path.exists(imgs_dir):
-    image_files = glob.glob(os.path.join(imgs_dir, "*"))
-    stats['questions_with_images'] = len(image_files)
 
   # Process each metadata JSON file to get exercise numbers, question types, and AI calls
   for json_file in metadata_files:
@@ -632,8 +594,6 @@ def generate_report(start_time, end_time, stats, dataset_dir, version):
 
 **Number of Questions:** {stats['total_questions']}
 
-**Number of Questions with Images:** {stats['questions_with_images']}
-
 **Total Cost:** ${total_cost:.4f}
 
 ## Questions by Type
@@ -709,7 +669,6 @@ def generate_metadata(start_time, end_time, stats, dataset_dir, version):
       "version": version,
       "exercise_count": len(stats['exercises']),
       "question_count": stats['total_questions'],
-      "questions_with_images": stats['questions_with_images'],
       "questions_by_type": dict(stats['questions_by_type']),
       "exercises": sorted(list(stats['exercises'])),
       "ai_calls": ai_calls_list,
@@ -719,84 +678,10 @@ def generate_metadata(start_time, end_time, stats, dataset_dir, version):
   return metadata
 
 
-def copy_preprocessed_images(dataset_dir, processed_metadata_files):
-  """
-  Optional function to copy images with 'pre_' prefix from raw/ folders
-  to dataset/raw/ with sequential IDs matching the main dataset processing.
-  """
-  # Determine the correct data path
-  data_base = "raw"
-  if os.path.exists("questions/myzanichelli/raw"):
-    data_base = "questions/myzanichelli/raw"
-
-  if not os.path.exists(data_base):
-    print(f"Warning: Data directory '{data_base}' not found")
-    return
-
-  # Create dataset/raw directory if it doesn't exist
-  dataset_raw_dir = os.path.join(dataset_dir, "raw")
-  os.makedirs(dataset_raw_dir, exist_ok=True)
-
-  copied_count = 0
-  image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp']
-
-  # Process metadata files in the same order as main processing
-  for metadata_file in processed_metadata_files:
-    try:
-      # Read the metadata to get exercise and question info
-      with open(metadata_file, 'r', encoding='utf-8') as f:
-        json_data = json.load(f)
-
-      # Get the file ID from the metadata filename (e.g., "0001.json" -> "0001")
-      metadata_filename = os.path.basename(metadata_file)
-      file_id = os.path.splitext(metadata_filename)[0]
-
-      # Extract exercise and question numbers from the metadata
-      exercise_num = json_data.get("exercise")
-      question_num = json_data.get("question")
-
-      if exercise_num is None or question_num is None:
-        continue
-
-      # Look for preprocessed image in screenshot folder
-      screenshot_folder = os.path.join(data_base, str(exercise_num), "screenshot")
-      if not os.path.exists(screenshot_folder):
-        continue
-
-      # Try to find the preprocessed image
-      found_image = None
-      for ext in image_extensions:
-        pre_image_path = os.path.join(screenshot_folder, f"pre_{question_num}{ext}")
-        if os.path.exists(pre_image_path):
-          found_image = pre_image_path
-          break
-
-      if found_image:
-        # Get the extension from the found image
-        image_ext = os.path.splitext(found_image)[1]
-        # Copy to dataset/raw/ with sequential ID
-        dest_filename = f"{file_id}{image_ext}"
-        dest_path = os.path.join(dataset_raw_dir, dest_filename)
-        shutil.copy2(found_image, dest_path)
-        print(f"Copied preprocessed image: {found_image} -> {dest_path}")
-        copied_count += 1
-
-    except Exception as e:
-      print(
-        f"Warning: Could not process preprocessed image for {metadata_file}: {e}")
-      continue
-
-  if copied_count > 0:
-    print(f"Copied {copied_count} preprocessed images to {dataset_raw_dir}")
-  else:
-    print("No preprocessed images with 'pre_' prefix found")
-
-
 @click.command()
 @click.option('--version', type=float, help='Specify version number for the report')
-@click.option('--copy-preprocessed', is_flag=True, help='Copy images with pre_ prefix from raw/ folders')
 @click.option('--output-dir', default='dataset', help='Output directory for the dataset (default: dataset)')
-def main(version, copy_preprocessed, output_dir):
+def main(version, output_dir):
   """Main function to process all JSON files and create dataset."""
   start_time = datetime.now()
 
@@ -873,19 +758,18 @@ def main(version, copy_preprocessed, output_dir):
         json.dump(json_data, f, indent=2, ensure_ascii=False)
 
       # Look for and copy associated image
-      image_file = find_associated_image(json_file, json_data)
+      exercise_num = json_data.get("exercise")
+      question_num = json_data.get("question")
+      image_file = find_associated_image(exercise_num, question_num)
+      
       if image_file:
-        # Get image extension
-        image_path_obj = Path(image_file)
-        ext = image_path_obj.suffix
-        image_filename = f"{file_id}{ext}"
+        # Copy image with same file_id as the text and json files
+        image_filename = f"{file_id}.jpg"
         image_dest_path = imgs_dir / image_filename
         shutil.copy2(image_file, image_dest_path)
-        print(
-          f"Processed: {json_file} -> {file_id}.txt, {file_id}.json, {file_id}{ext}")
+        print(f"Processed: {json_file} -> {file_id}.txt, {file_id}.json, {file_id}.jpg")
       else:
-        print(
-          f"Processed: {json_file} -> {file_id}.txt, {file_id}.json (no image)")
+        print(f"Processed: {json_file} -> {file_id}.txt, {file_id}.json (no image)")
 
       processed_files.append(json_file)
       processed_metadata_files.append(str(json_path))
@@ -902,8 +786,7 @@ def main(version, copy_preprocessed, output_dir):
                   processed_files, start_time, end_time)
 
   # Collect statistics
-  stats = collect_statistics_from_metadata(
-    processed_metadata_files, str(imgs_dir))
+  stats = collect_statistics_from_metadata(processed_metadata_files)
 
   # Calculate version once for both files
   if version is None:
@@ -925,11 +808,6 @@ def main(version, copy_preprocessed, output_dir):
   metadata_file = dataset_path / REPORT_CONFIG['metadata_filename']
   with open(metadata_file, 'w', encoding='utf-8') as f:
     json.dump(metadata, f, indent=2, ensure_ascii=False)
-
-  # Copy preprocessed images if requested
-  if copy_preprocessed:
-    print(f"\nCopying preprocessed images...")
-    copy_preprocessed_images(dataset_dir, processed_metadata_files)
 
   print(f"\nProcessing complete!")
   print(f"Processed {len(processed_files)} files")
