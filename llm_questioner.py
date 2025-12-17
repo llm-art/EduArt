@@ -13,18 +13,18 @@ Features:
 - Results stored in answers/ folder with metadata
 
 Usage:
-    python 4_llm_questioner.py --start 1 --end 10 --models google-gemini-2.5-flash-lite
-    python 4_llm_questioner.py --models model1 --models model2 --models model3
-    python 4_llm_questioner.py --types multiple_choice,true_false
-    python 4_llm_questioner.py --output my_results.csv
+    python llm_questioner.py --start 1 --end 10 --models google-gemini-2.5-flash-lite
+    python llm_questioner.py --models model1 --models model2 --models model3
+    python llm_questioner.py --types multiple_choice,true_false
+    python llm_questioner.py --output my_results.csv
 """
 
 import click
 from pathlib import Path
 import sys
 
-# Add parent directory to path for shared modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add questions directory to path for shared modules
+sys.path.insert(0, str(Path(__file__).parent / "questions"))
 
 # Import modular components
 from modules.questioner import LLMQuestioner
@@ -65,7 +65,7 @@ def main(start, end, types, models, output, verbose):
             print("\nInitializing LLM Questioner...")
         
         # Set base and prompts directories
-        base_dir = Path(__file__).parent.parent  # datasets directory
+        base_dir = Path(__file__).parent  # datasets directory
         prompts_dir = base_dir / "prompts"  # datasets/prompts
         
         questioner = LLMQuestioner(models_to_test=models_to_test, base_dir=base_dir, prompts_dir=prompts_dir)

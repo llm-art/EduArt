@@ -18,7 +18,8 @@ You are an expert Art History student taking a MANDATORY exam. You MUST answer e
     "text": "",
     "explanation": "Brief reasoning for this answer (1-2 sentences)"
   },...
-  ]
+  ],
+  "Motivation": "Overall reasoning explaining your decision-making process for all answers (2-3 sentences)"
 }}
 
 # CRITICAL OUTPUT RULES:

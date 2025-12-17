@@ -120,6 +120,7 @@ class AnswerEvaluator:
             
             response_data = json.loads(llm_response)
             parsed_response = response_data.get('Answers', [])
+            motivation = response_data.get('Motivation', '')
             
             # Route to appropriate evaluation function based on question type
             # ID-only evaluation (text is ignored)
@@ -142,6 +143,7 @@ class AnswerEvaluator:
                 }
             
             evaluation["llm_answer"] = response_data
+            evaluation["motivation"] = motivation
             
             return evaluation
             

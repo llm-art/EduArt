@@ -30,31 +30,31 @@
       ]
     },
     {
-      "name": "My_Zanichelli -  Dataset bundler",
+      "name": "My_Zanichelli - Dataset bundler",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/questions/myzanichelli/3_dataset_bundler.py",
       "console": "integratedTerminal",
       "args": []
     },
-        {
-      "name": "[4] LLM Questioner",
+    {
+      "name": "LLM Questioner",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/questions/4_llm_questioner.py",
+      "program": "${workspaceFolder}/llm_questioner.py",
       "console": "integratedTerminal",
       "args": [
         "--start", "1",
-        "--end", "50",
+        "--end", "5",
         // OpenAI models
         //"--models", "openai/gpt-4.1-2025-04-14",
         //"--models", "openai/gpt-5-2025-08-07",
         //"--models", "openai/o3-2025-04-16",
 
         // Google models
-        "--models", "google/gemini-2.5-pro",
+        //"--models", "google/gemini-2.5-pro",
         //"--models", "google/gemini-2.5-flash",
-        //"--models", "google/gemini-2.5-flash-lite",
+        "--models", "google/gemini-2.5-flash-lite",
 
         // Anthropic models
         //"--models", "anthropic/claude-haiku-4-5-20251001",

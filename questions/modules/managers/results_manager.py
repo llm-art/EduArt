@@ -56,7 +56,7 @@ class ResultsManager:
         
         Args:
             results_dir: Directory to store results (not used, kept for compatibility)
-            question_mode: Question mode - 'text' or 'screenshot'
+            question_mode: Question mode - 'text' or 'screenshot' (kept for compatibility, but no longer creates subdirectories)
             answers_base_dir: Base directory for answers folder. Should be passed from calling script.
                             Defaults to None for backward compatibility (uses project root).
         """
@@ -73,15 +73,10 @@ class ResultsManager:
         else:
             answers_base = Path(answers_base_dir) / 'answers'
         
-        # Create mode-specific answers directory
-        if question_mode == 'screenshot':
-            self.answers_dir = answers_base / 'screenshot'
-        else:
-            self.answers_dir = answers_base / 'text'
-            
+        # Create answers directory directly without mode-specific or data subdirectories
+        self.answers_dir = answers_base
         self.answers_dir.mkdir(parents=True, exist_ok=True)
-        self.answers_data_dir = self.answers_dir / 'data'
-        self.answers_data_dir.mkdir(parents=True, exist_ok=True)
+        self.answers_data_dir = self.answers_dir  # Model folders go directly in answers/
         
         # Track AI calls for metadata and processed models
         self.ai_calls: List[Dict[str, Any]] = []
@@ -126,7 +121,7 @@ class ResultsManager:
             question_type: Type of question
             llm_answer: LLM response
             correct_answer: Correct answer
-            evaluation: Evaluation results (now includes metrics, confidence_level, error_analysis)
+            evaluation: Evaluation results (now includes metrics, confidence_level, error_analysis, motivation)
             processing_time: Time taken to process
             error: Error message if any
             question_data: Additional question data for individual JSON files
@@ -150,7 +145,8 @@ class ResultsManager:
             'output_tokens': output_tokens,
             # Enhanced metrics
             'metrics': evaluation.get('metrics', {}),
-            'error_analysis': evaluation.get('error_analysis', {})
+            'error_analysis': evaluation.get('error_analysis', {}),
+            'motivation': evaluation.get('motivation', '')
         }
         
         self.results.append(result)
@@ -241,6 +237,10 @@ class ResultsManager:
             # Add error analysis if available
             if 'error_analysis' in result and result['error_analysis']:
                 evaluation_data['error_analysis'] = result['error_analysis']
+            
+            # Add motivation if available
+            if 'motivation' in result and result['motivation']:
+                evaluation_data['motivation'] = result['motivation']
             
             individual_result['evaluation'] = evaluation_data
             
@@ -753,15 +753,14 @@ This directory contains the results of evaluating Large Language Models (LLMs) o
 answers/
 ├── metadata.json          # Comprehensive evaluation metadata
 ├── README.md             # This file
-└── data/                 # Individual question results organized by model
-    ├── google_gemini-2.5-flash-lite/
-    │   ├── 0001.json     # Results for question 0001
-    │   ├── 0002.json     # Results for question 0002
-    │   └── ...           # More question results
-    ├── openai_gpt-4o/
-    │   ├── 0001.json     # Results for question 0001
-    │   └── ...           # More question results
-    └── ...               # More model folders
+├── google_gemini-2.5-flash-lite/
+│   ├── 0001.json         # Results for question 0001
+│   ├── 0002.json         # Results for question 0002
+│   └── ...               # More question results
+├── openai_gpt-4o/
+│   ├── 0001.json         # Results for question 0001
+│   └── ...               # More question results
+└── ...                   # More model folders
 ```
 
 ## Question Types Distribution
@@ -875,6 +874,6 @@ answers/
         print(f"\nAnswers folder structure created at: {self.answers_dir}")
         print(f"- metadata.json: Comprehensive evaluation metadata")
         print(f"- README.md: Human-readable summary and analysis")
-        print(f"- data/: Individual question results organized by model ({total_files} total files)")
+        print(f"- Model folders: Individual question results organized by model ({total_files} total files)")
         for folder_info in model_folders:
             print(folder_info)
