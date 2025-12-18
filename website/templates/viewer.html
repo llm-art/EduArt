@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Answer Viewer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f7fa;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 25px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 1000;
+    }
+
+    .navbar-title {
+      font-size: 1.5em;
+      font-weight: 700;
+      margin-right: auto;
+    }
+
+    .navbar-info {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .info-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .model-select {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 200px;
+      transition: all 0.3s ease;
+    }
+
+    .model-select:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .model-select option {
+      background: #667eea;
+      color: white;
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+      font-weight: 600;
+      color: #333;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .question-list {
+      padding: 10px 0;
+    }
+
+    .question-item {
+      padding: 15px 20px;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      transition: all 0.2s ease;
+      color: #333;
+    }
+
+    .question-item:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .question-item.active {
+      background: #e7eaff;
+      border-left-color: #667eea;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .question-id {
+      font-size: 1em;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .loading,
+    .no-selection {
+      text-align: center;
+      padding: 100px 20px;
+      color: #999;
+      font-size: 1.2em;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* Panel Styles */
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .panel-header {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #667eea;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Question Panel */
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+
+    .question-text {
+      font-size: 1.1em;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .question-type-badge {
+      display: inline-block;
+      background: #e7eaff;
+      color: #667eea;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+
+    .choices {
+      margin-top: 15px;
+    }
+
+    .choice-item {
+      background: #f8f9fa;
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      border-left: 4px solid #e9ecef;
+      display: flex;
+      gap: 10px;
+    }
+
+    .choice-item.correct {
+      background: #d4edda;
+      border-left-color: #28a745;
+    }
+
+    .choice-item.selected {
+      background: #fff3cd;
+      border-left-color: #ffc107;
+    }
+
+    .choice-id {
+      font-weight: 600;
+      color: #667eea;
+      min-width: 30px;
+    }
+
+    .prompt-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em;
+      line-height: 1.6;
+      overflow-x: auto;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    /* Answer Panel */
+    .evaluation-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+
+    .evaluation-status.correct {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .evaluation-status.incorrect {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .evaluation-status::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .evaluation-status.correct::before {
+      background: #28a745;
+    }
+
+    .evaluation-status.incorrect::before {
+      background: #dc3545;
+    }
+
+    .score-display {
+      font-size: 2em;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+
+    .answer-item {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 2px solid #e9ecef;
+    }
+
+    .answer-label {
+      font-weight: 600;
+      color: #667eea;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      margin-top: 15px;
+    }
+
+    .answer-label:first-child {
+      margin-top: 0;
+    }
+
+    .answer-id {
+      font-weight: 700;
+      color: #667eea;
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .answer-text {
+      font-size: 1.1em;
+      color: #333;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .answer-explanation {
+      background: #f8f9fa;
+      color: #666;
+      line-height: 1.6;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 3px solid #667eea;
+    }
+
+    .motivation-box {
+      background: #fff9e6;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #ffc107;
+      color: #856404;
+      line-height: 1.6;
+    }
+
+    .motivation-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #856404;
+    }
+
+    /* Image Display */
+    .question-image {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin: 15px auto;
+      display: block;
+    }
+
+    /* Metrics */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .metric-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.4em;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .metric-label {
+      font-size: 0.85em;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .error-box {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .details-box {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      color: #856404;
+    }
+
+    @media (max-width: 1200px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-title">🔍 Answer Viewer</div>
+    <div class="navbar-info">
+      <div class="info-group">
+        <span class="info-label">Model:</span>
+        <select id="modelSelect" class="model-select">
+          <option value="">Select a model...</option>
+        </select>
+      </div>
+      <div class="info-group" id="questionInfo" style="display: none;">
+        <span class="info-label">Question:</span>
+        <span id="currentQuestion">-</span>
+      </div>
+      <div class="info-group" id="typeInfo" style="display: none;">
+        <span class="info-label">Type:</span>
+        <span id="currentType">-</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">Questions</div>
+      <div id="questionList" class="question-list">
+        <div style="padding: 20px; text-align: center; color: #999;">
+          Select a model to load questions
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <div id="noSelection" class="no-selection">
+        👆 Select a model and question to begin
+      </div>
+      <div id="loading" class="loading" style="display: none;">
+        Loading question data...
+      </div>
+      <div id="content" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentModel = null;
+    let currentQuestion = null;
+
+    // Load models on page load
+    async function loadModels() {
+        try {
+            const response = await fetch('/api/models');
+            const models = await response.json();
+            
+            const select = document.getElementById('modelSelect');
+            select.innerHTML = '<option value="">Select a model...</option>';
+            
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                select.appendChild(option);
+            });
+            
+            // Auto-select first model if available
+            if (models.length > 0) {
+                select.value = models[0];
+                currentModel = models[0];
+                await loadQuestions(models[0]);
+            }
+        } catch (error) {
+            console.error('Failed to load models:', error);
+        }
+    }
+
+    // Model selection handler
+    document.getElementById('modelSelect').addEventListener('change', async (e) => {
+      const model = e.target.value;
+      if (!model) return;
+
+      currentModel = model;
+      await loadQuestions(model);
+    });
+
+    // Load questions for a model
+    async function loadQuestions(model) {
+      try {
+        const response = await fetch(`/api/questions/${model}`);
+        const questions = await response.json();
+
+        const listDiv = document.getElementById('questionList');
+
+        if (questions.length === 0) {
+          listDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No questions found</div>';
+          return;
+        }
+
+        listDiv.innerHTML = '';
+        questions.forEach(question => {
+          const div = document.createElement('div');
+          div.className = 'question-item';
+          div.innerHTML = `<div class="question-id">${question}</div>`;
+          div.onclick = () => selectQuestion(question, div);
+          listDiv.appendChild(div);
+        });
+      } catch (error) {
+        console.error('Failed to load questions:', error);
+      }
+    }
+
+    // Select a question
+    async function selectQuestion(question, element) {
+      // Update active state
+      document.querySelectorAll('.question-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      element.classList.add('active');
+
+      currentQuestion = question;
+
+      // Update navbar
+      document.getElementById('questionInfo').style.display = 'flex';
+      document.getElementById('currentQuestion').textContent = question;
+
+      // Load question data
+      await loadQuestionData(currentModel, question);
+    }
+
+    // Load question data
+    async function loadQuestionData(model, question) {
+      document.getElementById('noSelection').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('content').style.display = 'none';
+
+      try {
+        const response = await fetch(`/api/question/${model}/${question}`);
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        displayQuestionData(data);
+      } catch (error) {
+        document.getElementById('loading').innerHTML = `
+                    <div class="error-box">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+      }
+    }
+
+    // Helper function to escape HTML and handle line breaks
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Display question data
+    function displayQuestionData(data) {
+      document.getElementById('loading').style.display = 'none';
+      const contentDiv = document.getElementById('content');
+      contentDiv.style.display = 'block';
+
+      const questionData = data.question_data || {};
+      const evaluation = data.evaluation || {};
+
+      // Update navbar type
+      document.getElementById('typeInfo').style.display = 'flex';
+      document.getElementById('currentType').textContent = questionData.question_type || 'Unknown';
+
+      let html = '<div class="content-grid">';
+
+      // Left Panel - Question
+      html += `
+                <div class="panel">
+                    <div class="panel-header">📝 Question</div>
+            `;
+
+      // Add image if available
+      if (questionData.has_image && questionData.image_path) {
+        html += `
+                    <div class="section">
+                        <img src="/images/${questionData.image_path}" class="question-image" alt="Question Image">
+                    </div>
+                `;
+      }
+
+      // Add title if available
+      if (questionData.question_title) {
+        html += `
+                    <div class="section">
+                        <div class="section-title">Title</div>
+                        <div class="question-text" style="font-weight: 600;">${escapeHtml(questionData.question_title)}</div>
+                    </div>
+                `;
+      }
+
+      html += `
+                    <div class="section">
+                        <div class="section-title">Question Text</div>
+                        <div class="question-text">${escapeHtml(questionData.question_text || 'N/A')}</div>
+                        <span class="question-type-badge">${escapeHtml(questionData.question_type || 'unknown')}</span>
+                    </div>
+            `;
+
+      // Display choices if available
+      const choices = questionData.choices || [];
+      if (choices.length > 0) {
+        const correctIds = new Set((questionData.correct_answers || []).map(a => a.id));
+        html += `
+                    <div class="section">
+                        <div class="section-title">Answer Choices</div>
+                        <div class="choices">
+                `;
+        choices.forEach(choice => {
+          const isCorrect = correctIds.has(choice.id);
+          html += `
+                        <div class="choice-item ${isCorrect ? 'correct' : ''}">
+                            <span class="choice-id">${escapeHtml(choice.id)}.</span>
+                            <span>${escapeHtml(choice.text)}</span>
+                        </div>
+                    `;
+        });
+        html += `</div></div>`;
+      }
+
+      html += `</div>`;
+
+      // Right Panel - AI Response
+      html += `
+                <div class="panel">
+                    <div class="panel-header">🤖 AI Response</div>
+                    
+                    <div class="section">
+                        <div class="section-title">Evaluation</div>
+                        ${renderEvaluation(evaluation)}
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">AI Answer</div>
+                        ${renderParsedAnswer(evaluation.llm_answer)}
+                    </div>
+            `;
+
+      if (evaluation.details) {
+        html += `
+                    <div class="section">
+                        <div class="section-title">Details</div>
+                        <div class="details-box">${escapeHtml(evaluation.details)}</div>
+                    </div>
+                `;
+      }
+
+      if (evaluation.error) {
+        html += `
+                    <div class="section">
+                        <div class="section-title">Error</div>
+                        <div class="error-box">${escapeHtml(evaluation.error)}</div>
+                    </div>
+                `;
+      }
+
+      // Metrics
+      html += `
+                    <div class="section">
+                        <div class="section-title">Metrics</div>
+                        ${renderMetrics(data.ai_calls)}
+                    </div>
+                </div>
+            `;
+
+      html += '</div>'; // End content-grid
+
+      contentDiv.innerHTML = html;
+    }
+
+    // Render evaluation status
+    function renderEvaluation(evaluation) {
+      const isCorrect = evaluation.is_correct === true;
+      return `
+                <div class="evaluation-status ${isCorrect ? 'correct' : 'incorrect'}">
+                    ${isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                </div>
+                <div class="score-display">Score: ${evaluation.score !== undefined ? evaluation.score : 'N/A'}</div>
+            `;
+    }
+
+    // Render parsed answer (already an object from backend)
+    function renderParsedAnswer(llmAnswer) {
+        if (!llmAnswer) return '<p>No answer available</p>';
+        
+        let html = '';
+        
+        // Display answers (note: property is "Answers" with capital A)
+        if (llmAnswer.Answers && Array.isArray(llmAnswer.Answers) && llmAnswer.Answers.length > 0) {
+            html += '<div class="answer-label">Answer</div>';
+            llmAnswer.Answers.forEach((answer) => {
+                html += `
+                    <div class="answer-item">
+                        <div class="answer-id">${escapeHtml(answer.id || '')}</div>
+                        <div class="answer-text">${escapeHtml(answer.text || '')}</div>
+                        
+                        ${answer.explanation ? `
+                            <div class="answer-label">Explanation</div>
+                            <div class="answer-explanation">
+                                ${escapeHtml(answer.explanation)}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+        }
+        
+        // Display motivation (note: property is "Motivation" with capital M)
+        if (llmAnswer.Motivation) {
+            html += `
+                <div class="answer-label">Motivation</div>
+                <div class="motivation-box">
+                    ${escapeHtml(llmAnswer.Motivation)}
+                </div>
+            `;
+        }
+        
+        return html || '<p>No answer data available</p>';
+    }
+
+    // Render metrics
+    function renderMetrics(aiCalls) {
+      if (!aiCalls || aiCalls.length === 0) {
+        return '<p>No metrics available</p>';
+      }
+
+      const call = aiCalls[0];
+      return `
+                <div class="metrics">
+                    <div class="metric-card">
+                        <div class="metric-value">${call.input_tokens || 0}</div>
+                        <div class="metric-label">Input Tokens</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${call.output_tokens || 0}</div>
+                        <div class="metric-label">Output Tokens</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${call.total_tokens || 0}</div>
+                        <div class="metric-label">Total Tokens</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${call.processing_time ? call.processing_time.toFixed(2) + 's' : 'N/A'}</div>
+                        <div class="metric-label">Processing Time</div>
+                    </div>
+                </div>
+            `;
+    }
+
+    // Parse choices from prompt
+    function parseChoices(prompt) {
+      const choices = [];
+      const lines = prompt.split('\n');
+      let inChoices = false;
+
+      for (const line of lines) {
+        if (line.includes('Choices:')) {
+          inChoices = true;
+          continue;
+        }
+
+        if (inChoices && line.trim()) {
+          const match = line.match(/^([A-Z])\.\s*(.+)$/);
+          if (match) {
+            choices.push({ id: match[1], text: match[2] });
+          } else if (!line.match(/^[A-Z]\./)) {
+            break;
+          }
+        }
+      }
+
+      return choices;
+    }
+
+    // Initialize
+    loadModels();
+  </script>
+</body>
+
+</html>
