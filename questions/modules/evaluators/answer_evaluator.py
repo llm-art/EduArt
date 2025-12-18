@@ -111,13 +111,28 @@ class AnswerEvaluator:
         """
         try:
             # Clean and extract JSON from response
-            llm_response = llm_response.replace("```json","").replace("```", "")
+            original_response = llm_response
+            llm_response = llm_response.replace("```json","").replace("```", "").strip()
             
-            # Try to extract JSON if there's extra text (common with Claude/Anthropic)
-            json_match = re.search(r'\{[\s\S]*"Answers"[\s\S]*\}', llm_response)
-            if json_match:
-                llm_response = json_match.group(0)
+            # Fix common JSON formatting issues from LLMs
+            # Remove double braces that some LLMs add
+            llm_response = re.sub(r'^\{\{', '{', llm_response)
+            llm_response = re.sub(r'\}\}$', '}', llm_response)
             
+            # Attempt to fix incomplete JSON responses
+            # Count opening and closing braces and brackets
+            open_braces = llm_response.count('{')
+            close_braces = llm_response.count('}')
+            open_brackets = llm_response.count('[')
+            close_brackets = llm_response.count(']')
+            
+            # Add missing closing brackets/braces
+            if close_brackets < open_brackets:
+                llm_response += ']' * (open_brackets - close_brackets)
+            if close_braces < open_braces:
+                llm_response += '}' * (open_braces - close_braces)
+            
+            # Try to parse the JSON
             response_data = json.loads(llm_response)
             parsed_response = response_data.get('Answers', [])
             motivation = response_data.get('Motivation', '')

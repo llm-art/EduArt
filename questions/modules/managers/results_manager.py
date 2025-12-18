@@ -219,7 +219,7 @@ class ResultsManager:
             evaluation_data = {
                 'model_name': result['model_name'],
                 'question_type': result['question_type'],
-                'llm_answer': result['llm_answer'],
+                'llm_answer': result['llm_answer'],  # Keep as dict/object, not string
                 'correct_answer': result['correct_answer'],
                 'is_correct': result['is_correct'],
                 'score': result['score'],

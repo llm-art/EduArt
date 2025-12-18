@@ -204,7 +204,7 @@ class LLMQuestioner:
                         question_id=question_id,
                         model_name=model_name,
                         question_type=question_type,
-                        llm_answer=str(evaluation.get("llm_answer", llm_response)),
+                        llm_answer=evaluation.get("llm_answer", llm_response),
                         correct_answer=correct_answer_str,
                         evaluation=evaluation,
                         processing_time=processing_time,
