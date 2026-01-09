@@ -1,0 +1,62 @@
+Analyze this image of AP Art History exam questions and extract ALL questions visible on this page.
+
+IMPORTANT - CHECK IF THIS IS A REAL QUESTION PAGE:
+- If this page is ONLY a cover page, title page, or instructions page with NO actual numbered questions, return: {{"has_questions": false, "reason": "cover page"}}
+- Cover pages typically contain only: title, copyright information, College Board logo, general information
+- Instruction pages may contain directions but NO numbered questions with answer choices
+- Only process pages that contain actual numbered questions (e.g., "1. The subject of both works...")
+
+IMPORTANT: This page may contain MULTIPLE questions (e.g., questions 1-7). Extract ALL of them.
+
+EXTRACTION REQUIREMENTS:
+- Identify each question by its number (1., 2., 3., etc.)
+- Extract the question text and all choices for EACH question
+- Return an array of question objects
+- If NO questions are found, return {{"has_questions": false, "reason": "no numbered questions found"}}
+
+SCHEMA:
+{{
+  "page_header": "text describing which questions this page contains (e.g., 'Questions 1-7 are based on...')",
+  "image_reference": "description of referenced images if mentioned in header",
+  "questions": [
+    {{
+      "question_number": 1,
+      "question_text": "The subject of both works centers on the",
+      "choices": [
+        {{"id": "A", "text": "Nativity"}},
+        {{"id": "B", "text": "Lamentation"}},
+        {{"id": "C", "text": "Annunciation"}},
+        {{"id": "D", "text": "Crucifixion"}}
+      ]
+    }},
+    {{
+      "question_number": 2,
+      "question_text": "Both works come from which art-historical period?",
+      "choices": [
+        {{"id": "A", "text": "Baroque"}},
+        {{"id": "B", "text": "Renaissance"}},
+        {{"id": "C", "text": "Rococo"}},
+        {{"id": "D", "text": "Classical"}}
+      ]
+    }}
+    // ... more questions if present
+  ]
+}}
+
+STRICT REQUIREMENTS:
+- If this is NOT a question page (cover/title/instructions only), return: {{"has_questions": false, "reason": "cover page"}}
+- If this IS a question page, return ONLY the JSON object specified in the schema above
+- Extract ALL questions visible on the page
+- Each question must have question_number, question_text, and choices
+- Preserve exact question wording and choice order
+- Use null for missing data
+- DO NOT add comments or explanations outside the JSON
+- If the questions array is empty, return {{"has_questions": false, "reason": "no questions found"}}
+
+CRITICAL: Extract EVERY question you can see on this page. Look for numbered questions (1., 2., 3., etc.) and extract each one completely.
+
+Noisy OCR text:
+{ocr_text}
+
+HTML text:
+{html_text}

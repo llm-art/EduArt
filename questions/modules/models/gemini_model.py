@@ -72,7 +72,7 @@ class GeminiVisionModel(VisionModel):
                 print(f"Fallback also failed: {e2}")
                 raise e
     
-    def chat(self, image_path: str, system_prompt: str, user_prompt: str) -> str:
+    def chat(self, image_path: str, system_prompt: str, user_prompt: str, max_tokens: Optional[int] = None) -> str:
         """
         Process image and text using Gemini via LangChain
         
@@ -80,6 +80,7 @@ class GeminiVisionModel(VisionModel):
             image_path: Path to the image file
             system_prompt: System prompt for the model
             user_prompt: User prompt with instructions
+            max_tokens: Optional maximum output tokens (overrides default)
             
         Returns:
             Generated text response
@@ -95,6 +96,19 @@ class GeminiVisionModel(VisionModel):
                 print(f"DEBUG: Starting Gemini chat with image: {image_path}")
                 print(f"DEBUG: Model name: {self.model_name}")
                 print(f"DEBUG: API key configured: {bool(self.api_key)}")
+                if max_tokens:
+                    print(f"DEBUG: Using custom max_tokens: {max_tokens}")
+            
+            # Create a new LLM instance with custom max_tokens if provided
+            llm_to_use = self.llm
+            if max_tokens is not None:
+                llm_to_use = ChatGoogleGenerativeAI(
+                    model=self.model_name,
+                    google_api_key=self.api_key,
+                    temperature=self.temperature,
+                    max_output_tokens=max_tokens,
+                    convert_system_message_to_human=True
+                )
             
             # Read and encode image
             if Config.VERBOSE:
@@ -126,7 +140,7 @@ class GeminiVisionModel(VisionModel):
             if Config.VERBOSE:
                 print("DEBUG: Sending request to Gemini...")
             # Generate response
-            response = self.llm.invoke([message])
+            response = llm_to_use.invoke([message])
             
             if Config.VERBOSE:
                 print(f"DEBUG: Received response type: {type(response)}")

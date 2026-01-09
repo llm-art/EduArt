@@ -1,0 +1,61 @@
+Analyze this image of an AP Art History exam question and extract all structured elements.
+
+IMPORTANT - CHECK IF THIS IS A REAL QUESTION PAGE:
+- If this page is ONLY a cover page, title page, or instructions page with NO actual numbered questions, return: {{"has_question": false}}
+- Cover pages typically contain only: title, copyright information, College Board logo, general information
+- Instruction pages contain only directions but no numbered questions with answer choices
+- Only process pages that contain actual numbered questions (e.g., "1. The subject of both works...")
+
+This is a multiple choice question (radio button type) where only ONE answer is correct.
+
+IMPORTANT - ARTWORK IMAGES:
+- Some questions reference specific artwork images (e.g., "QUESTIONS 1-7: LEFT IMAGE" and "RIGHT IMAGE")
+- If you see text like "Questions 1-7 are based on the corresponding color images", note the range
+- Extract any image labels or references you see (e.g., "LEFT IMAGE", "RIGHT IMAGE", "Image A", "Image B")
+- Note the question range that shares these images (e.g., "Questions 1-7")
+
+EXTRACTION REQUIREMENTS:
+- Extract the question text (must start with a number like "1.", "2.", etc.)
+- Extract all answer choices with letters (A, B, C, D)
+- The correct answer will be provided separately (not in this image)
+- Identify which artwork images this question references (if any)
+
+SCHEMA:
+{{
+  "exercise": null,
+  "question": null,
+  "type": "multiple_choice_radio",
+  "question_text": "full question text",
+  "choices": [
+    {{"id": "A", "text": "option A text"}},
+    {{"id": "B", "text": "option B text"}},
+    {{"id": "C", "text": "option C text"}},
+    {{"id": "D", "text": "option D text"}}
+  ],
+  "answers": [],
+  "images": [],
+  "image_references": null,
+  "language": "en"
+}}
+
+STRICT REQUIREMENTS:
+- If this is NOT a question page (cover/title/instructions only), return: {{"has_question": false, "reason": "cover page"}}
+- If this IS a question page, return ONLY the JSON object specified in the schema
+- DO NOT add any other fields beyond those specified in the schema
+- DO NOT add comments or explanations
+- Extract ALL choices with their correct letters (A, B, C, D)
+- Preserve exact question wording
+- Leave exercise, question, answers, and images as empty/null (will be filled later by the processor)
+- For image_references, include text like "Questions 1-7: left and right images" if you see such information, otherwise null
+- Language is always "en" for AP Art History
+- Use null for missing data, not empty strings
+- You MUST preserve the original order of choices as they appear
+- If question_text is null or choices array is empty, this indicates NO valid question was found
+
+CRITICAL: You MUST return ONLY valid JSON. Either {{"has_question": false, "reason": "..."}} OR the complete question schema. DO NOT add any additional text outside the JSON.
+
+Noisy OCR text:
+{ocr_text}
+
+HTML text:
+{html_text}

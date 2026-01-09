@@ -38,6 +38,80 @@
       "args": []
     },
     {
+      "name": "AP_Art_History - 2010 Preprocessor ",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/ap_art_history/question_preprocessor.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--exercise", "2010",
+        "--max-question", "32"
+      ]
+    },
+    {
+      "name": "AP_Art_History - 2011 Preprocessor ",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/ap_art_history/question_preprocessor.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--exercise", "2011",
+        "--max-question", "29"
+      ]
+    },
+    {
+      "name": "AP_Art_History - 2012 Preprocessor ",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/ap_art_history/question_preprocessor.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--exercise", "2012",
+        "--max-question", "36"
+      ]
+    },
+    {
+      "name": "AP_Art_History - 2013 Preprocessor ",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/ap_art_history/question_preprocessor.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--exercise", "2013",
+        "--max-question", "36"
+      ]
+    },
+    {
+      "name": "AP_Art_History - 2014 Preprocessor ",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/ap_art_history/question_preprocessor.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--exercise", "2014",
+        "--max-question", "35"
+      ]
+    },
+    {
+      "name": "AP_Art_History - 2015 Preprocessor ",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/ap_art_history/question_preprocessor.py",
+      "console": "integratedTerminal",
+      "args": [
+        "--exercise", "2015",
+        "--max-question", "35"
+      ]
+    },
+    {
+      "name": "AP_Art_History - Question viewer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/questions/ap_art_history/website/question_viewer.py",
+      "console": "integratedTerminal",
+      "args": []
+    },
+    {
       "name": "LLM Questioner",
       "type": "debugpy",
       "request": "launch",
@@ -54,12 +128,12 @@
         // Google models
         //"--models", "google/gemini-2.5-pro",
         //"--models", "google/gemini-2.5-flash",
-        "--models", "google/gemini-2.5-flash-lite",
+        //"--models", "google/gemini-2.5-flash-lite",
 
         // Anthropic models
-        //"--models", "anthropic/claude-haiku-4-5-20251001",
-        //"--models", "anthropic/claude-sonnet-4-5-20250929",
-        //"--models", "anthropic/claude-opus-4-1-20250805",
+        "--models", "anthropic/claude-haiku-4-5-20251001",
+        "--models", "anthropic/claude-sonnet-4-5-20250929",
+        "--models", "anthropic/claude-opus-4-1-20250805",
 
         //"--models", "anthropic/claude-3-5-sonnet-20241022",
         //"--models", "anthropic/claude-3-haiku-20240307",
@@ -67,6 +141,14 @@
         "--verbose",
         //"--question-mode", "text"
       ]
-    }
+    },
+    {
+      "name": "website viewer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/website/answer_viewer.py",
+      "console": "integratedTerminal",
+      "args": []
+    },
   ]
 }

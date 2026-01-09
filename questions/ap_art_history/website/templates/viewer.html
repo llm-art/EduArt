@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AP Art History Question Viewer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f7fa;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 25px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 1000;
+    }
+
+    .navbar-title {
+      font-size: 1.5em;
+      font-weight: 700;
+      margin-right: auto;
+    }
+
+    .navbar-info {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .info-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .exercise-select {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 150px;
+      transition: all 0.3s ease;
+    }
+
+    .exercise-select:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .exercise-select option {
+      background: #667eea;
+      color: white;
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+      font-weight: 600;
+      color: #333;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .exercise-list {
+      padding: 10px 0;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .exercise-item {
+      padding: 15px 20px;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      transition: all 0.2s ease;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .exercise-item:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .exercise-item.active {
+      background: #e7eaff;
+      border-left-color: #667eea;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .page-list {
+      padding: 10px 0;
+    }
+
+    /* Collapsible Page Item */
+    .page-item {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .page-header {
+      padding: 15px 20px;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      transition: all 0.2s ease;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 500;
+    }
+
+    .page-header:hover {
+      background: #f8f9fa;
+      border-left-color: #667eea;
+    }
+
+    .page-header.active {
+      background: #e7eaff;
+      border-left-color: #667eea;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .page-toggle {
+      font-size: 0.8em;
+      transition: transform 0.2s ease;
+    }
+
+    .page-toggle.expanded {
+      transform: rotate(90deg);
+    }
+
+    /* Question List (nested under page) */
+    .question-list {
+      display: none;
+      background: #f8f9fa;
+      border-left: 4px solid #e9ecef;
+    }
+
+    .question-list.expanded {
+      display: block;
+    }
+
+    .question-item {
+      padding: 12px 20px 12px 40px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #555;
+      font-size: 0.95em;
+    }
+
+    .question-item:hover {
+      background: #e9ecef;
+      color: #667eea;
+    }
+
+    .question-item.active {
+      background: #667eea;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .loading,
+    .no-selection {
+      text-align: center;
+      padding: 100px 20px;
+      color: #999;
+      font-size: 1.2em;
+    }
+
+    .content-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Artwork Section */
+    .artwork-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .artwork-title {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #667eea;
+    }
+
+    .artwork-image {
+      width: 100%;
+      max-width: 800px;
+      display: block;
+      margin: 20px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .image-reference {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      margin-top: 15px;
+      font-style: italic;
+      color: #666;
+    }
+
+    /* Question Card */
+    .question-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-left: 5px solid #667eea;
+    }
+
+    .question-header {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .question-text {
+      font-size: 1.1em;
+      line-height: 1.6;
+      color: #333;
+      flex: 1;
+      font-weight: 700;
+    }
+
+    .choices-section {
+      margin-top: 20px;
+    }
+
+    .choices-title {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 12px;
+      font-size: 1em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .choice-item {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border-left: 4px solid #e9ecef;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: all 0.2s ease;
+    }
+
+    .choice-item:hover {
+      background: #f0f0f0;
+    }
+
+    .choice-item.correct {
+      background: #d4edda;
+      border-left-color: #28a745;
+      font-weight: 500;
+    }
+
+    .choice-id {
+      font-weight: 700;
+      color: #667eea;
+      min-width: 30px;
+      font-size: 1.1em;
+    }
+
+    .choice-item.correct .choice-id {
+      color: #28a745;
+    }
+
+    .choice-text {
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .correct-badge {
+      background: #28a745;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.85em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .answer-section {
+      margin-top: 20px;
+      background: #e7f3ff;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #2196F3;
+    }
+
+    .answer-label {
+      font-weight: 600;
+      color: #1976D2;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .answer-content {
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .error-box {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 1200px) {
+      .sidebar {
+        width: 220px;
+      }
+
+      .content-area {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 180px;
+      }
+
+      .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .question-number {
+        min-width: 60px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-title">AP Art History Question Viewer</div>
+    <div class="navbar-info">
+      <div class="info-group" id="questionInfo" style="display: none;">
+        <span class="info-label">Question:</span>
+        <span id="currentQuestion">-</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">Questions</div>
+      <div id="exerciseList" class="exercise-list">
+        <div style="padding: 20px; text-align: center; color: #999;">
+          Loading exercises...
+        </div>
+      </div>
+      <div id="pageList" class="page-list" style="display: none;">
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <div id="noSelection" class="no-selection">
+        👆 Select an exercise and question to begin
+      </div>
+      <div id="loading" class="loading" style="display: none;">
+        Loading question data...
+      </div>
+      <div id="content" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentExercise = null;
+    let pagesData = {}; // Store page data to avoid re-fetching
+
+    // Load exercises on page load
+    async function loadExercises() {
+      try {
+        const response = await fetch('/api/exercises');
+        const exercises = await response.json();
+
+        const listDiv = document.getElementById('exerciseList');
+        
+        if (exercises.length === 0) {
+          listDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No exercises found</div>';
+          return;
+        }
+
+        listDiv.innerHTML = '';
+        
+        exercises.forEach(exercise => {
+          const exerciseItem = document.createElement('div');
+          exerciseItem.className = 'exercise-item';
+          exerciseItem.textContent = exercise;
+          exerciseItem.onclick = async () => {
+            // Update active state
+            document.querySelectorAll('.exercise-item').forEach(item => {
+              item.classList.remove('active');
+            });
+            exerciseItem.classList.add('active');
+            
+            currentExercise = exercise;
+            pagesData = {}; // Clear cache
+            document.getElementById('pageList').style.display = 'block';
+            await loadPages(exercise);
+          };
+          listDiv.appendChild(exerciseItem);
+        });
+
+        // Auto-select first exercise if available
+        if (exercises.length > 0) {
+          const firstExercise = listDiv.querySelector('.exercise-item');
+          if (firstExercise) {
+            firstExercise.click();
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load exercises:', error);
+      }
+    }
+
+    // Load pages for an exercise
+    async function loadPages(exercise) {
+      try {
+        const response = await fetch(`/api/pages/${exercise}`);
+        const pages = await response.json();
+
+        const listDiv = document.getElementById('pageList');
+
+        if (pages.length === 0) {
+          listDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No pages found</div>';
+          return;
+        }
+
+        listDiv.innerHTML = '';
+        
+        // Fetch all page data to get questions
+        for (const pageNum of pages) {
+          const pageData = await fetchPageData(exercise, pageNum);
+          pagesData[pageNum] = pageData;
+          
+          // Create collapsible page item
+          const pageItem = document.createElement('div');
+          pageItem.className = 'page-item';
+          
+          const pageHeader = document.createElement('div');
+          pageHeader.className = 'page-header';
+          pageHeader.innerHTML = `
+            <span>Block ${pageNum}</span>
+            <span class="page-toggle">▶</span>
+          `;
+          
+          const questionList = document.createElement('div');
+          questionList.className = 'question-list';
+          
+          // Add questions to the list
+          const questions = pageData.questions || [];
+          questions.forEach(question => {
+            const qNum = question.question || question.question_number;
+            const qItem = document.createElement('div');
+            qItem.className = 'question-item';
+            qItem.textContent = `Question ${qNum}`;
+            qItem.onclick = (e) => {
+              e.stopPropagation();
+              selectQuestion(exercise, pageNum, qNum);
+            };
+            questionList.appendChild(qItem);
+          });
+          
+          // Toggle page expansion
+          pageHeader.onclick = () => {
+            const isExpanded = questionList.classList.contains('expanded');
+            
+            // Close all other pages
+            document.querySelectorAll('.question-list').forEach(list => {
+              list.classList.remove('expanded');
+            });
+            document.querySelectorAll('.page-toggle').forEach(toggle => {
+              toggle.classList.remove('expanded');
+            });
+            document.querySelectorAll('.page-header').forEach(header => {
+              header.classList.remove('active');
+            });
+            
+            if (!isExpanded) {
+              questionList.classList.add('expanded');
+              pageHeader.querySelector('.page-toggle').classList.add('expanded');
+              pageHeader.classList.add('active');
+              
+              // Auto-select first question
+              if (questions.length > 0) {
+                const firstQ = questions[0].question || questions[0].question_number;
+                selectQuestion(exercise, pageNum, firstQ);
+              }
+            }
+          };
+          
+          pageItem.appendChild(pageHeader);
+          pageItem.appendChild(questionList);
+          listDiv.appendChild(pageItem);
+        }
+        
+        // Auto-expand first page and select first question
+        if (pages.length > 0) {
+          const firstPageHeader = listDiv.querySelector('.page-header');
+          if (firstPageHeader) {
+            firstPageHeader.click();
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load pages:', error);
+      }
+    }
+
+    // Fetch page data (with caching)
+    async function fetchPageData(exercise, pageNum) {
+      if (pagesData[pageNum]) {
+        return pagesData[pageNum];
+      }
+      
+      const response = await fetch(`/api/page/${exercise}/${pageNum}`);
+      const data = await response.json();
+      return data;
+    }
+
+    // Select a question
+    async function selectQuestion(exercise, pageNum, questionNum) {
+      // Update active state
+      document.querySelectorAll('.question-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update navbar
+      document.getElementById('questionInfo').style.display = 'flex';
+      document.getElementById('currentQuestion').textContent = questionNum;
+
+      // Load question data
+      await loadQuestionData(exercise, pageNum, questionNum);
+    }
+
+    // Load question data
+    async function loadQuestionData(exercise, pageNum, questionNum) {
+      document.getElementById('noSelection').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('content').style.display = 'none';
+
+      try {
+        const response = await fetch(`/api/question/${exercise}/${pageNum}/${questionNum}`);
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        displayQuestionData(data);
+      } catch (error) {
+        document.getElementById('loading').innerHTML = `
+          <div class="error-box">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Display question data
+    function displayQuestionData(data) {
+      document.getElementById('loading').style.display = 'none';
+      const contentDiv = document.getElementById('content');
+      contentDiv.style.display = 'block';
+
+      const question = data.question;
+
+      let html = '<div class="content-wrapper">';
+
+      // Display artwork image if available
+      if (data.has_artwork && data.artwork_url) {
+        html += `
+          <div class="artwork-section">
+            <div class="artwork-title">Artwork</div>
+            <img src="${data.artwork_url}" class="artwork-image" alt="Artwork">
+          </div>
+        `;
+      }
+
+      // Display the question
+      html += renderQuestion(question);
+
+      html += '</div>'; // End content-wrapper
+
+      contentDiv.innerHTML = html;
+    }
+
+    // Render a single question
+    function renderQuestion(question) {
+      const questionText = question.question_text || 'No question text';
+      const choices = question.choices || [];
+      const answers = question.answers || [];
+      
+      // Get correct answer IDs
+      const correctIds = new Set(answers.map(a => a.id));
+
+      let html = `
+        <div class="question-card">
+          <div class="question-header">
+            <div class="question-text">${escapeHtml(questionText)}</div>
+          </div>
+      `;
+
+      // Display choices
+      if (choices.length > 0) {
+        html += `
+          <div class="choices-section">
+            <div class="choices-title">Answer Choices</div>
+        `;
+
+        choices.forEach(choice => {
+          const isCorrect = choice.is_correct || correctIds.has(choice.id);
+          html += `
+            <div class="choice-item ${isCorrect ? 'correct' : ''}">
+              <span class="choice-id">${escapeHtml(choice.id || '')}.</span>
+              <span class="choice-text">${escapeHtml(choice.text || '')}</span>
+              ${isCorrect ? '<span class="correct-badge">✓ Correct</span>' : ''}
+            </div>
+          `;
+        });
+
+        html += '</div>'; // End choices-section
+      }
+
+      html += '</div>'; // End question-card
+
+      return html;
+    }
+
+    // Initialize
+    loadExercises();
+  </script>
+</body>
+
+</html>

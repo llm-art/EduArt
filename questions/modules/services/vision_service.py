@@ -48,7 +48,7 @@ class VisionModelService:
         self.prompt_manager = prompt_manager
     
     def chat(self, image_path: str, system_prompt: str, user_prompt: str,
-             description: str = "AI call") -> str:
+             description: str = "AI call", max_tokens: Optional[int] = None) -> str:
         """
         Call the configured vision model with image and text prompts.
         
@@ -57,6 +57,7 @@ class VisionModelService:
             system_prompt: System prompt for the model
             user_prompt: User prompt with instructions
             description: Description of the AI call for metadata tracking
+            max_tokens: Optional maximum tokens for response (overrides config)
             
         Returns:
             Generated text response
@@ -74,8 +75,11 @@ class VisionModelService:
             input_text = f"{system_prompt}\n{user_prompt}"
             input_tokens = self._estimate_tokens(input_text)
             
-            # Call the model
-            response = self.vision_model.chat(image_path, system_prompt, user_prompt)
+            # Call the model with optional max_tokens override
+            if max_tokens is not None:
+                response = self.vision_model.chat(image_path, system_prompt, user_prompt, max_tokens=max_tokens)
+            else:
+                response = self.vision_model.chat(image_path, system_prompt, user_prompt)
             
             # Calculate processing time and output tokens
             processing_time = time.time() - start_time
@@ -220,7 +224,7 @@ class VisionModelService:
             print(f"Question type extraction error: {e}")
             return {"type": "unknown", "extraction_error": str(e)}
     
-    def extract_question_text(self, image_path: Path, question_type: str, 
+    def extract_question_text(self, image_path: Path, question_type: str,
                             ocr_text: str, html_text: str) -> Dict[str, Any]:
         """
         Extract question text based on the detected type.
@@ -255,6 +259,18 @@ class VisionModelService:
             
             # Parse JSON response
             question_data = self._parse_json_response(response)
+            
+            # Check if the LLM detected no actual question (e.g., cover page)
+            if not question_data.get('has_question', True):
+                reason = question_data.get('reason', 'no question detected')
+                print(f"⚠️  Page has no actual question: {reason}")
+                return {
+                    "has_question": False,
+                    "reason": reason,
+                    "question_text": None,
+                    "choices": [],
+                    "type": question_type
+                }
             
             return question_data
             
