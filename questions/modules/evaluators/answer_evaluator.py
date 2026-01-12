@@ -135,7 +135,6 @@ class AnswerEvaluator:
             # Try to parse the JSON
             response_data = json.loads(llm_response)
             parsed_response = response_data.get('Answers', [])
-            motivation = response_data.get('Motivation', '')
             
             # Route to appropriate evaluation function based on question type
             # ID-only evaluation (text is ignored)
@@ -157,8 +156,19 @@ class AnswerEvaluator:
                     'error_analysis': {}
                 }
             
-            evaluation["llm_answer"] = response_data
-            evaluation["motivation"] = motivation
+            # Remove explanation and motivation fields from answers
+            cleaned_response = []
+            for answer in parsed_response:
+                if isinstance(answer, dict):
+                    cleaned_answer = {
+                        'id': answer.get('id', ''),
+                        'text': answer.get('text', '')
+                    }
+                    cleaned_response.append(cleaned_answer)
+                else:
+                    cleaned_response.append(answer)
+            
+            evaluation["llm_answer"] = {"Answers": cleaned_response}
             
             return evaluation
             

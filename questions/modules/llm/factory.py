@@ -6,6 +6,7 @@ from .base import LLMProvider
 from .openai_provider import OpenAIProvider
 from .google_provider import GoogleProvider
 from .anthropic_provider import AnthropicProvider
+from .harvard_bedrock_provider import HarvardBedrockProvider
 from ..core.exceptions import ConfigurationError
 
 
@@ -28,6 +29,35 @@ class LLMConfig:
             'claude-sonnet-4-5-20250929',
             'claude-haiku-4-5-20251001',
             'claude-opus-4-1-20250805',
+        ],
+        'harvard': [
+            # V2 models (with us. prefix) - Anthropic Claude
+            'us.anthropic.claude-opus-4-5-20251101-v1:0',
+            'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+            'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+            'us.anthropic.claude-sonnet-4-20250514-v1:0',
+            'us.anthropic.claude-opus-4-20250514-v1:0',
+            'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
+            'us.anthropic.claude-3-5-haiku-20241022-v1:0',
+            'us.anthropic.claude-3-haiku-20240307-v1:0',
+            # V2 models - Meta Llama
+            'us.meta.llama4-maverick-17b-instruct-v1:0',
+            'us.meta.llama4-scout-17b-instruct-v1:0',
+            'us.meta.llama3-3-70b-instruct-v1:0',
+            'us.meta.llama3-2-1b-instruct-v1:0',
+            'us.meta.llama3-2-3b-instruct-v1:0',
+            'us.meta.llama3-2-11b-instruct-v1:0',
+            'us.meta.llama3-1-8b-instruct-v1:0',
+            'us.meta.llama3-1-70b-instruct-v1:0',
+            'us.meta.llama3-1-405b-instruct-v1:0',
+            # V2 models - Mistral
+            'us.mistral.pixtral-large-2502-v1:0',
+            # V1 models (legacy, without us. prefix)
+            'anthropic.claude-3-5-sonnet-20241022-v2:0',
+            'anthropic.claude-3-5-haiku-20241022-v1:0',
+            'anthropic.claude-3-opus-20240229-v1:0',
+            'meta.llama3-3-70b-instruct-v1:0',
+            'meta.llama3-1-405b-instruct-v1:0',
         ]
     }
     
@@ -35,6 +65,9 @@ class LLMConfig:
     TEMPERATURE = float(os.getenv('TEMPERATURE', '0.0'))
     MAX_TOKENS = int(os.getenv('MAX_TOKENS', '512'))
     TIMEOUT = int(os.getenv('TIMEOUT', '30'))
+    
+    # Harvard Bedrock API settings
+    HARVARD_API_VERSION = os.getenv('HARVARD_API_VERSION', 'v2')
     
     # Models to test (from environment variable)
     MODELS_TO_TEST = [m.strip() for m in os.getenv('MODELS_TO_TEST', '').split(',') if m.strip()]
@@ -45,7 +78,7 @@ def create_llm_provider(provider_type: str, model_name: str, **kwargs) -> LLMPro
     Create an LLM provider instance.
     
     Args:
-        provider_type: Type of provider ('openai', 'google', 'anthropic')
+        provider_type: Type of provider ('openai', 'google', 'anthropic', 'harvard')
         model_name: Name of the model
         **kwargs: Additional provider-specific parameters
         
@@ -72,6 +105,10 @@ def create_llm_provider(provider_type: str, model_name: str, **kwargs) -> LLMPro
     elif provider_type == 'anthropic':
         config['timeout'] = kwargs.get('timeout', LLMConfig.TIMEOUT)
         provider = AnthropicProvider(model_name, **config)
+    elif provider_type == 'harvard':
+        config['timeout'] = kwargs.get('timeout', LLMConfig.TIMEOUT)
+        config['api_version'] = kwargs.get('api_version', LLMConfig.HARVARD_API_VERSION)
+        provider = HarvardBedrockProvider(model_name, **config)
     else:
         raise ConfigurationError(f"Unsupported provider type: {provider_type}")
     
@@ -79,6 +116,43 @@ def create_llm_provider(provider_type: str, model_name: str, **kwargs) -> LLMPro
         raise ConfigurationError(f"{provider_type} provider is not available. Check API keys and dependencies.")
     
     return provider
+
+
+def _normalize_model_specs(models: List[str]) -> List[str]:
+    """
+    Normalize model specifications by adding provider prefixes where needed.
+    
+    Args:
+        models: List of model specifications (with or without provider prefix)
+        
+    Returns:
+        List of normalized model specifications with provider prefixes
+    """
+    normalized = []
+    
+    for model in models:
+        model = model.strip()
+        if not model:
+            continue
+        
+        # If model already has a provider prefix, keep it as is
+        if any(model.startswith(f"{provider}/") for provider in ['openai', 'google', 'anthropic', 'harvard']):
+            normalized.append(model)
+        else:
+            # Try to match with known models and add appropriate prefix
+            if model in LLMConfig.MODELS['google']:
+                normalized.append(f"google/{model}")
+            elif model in LLMConfig.MODELS['openai']:
+                normalized.append(f"openai/{model}")
+            elif model in LLMConfig.MODELS['anthropic']:
+                normalized.append(f"anthropic/{model}")
+            elif model in LLMConfig.MODELS['harvard']:
+                normalized.append(f"harvard/{model}")
+            else:
+                # Default to google for unknown models
+                normalized.append(f"google/{model}")
+    
+    return normalized
 
 
 def create_providers_from_config(models_to_test: Optional[List[str]] = None) -> List[LLMProvider]:
@@ -98,28 +172,10 @@ def create_providers_from_config(models_to_test: Optional[List[str]] = None) -> 
     
     # Determine which models to test
     if models_to_test:
-        selected_models = models_to_test
+        selected_models = _normalize_model_specs(models_to_test)
     elif LLMConfig.MODELS_TO_TEST:
         # Handle models from .env file - they might not have provider prefix
-        selected_models = []
-        for model in LLMConfig.MODELS_TO_TEST:
-            model = model.strip()
-            if not model:
-                continue
-            # If model doesn't have provider prefix, try to determine it
-            if not any(model.startswith(f"{provider}/") for provider in ['openai', 'google', 'anthropic']):
-                # Try to match with known models
-                if model in LLMConfig.MODELS['google']:
-                    selected_models.append(f"google/{model}")
-                elif model in LLMConfig.MODELS['openai']:
-                    selected_models.append(f"openai/{model}")
-                elif model in LLMConfig.MODELS['anthropic']:
-                    selected_models.append(f"anthropic/{model}")
-                else:
-                    # Default to google for unknown models
-                    selected_models.append(f"google/{model}")
-            else:
-                selected_models.append(model)
+        selected_models = _normalize_model_specs(LLMConfig.MODELS_TO_TEST)
     else:
         selected_models = []
         # Add all available models based on API keys
@@ -129,6 +185,11 @@ def create_providers_from_config(models_to_test: Optional[List[str]] = None) -> 
             selected_models.extend([f"google/{m}" for m in LLMConfig.MODELS['google']])
         if os.getenv('ANTHROPIC_API_KEY'):
             selected_models.extend([f"anthropic/{m}" for m in LLMConfig.MODELS['anthropic']])
+        if os.getenv('HARVARD_API_KEY'):
+            selected_models.extend([f"harvard/{m}" for m in LLMConfig.MODELS['harvard']])
+    
+    # Final safety check: normalize any remaining models just in case
+    selected_models = _normalize_model_specs(selected_models) if selected_models else []
     
     # Initialize providers
     for model_spec in selected_models:
@@ -147,6 +208,11 @@ def create_providers_from_config(models_to_test: Optional[List[str]] = None) -> 
                 model_name = model_spec[10:]  # Remove 'anthropic/' prefix
                 if model_name in LLMConfig.MODELS['anthropic']:
                     provider = create_llm_provider('anthropic', model_name)
+                    providers.append(provider)
+            elif model_spec.startswith('harvard/'):
+                model_name = model_spec[8:]  # Remove 'harvard/' prefix
+                if model_name in LLMConfig.MODELS['harvard']:
+                    provider = create_llm_provider('harvard', model_name)
                     providers.append(provider)
             else:
                 print(f"Warning: Unknown model specification: {model_spec}")
@@ -168,7 +234,7 @@ def get_available_providers() -> Dict[str, Any]:
     """
     providers_info = {}
     
-    for provider_type in ['openai', 'google', 'anthropic']:
+    for provider_type in ['openai', 'google', 'anthropic', 'harvard']:
         try:
             # Try to create a provider with the first available model
             models = LLMConfig.MODELS.get(provider_type, [])

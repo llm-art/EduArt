@@ -76,7 +76,8 @@ class LLMQuestioner:
     
     def process_questions(self, start: Optional[int] = None, end: Optional[int] = None,
                           question_types: Optional[List[str]] = None,
-                          output_file: str = 'llm_evaluation_results.csv') -> Dict[str, Any]:
+                          output_file: str = 'llm_evaluation_results.csv',
+                          force: bool = False) -> Dict[str, Any]:
         """
         Process questions and query LLM responses.
         
@@ -85,6 +86,7 @@ class LLMQuestioner:
             end: End question number
             question_types: List of question types to filter by
             output_file: Output CSV filename (not used)
+            force: Force reprocessing of existing results
             
         Returns:
             Processing results summary
@@ -121,6 +123,7 @@ class LLMQuestioner:
         current_operation = 0
         successful_operations = 0
         failed_operations = 0
+        skipped_operations = 0
 
         
         for file_path in question_files:
@@ -153,13 +156,39 @@ class LLMQuestioner:
                 
                 # Check if question has an image (from question data)
                 has_image = question_data.get('has_image', False)
-                image_path = question_data.get('image') if has_image else None
+                image_path = None
+                if has_image:
+                    # Get image path and resolve it to absolute path
+                    image_ref = question_data.get('image')
+                    if image_ref:
+                        # Image path from metadata is relative to dataset/ directory
+                        # Resolve it as: base_dir / 'dataset' / image_ref
+                        image_path = self.config.base_dir / 'dataset' / image_ref
+                        if not image_path.exists():
+                            print(f"Warning: Image file not found at {image_path}")
+                            has_image = False
+                            image_path = None
+                        else:
+                            image_path = str(image_path)
                 
                 print(f"\nProcessing Question {question_id} ({question_type})")
+                if has_image and image_path:
+                    print(f"  Image: {image_path}")
                 
                 for provider in self.providers:
                     current_operation += 1
                     model_name = provider.get_model_name()
+                    
+                    # Check if result already exists
+                    if not force and self.results_manager.result_exists(question_id, model_name):
+                        print(f"  [{current_operation}/{total_operations}] {model_name}: Skipping (result exists)")
+                        skipped_operations += 1
+                        
+                        # Load existing result to include in summary
+                        existing_result = self.results_manager.load_existing_result(question_id, model_name)
+                        if existing_result:
+                            self.results_manager.add_existing_result(existing_result)
+                        continue
                     
                     print(f"  [{current_operation}/{total_operations}] Testing {model_name}...", end=' ')
                     
@@ -173,10 +202,28 @@ class LLMQuestioner:
                     try:
                         # Query LLM with retry logic
                         def query_llm():
-                            return provider.query(prompt, system_prompt=system_prompt, image_path=image_path)
+                            result = provider.query(prompt, system_prompt=system_prompt, image_path=image_path)
+                            # Handle both tuple return (response, tokens) and string return for backward compatibility
+                            if isinstance(result, tuple) and len(result) == 2:
+                                return result
+                            else:
+                                return result, {'input_tokens': 0, 'output_tokens': 0}
                         
-                        llm_response = retry_with_backoff(query_llm)
+                        response_data = retry_with_backoff(query_llm)
+                        
+                        # Unpack response and token metadata
+                        if isinstance(response_data, tuple):
+                            llm_response, token_metadata = response_data
+                            input_tokens = token_metadata.get('input_tokens', 0)
+                            output_tokens = token_metadata.get('output_tokens', 0)
+                        else:
+                            llm_response = response_data
+                            input_tokens = 0
+                            output_tokens = 0
+                        
                         print(f"    Response received: {len(llm_response)} characters")
+                        if input_tokens > 0 or output_tokens > 0:
+                            print(f"    Tokens: input={input_tokens}, output={output_tokens}")
                         
                         # Evaluate the response
                         evaluation = evaluator.evaluate_response(question_type, llm_response, correct_answers)
@@ -189,17 +236,15 @@ class LLMQuestioner:
                         formatted_error = f"{error_type}: {error_msg}" if error_msg else error_type
                         print(f"ERROR: {formatted_error}")
                         failed_operations += 1
+                        input_tokens = 0
+                        output_tokens = 0
                     
                     processing_time = time.time() - start_time
-                    
-                    # Simple token estimation
-                    input_tokens = len(prompt.split())
-                    output_tokens = len(llm_response.split())
                     
                     # Format correct answers as string for display
                     correct_answer_str = str(correct_answers)
                     
-                    # Store result
+                    # Store result (with force flag to clear old ai_calls if needed)
                     self.results_manager.add_result(
                         question_id=question_id,
                         model_name=model_name,
@@ -219,7 +264,8 @@ class LLMQuestioner:
                             'prompt': prompt
                         },
                         input_tokens=int(input_tokens),
-                        output_tokens=int(output_tokens)
+                        output_tokens=int(output_tokens),
+                        force=force
                     )
                     
                     # Small delay to avoid rate limiting
@@ -238,6 +284,7 @@ class LLMQuestioner:
             'total_operations': total_operations,
             'successful_operations': successful_operations,
             'failed_operations': failed_operations,
+            'skipped_operations': skipped_operations,
             'success_rate': (successful_operations / total_operations * 100) if total_operations > 0 else 0,
             'questions_processed': len(question_files),
             'models_tested': len(self.providers),

@@ -7,19 +7,22 @@ from the dataset.
 
 Features:
 - Modular architecture with reusable components
-- Support for OpenAI, Google Gemini, and Anthropic Claude models
+- Support for OpenAI, Google Gemini, Anthropic Claude, and Harvard Bedrock models
 - Configurable question filtering by range and type
 - Retry logic with exponential backoff for API calls
 - Results stored in answers/ folder with metadata
 
 Usage:
-    python llm_questioner.py --start 1 --end 10 --models google-gemini-2.5-flash-lite
+    python llm_questioner.py --start 1 --end 10 --models google/gemini-2.5-flash-lite
+    python llm_questioner.py --models harvard/us.anthropic.claude-opus-4-5-20251101-v1:0
     python llm_questioner.py --models model1 --models model2 --models model3
     python llm_questioner.py --types multiple_choice,true_false
     python llm_questioner.py --output my_results.csv
+    python llm_questioner.py --api-version v2 --models harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0
 """
 
 import click
+import os
 from pathlib import Path
 import sys
 
@@ -37,13 +40,18 @@ from modules.core.exceptions import ConfigurationError, ProcessingError
 @click.option('--types', help='Comma-separated list of question types to test')
 @click.option('--models', multiple=True, help='Model to test (can be specified multiple times)')
 @click.option('--output', default='llm_evaluation_results.csv', help='Output CSV file')
+@click.option('--api-version', default='v2', help='Harvard Bedrock API version (v1 or v2, default: v2)')
+@click.option('--force', is_flag=True, default=False, help='Force reprocessing of existing results')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
-def main(start, end, types, models, output, verbose):
+def main(start, end, types, models, output, api_version, force, verbose):
     """LLM Questioner for Italian Art History - Modular Version."""
     
     if verbose:
         print("LLM Questioner for Italian Art History - Modular Version")
         print("=" * 60)
+    
+    # Set Harvard API version in environment for factory to use
+    os.environ['HARVARD_API_VERSION'] = api_version
     
     # Parse question types filter
     question_types = None
@@ -58,6 +66,7 @@ def main(start, end, types, models, output, verbose):
         models_to_test = list(models)  # models is now a tuple from multiple=True
         if verbose:
             print(f"Models to test: {models_to_test}")
+            print(f"Harvard API version: {api_version}")
     
     try:
         # Initialize questioner
@@ -88,7 +97,8 @@ def main(start, end, types, models, output, verbose):
             start=start,
             end=end,
             question_types=question_types,
-            output_file=output
+            output_file=output,
+            force=force
         )
         
         # Print final summary
@@ -98,10 +108,15 @@ def main(start, end, types, models, output, verbose):
         print(f"Total operations: {results['total_operations']}")
         print(f"Successful operations: {results['successful_operations']}")
         print(f"Failed operations: {results['failed_operations']}")
+        print(f"Skipped operations: {results.get('skipped_operations', 0)}")
         print(f"Success rate: {results['success_rate']:.1f}%")
         print(f"Questions processed: {results['questions_processed']}")
         print(f"Models tested: {results['models_tested']}")
         print(f"Results saved to: {results['answers_folder']}")
+        
+        if results.get('skipped_operations', 0) > 0:
+            print(f"\nNote: {results['skipped_operations']} operations were skipped (results already exist)")
+            print(f"Use --force to reprocess existing results")
         
         print(f"\nProcessing complete!")
         

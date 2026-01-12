@@ -25,6 +25,9 @@ class QuestionerConfig:
         else:
             base_dir = Path(base_dir)
         
+        # Store base directory
+        self.base_dir = base_dir
+        
         # Dataset paths relative to base directory
         self.dataset_dir = base_dir / 'dataset' / 'data'
         self.results_dir = base_dir / 'results'
@@ -132,18 +135,6 @@ class QuestionerConfig:
         print(f"Dataset Directory: {self.dataset_dir}")
         print(f"Results Directory: {self.results_dir}")
         print(f"Dataset Valid: {self.validate_dataset_directory()}")
-        
-        # Check API keys
-        api_keys = {
-            'OpenAI': bool(os.getenv('OPENAI_API_KEY')),
-            'Google': bool(os.getenv('GOOGLE_API_KEY')),
-            'Anthropic': bool(os.getenv('ANTHROPIC_API_KEY'))
-        }
-        
-        print("API Keys:")
-        for provider, available in api_keys.items():
-            status = "✓" if available else "✗"
-            print(f"  {provider}: {status}")
         
         # Count available questions
         if self.validate_dataset_directory():

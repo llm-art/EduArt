@@ -43,6 +43,36 @@ MODEL_COSTS = {
     'anthropic/claude-3-haiku-20240307': {
         'input_cost_per_million_tokens': 0.25,
         'output_cost_per_million_tokens': 1.25
+    },
+    # Harvard Bedrock - Anthropic Claude models
+    'harvard/us.anthropic.claude-opus-4-5-20251101-v1:0': {
+        'input_cost_per_million_tokens': 15.00,
+        'output_cost_per_million_tokens': 75.00
+    },
+    'harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0': {
+        'input_cost_per_million_tokens': 3.00,
+        'output_cost_per_million_tokens': 15.00
+    },
+    'harvard/us.anthropic.claude-3-5-sonnet-20241022-v2:0': {
+        'input_cost_per_million_tokens': 3.00,
+        'output_cost_per_million_tokens': 15.00
+    },
+    'harvard/us.anthropic.claude-3-5-haiku-20241022-v1:0': {
+        'input_cost_per_million_tokens': 1.00,
+        'output_cost_per_million_tokens': 5.00
+    },
+    # Harvard Bedrock - Mistral models
+    'harvard/mistral.pixtral-large-2411-v1:0': {
+        'input_cost_per_million_tokens': 2.00,
+        'output_cost_per_million_tokens': 6.00
+    },
+    'harvard/us.mistral.pixtral-large-2502-v1:0': {
+        'input_cost_per_million_tokens': 2.00,
+        'output_cost_per_million_tokens': 6.00
+    },
+    'harvard/mistral.mistral-large-2407-v1:0': {
+        'input_cost_per_million_tokens': 3.00,
+        'output_cost_per_million_tokens': 9.00
     }
 }
 
@@ -81,37 +111,126 @@ class ResultsManager:
         # Track AI calls for metadata and processed models
         self.ai_calls: List[Dict[str, Any]] = []
         self.processed_models: set = set()
+        
+        # Track existing results loaded from previous runs
+        self.existing_results: List[Dict[str, Any]] = []
     
-    def _prepare_model_folder(self, model_name: str):
+    def _prepare_model_folder(self, model_name: str, force: bool = False):
         """
-        Prepare model-specific folder, removing it if it already exists.
+        Prepare model-specific folder. Only removes if force=True.
         
         Args:
             model_name: Name of the model
+            force: If True, remove existing folder and recreate
         """
         # Create safe folder name from model name
         safe_model_name = model_name.replace('/', '_').replace('\\', '_')
         model_dir = self.answers_data_dir / safe_model_name
         
-        # Only remove and recreate folder once per session
+        # Only remove and recreate folder once per session if force is True
         if model_name not in self.processed_models:
-            # Remove existing model folder if it exists
-            if model_dir.exists():
+            if force and model_dir.exists():
+                # Remove existing model folder if force is enabled
                 shutil.rmtree(model_dir)
                 print(f"Removed existing results for model: {model_name}")
             
-            # Create fresh model folder
+            # Create model folder (will not fail if already exists)
             model_dir.mkdir(parents=True, exist_ok=True)
             self.processed_models.add(model_name)
-            print(f"Created fresh folder for model: {model_name}")
+            
+            if not force and model_dir.exists():
+                print(f"Using existing folder for model: {model_name}")
+            else:
+                print(f"Created fresh folder for model: {model_name}")
         
         return model_dir
+    
+    def result_exists(self, question_id: str, model_name: str) -> bool:
+        """
+        Check if a result already exists for a question/model combination.
+        
+        Args:
+            question_id: Question identifier
+            model_name: Name of the model
+            
+        Returns:
+            True if result exists, False otherwise
+        """
+        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
+        model_dir = self.answers_data_dir / safe_model_name
+        json_filepath = model_dir / f"{question_id}.json"
+        return json_filepath.exists()
+    
+    def load_existing_result(self, question_id: str, model_name: str) -> Optional[Dict[str, Any]]:
+        """
+        Load an existing result from disk.
+        
+        Args:
+            question_id: Question identifier
+            model_name: Name of the model
+            
+        Returns:
+            Result dictionary or None if not found
+        """
+        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
+        model_dir = self.answers_data_dir / safe_model_name
+        json_filepath = model_dir / f"{question_id}.json"
+        
+        if not json_filepath.exists():
+            return None
+        
+        try:
+            with open(json_filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Extract result data from the JSON structure
+            if 'evaluation' in data:
+                eval_data = data['evaluation']
+                result = {
+                    'question_id': data.get('question_id', question_id),
+                    'model_name': eval_data.get('model_name', model_name),
+                    'question_type': eval_data.get('question_type', ''),
+                    'llm_answer': eval_data.get('llm_answer', ''),
+                    'correct_answer': eval_data.get('correct_answer', ''),
+                    'is_correct': eval_data.get('is_correct'),
+                    'score': eval_data.get('score'),
+                    'details': eval_data.get('details', ''),
+                    'processing_time': eval_data.get('processing_time', 0),
+                    'error': eval_data.get('error', ''),
+                    'error_type': eval_data.get('error_type', ''),
+                    'timestamp': eval_data.get('timestamp', ''),
+                    'input_tokens': 0,
+                    'output_tokens': 0,
+                    'metrics': eval_data.get('metrics', {}),
+                    'error_analysis': eval_data.get('error_analysis', {}),
+                    'motivation': eval_data.get('motivation', '')
+                }
+                
+                # Try to get token info from ai_calls if available
+                if 'ai_calls' in data and data['ai_calls']:
+                    latest_call = data['ai_calls'][-1]
+                    result['input_tokens'] = latest_call.get('input_tokens', 0)
+                    result['output_tokens'] = latest_call.get('output_tokens', 0)
+                
+                return result
+        except Exception as e:
+            print(f"Warning: Failed to load existing result for {question_id}/{model_name}: {e}")
+            return None
+    
+    def add_existing_result(self, result: Dict[str, Any]):
+        """
+        Add an existing result to the results list for summary generation.
+        
+        Args:
+            result: Result dictionary
+        """
+        self.existing_results.append(result)
     
     def add_result(self, question_id: str, model_name: str, question_type: str,
                    llm_answer: str, correct_answer: str, evaluation: Dict[str, Any],
                    processing_time: float, error: str = "", error_type: str = "",
                    question_data: Optional[Dict[str, Any]] = None,
-                   input_tokens: int = 0, output_tokens: int = 0):
+                   input_tokens: int = 0, output_tokens: int = 0, force: bool = False):
         """
         Add evaluation result with enhanced metrics.
         
@@ -127,6 +246,7 @@ class ResultsManager:
             question_data: Additional question data for individual JSON files
             input_tokens: Number of input tokens used
             output_tokens: Number of output tokens generated
+            force: If True, clear old ai_calls when saving (used with --force flag)
         """
         result = {
             'question_id': question_id,
@@ -151,8 +271,8 @@ class ResultsManager:
         
         self.results.append(result)
         
-        # Prepare model-specific folder
-        model_dir = self._prepare_model_folder(model_name)
+        # Prepare model-specific folder (don't force remove)
+        model_dir = self._prepare_model_folder(model_name, force=False)
         
         # Track AI call for metadata
         ai_call = {
@@ -167,9 +287,9 @@ class ResultsManager:
         self.ai_calls.append(ai_call)
         
         # Save individual question result as JSON in model-specific folder
-        self._save_individual_result(question_id, result, question_data, model_dir)
+        self._save_individual_result(question_id, result, question_data, model_dir, force=force)
     
-    def _save_individual_result(self, question_id: str, result: Dict[str, Any], question_data: Optional[Dict[str, Any]] = None, model_dir: Optional[Path] = None):
+    def _save_individual_result(self, question_id: str, result: Dict[str, Any], question_data: Optional[Dict[str, Any]] = None, model_dir: Optional[Path] = None, force: bool = False):
         """
         Save individual question result as JSON file in model-specific folder.
         
@@ -178,6 +298,7 @@ class ResultsManager:
             result: Result data
             question_data: Additional question data
             model_dir: Model-specific directory path
+            force: If True, clear old ai_calls and start fresh
         """
         try:
             # Use model-specific directory
@@ -189,12 +310,13 @@ class ResultsManager:
             
             # Load existing file if it exists to preserve previous AI calls
             existing_data = {}
-            if json_filepath.exists():
+            if json_filepath.exists() and not force:
                 with open(json_filepath, 'r', encoding='utf-8') as f:
                     existing_data = json.load(f)
             
             # Create comprehensive result data
-            individual_result = existing_data.copy() if existing_data else {
+            # If force=True, start fresh without old ai_calls; otherwise preserve them
+            individual_result = existing_data.copy() if (existing_data and not force) else {
                 'question_id': question_id,
                 'ai_calls': []
             }
@@ -506,10 +628,13 @@ class ResultsManager:
         """Load all results from all model folders."""
         all_results = []
         
-        # Load from current session results
+        # Load from current session results (new results)
         all_results.extend(self.results)
         
-        # Load from existing model folders (excluding current session models)
+        # Load from existing results (loaded but not reprocessed)
+        all_results.extend(self.existing_results)
+        
+        # Load from existing model folders (models not in current session at all)
         for model_dir in self.answers_data_dir.iterdir():
             if model_dir.is_dir():
                 model_name = model_dir.name.replace('_', '/')  # Convert back from safe name
@@ -538,9 +663,13 @@ class ResultsManager:
                                 'details': eval_data.get('details', ''),
                                 'processing_time': eval_data.get('processing_time', 0),
                                 'error': eval_data.get('error', ''),
+                                'error_type': eval_data.get('error_type', ''),
                                 'timestamp': eval_data.get('timestamp', ''),
                                 'input_tokens': 0,  # Default for existing data
-                                'output_tokens': 0  # Default for existing data
+                                'output_tokens': 0,  # Default for existing data
+                                'metrics': eval_data.get('metrics', {}),
+                                'error_analysis': eval_data.get('error_analysis', {}),
+                                'motivation': eval_data.get('motivation', '')
                             }
                             
                             # Try to get token info from ai_calls if available
@@ -773,9 +902,9 @@ answers/
         
         readme_content += "\n## Model Performance Summary\n\n"
         
-        # Enhanced performance table with comprehensive metrics
-        readme_content += "| Model | Precision | Recall | F1 Score | Exact Match | Input Tokens | Output Tokens | Actual Cost |\n"
-        readme_content += "|-------|-----------|--------|----------|-------------|--------------|---------------|-------------|\n"
+        # Simplified performance table for multiple choice questions
+        readme_content += "| Model | Accuracy | Correct/Total | Input Tokens | Output Tokens | Actual Cost |\n"
+        readme_content += "|-------|----------|---------------|--------------|---------------|-------------|\n"
         
         # Sort models with Gemini models in specific order
         models = metadata.get('models', [])
@@ -794,10 +923,14 @@ answers/
         
         for model in sorted_models:
             model_name = model.get('model_name', 'Unknown')
-            precision = model.get('precision', 0)
-            recall = model.get('recall', 0)
-            f1 = model.get('f1', 0)
             exact_match = model.get('exact_match_rate', 0)
+            
+            # Calculate correct/total from question types
+            total_questions = 0
+            correct_questions = 0
+            for qtype_data in model.get('question_type', []):
+                total_questions += qtype_data.get('number_of_questions', 0)
+                correct_questions += qtype_data.get('correctly_answered_questions', 0)
             
             # Get token usage and calculate actual cost
             ai_calls = model.get('ai_calls', [])
@@ -811,9 +944,9 @@ answers/
                 
                 actual_cost = (input_tokens * input_cost_per_million / 1_000_000) + (output_tokens * output_cost_per_million / 1_000_000)
                 
-                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {exact_match:.3f} | {input_tokens:,} | {output_tokens:,} | ${actual_cost:.4f} |\n"
+                readme_content += f"| {model_name} | {exact_match:.1%} | {correct_questions}/{total_questions} | {input_tokens:,} | {output_tokens:,} | ${actual_cost:.4f} |\n"
             else:
-                readme_content += f"| {model_name} | {precision:.3f} | {recall:.3f} | {f1:.3f} | {exact_match:.3f} | 0 | 0 | $0.0000 |\n"
+                readme_content += f"| {model_name} | {exact_match:.1%} | {correct_questions}/{total_questions} | 0 | 0 | $0.0000 |\n"
         
         readme_content += "\n## Performance by Model and Question Type\n\n"
         
@@ -821,8 +954,8 @@ answers/
         for model in sorted_models:
             model_name = model.get('model_name', 'Unknown')
             readme_content += f"### {model_name}\n\n"
-            readme_content += "| Question Type | Questions | With Images | Correct | Precision | Recall | F1 Score |\n"
-            readme_content += "|---------------|-----------|-------------|---------|-----------|--------|----------|\n"
+            readme_content += "| Question Type | Questions | With Images | Correct | Accuracy |\n"
+            readme_content += "|---------------|-----------|-------------|---------|----------|\n"
             
             # Sort question types alphabetically
             question_types = sorted(model.get('question_type', []), key=lambda x: x.get('type', ''))
@@ -832,11 +965,9 @@ answers/
                 questions = type_data.get('number_of_questions', 0)
                 with_images = type_data.get('questions_with_images', 0)
                 correct = type_data.get('correctly_answered_questions', 0)
-                precision = type_data.get('precision', 0)
-                recall = type_data.get('recall', 0)
-                f1 = type_data.get('f1_score', type_data.get('f1', 0))  # Support both keys
+                accuracy = (correct / questions * 100) if questions > 0 else 0
                 
-                readme_content += f"| {qtype} | {questions} | {with_images} | {correct} | {precision:.3f} | {recall:.3f} | {f1:.3f} |\n"
+                readme_content += f"| {qtype} | {questions} | {with_images} | {correct} | {accuracy:.1f}% |\n"
             
             readme_content += "\n"
         

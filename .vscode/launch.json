@@ -30,14 +30,6 @@
       ]
     },
     {
-      "name": "My_Zanichelli - Dataset bundler",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/questions/myzanichelli/3_dataset_bundler.py",
-      "console": "integratedTerminal",
-      "args": []
-    },
-    {
       "name": "AP_Art_History - 2010 Preprocessor ",
       "type": "debugpy",
       "request": "launch",
@@ -112,6 +104,14 @@
       "args": []
     },
     {
+      "name": "Dataset bundler",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/dataset_bundler.py",
+      "console": "integratedTerminal",
+      "args": []
+    },
+    {
       "name": "LLM Questioner",
       "type": "debugpy",
       "request": "launch",
@@ -119,26 +119,19 @@
       "console": "integratedTerminal",
       "args": [
         "--start", "1",
-        "--end", "5",
+        "--end", "2",
+
+        "--force",
+
         // OpenAI models
         //"--models", "openai/gpt-4.1-2025-04-14",
-        //"--models", "openai/gpt-5-2025-08-07",
-        //"--models", "openai/o3-2025-04-16",
+        
+        // Anthropics
 
-        // Google models
-        //"--models", "google/gemini-2.5-pro",
-        //"--models", "google/gemini-2.5-flash",
-        //"--models", "google/gemini-2.5-flash-lite",
+        "--models", "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "--models", "harvard/us.mistral.pixtral-large-2502-v1:0",
 
-        // Anthropic models
-        "--models", "anthropic/claude-haiku-4-5-20251001",
-        "--models", "anthropic/claude-sonnet-4-5-20250929",
-        "--models", "anthropic/claude-opus-4-1-20250805",
-
-        //"--models", "anthropic/claude-3-5-sonnet-20241022",
-        //"--models", "anthropic/claude-3-haiku-20240307",
-        //"--models", "anthropic/claude-opus-4-20250514-thinking-16k",
-        "--verbose",
+        //"--verbose",
         //"--question-mode", "text"
       ]
     },
