@@ -104,6 +104,20 @@
       position: sticky;
       top: 0;
       z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .count-badge {
+      background: #e9ecef;
+      color: #666;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+      min-width: 30px;
+      text-align: center;
     }
 
     .exercise-list {
@@ -118,6 +132,9 @@
       transition: all 0.2s ease;
       color: #333;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .exercise-item:hover {
@@ -130,6 +147,11 @@
       border-left-color: #667eea;
       font-weight: 600;
       color: #667eea;
+    }
+
+    .exercise-item.active .count-badge {
+      background: #667eea;
+      color: white;
     }
 
     .page-list {
@@ -431,7 +453,10 @@
   <div class="main-container">
     <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-header">Questions</div>
+      <div class="sidebar-header">
+        <span>Questions</span>
+        <span id="totalCount" class="count-badge">0</span>
+      </div>
       <div id="exerciseList" class="exercise-list">
         <div style="padding: 20px; text-align: center; color: #999;">
           Loading exercises...
@@ -472,10 +497,27 @@
 
         listDiv.innerHTML = '';
         
-        exercises.forEach(exercise => {
+        let totalQuestions = 0;
+        
+        // Load all exercises and count questions
+        for (const exercise of exercises) {
+          const pagesResponse = await fetch(`/api/pages/${exercise}`);
+          const pages = await pagesResponse.json();
+          
+          let exerciseQuestionCount = 0;
+          for (const pageNum of pages) {
+            const pageData = await fetchPageData(exercise, pageNum);
+            exerciseQuestionCount += (pageData.questions || []).length;
+          }
+          
+          totalQuestions += exerciseQuestionCount;
+          
           const exerciseItem = document.createElement('div');
           exerciseItem.className = 'exercise-item';
-          exerciseItem.textContent = exercise;
+          exerciseItem.innerHTML = `
+            <span>${exercise}</span>
+            <span class="count-badge">${exerciseQuestionCount}</span>
+          `;
           exerciseItem.onclick = async () => {
             // Update active state
             document.querySelectorAll('.exercise-item').forEach(item => {
@@ -489,7 +531,10 @@
             await loadPages(exercise);
           };
           listDiv.appendChild(exerciseItem);
-        });
+        }
+        
+        // Update total count in header
+        document.getElementById('totalCount').textContent = totalQuestions;
 
         // Auto-select first exercise if available
         if (exercises.length > 0) {
