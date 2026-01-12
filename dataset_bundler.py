@@ -559,6 +559,10 @@ def main(question_type, version, output_dir):
     skipped_files = []
     processed_metadata_files = []
     
+    # Track image files to avoid duplicates
+    # Key: absolute path to source image, Value: (file_id, extension) of first copy
+    image_mapping = {}
+    
     # Collect all JSON files from all structured folders first
     all_json_files = []
     for structured_path in structured_folders:
@@ -627,17 +631,6 @@ def main(question_type, version, output_dir):
                     with open(txt_path, 'w', encoding='utf-8') as f:
                         f.write(txt_content)
                     
-                    # Add source information to the question data
-                    question_data_copy = question_data.copy()
-                    question_data_copy['source'] = f"{source_name}/{subfolder_name}"
-                    question_data_copy['source_file'] = str(json_file_path)
-                    
-                    # Save JSON file to metadata/ folder
-                    json_filename = f"{file_id}.json"
-                    json_path = metadata_dir / json_filename
-                    with open(json_path, 'w', encoding='utf-8') as f:
-                        json.dump(question_data_copy, f, indent=2, ensure_ascii=False)
-                    
                     # Look for and copy associated image
                     # Handle both "images" (array) and "image" (single) fields
                     image_ref = None
@@ -654,16 +647,57 @@ def main(question_type, version, output_dir):
                     
                     image_file = find_associated_image(json_file_path, image_ref, source_name, exercise_num, question_num)
                     
+                    # Add source information to the question data
+                    question_data_copy = question_data.copy()
+                    question_data_copy['source'] = f"{source_name}/{subfolder_name}"
+                    question_data_copy['source_file'] = str(json_file_path)
+                    
+                    # Normalize image metadata format
+                    # Remove old "images" array field if present
+                    if "images" in question_data_copy:
+                        del question_data_copy["images"]
+                    
+                    # Set standardized image fields
                     if image_file:
-                        # Copy image with same file_id as the text and json files
-                        # Keep original extension
-                        image_ext = image_file.suffix
-                        image_filename = f"{file_id}{image_ext}"
-                        image_dest_path = imgs_dir / image_filename
-                        shutil.copy2(image_file, image_dest_path)
-                        print(f"Processed: {json_file_path.name} (Q{question_data.get('question', '?')}) -> {file_id}.txt, {file_id}.json, {file_id}{image_ext}")
+                        # Get absolute path of source image for deduplication
+                        image_file_abs = image_file.resolve()
+                        
+                        # Check if this image has already been copied
+                        if image_file_abs in image_mapping:
+                            # Reuse the existing image file
+                            existing_file_id, existing_ext = image_mapping[image_file_abs]
+                            question_data_copy['has_image'] = True
+                            question_data_copy['image'] = f"imgs/{existing_file_id}{existing_ext}"
+                            
+                            print(f"Processed: {json_file_path.name} (Q{question_data.get('question', '?')}) -> {file_id}.txt, {file_id}.json, reusing image {existing_file_id}{existing_ext}")
+                        else:
+                            # Copy image with same file_id as the text and json files
+                            # Keep original extension
+                            image_ext = image_file.suffix
+                            image_filename = f"{file_id}{image_ext}"
+                            image_dest_path = imgs_dir / image_filename
+                            shutil.copy2(image_file, image_dest_path)
+                            
+                            # Track this image to avoid future duplicates
+                            image_mapping[image_file_abs] = (file_id, image_ext)
+                            
+                            # Set standardized fields pointing to dataset/imgs
+                            question_data_copy['has_image'] = True
+                            question_data_copy['image'] = f"imgs/{file_id}{image_ext}"
+                            
+                            print(f"Processed: {json_file_path.name} (Q{question_data.get('question', '?')}) -> {file_id}.txt, {file_id}.json, {file_id}{image_ext}")
                     else:
+                        # No image found
+                        question_data_copy['has_image'] = False
+                        question_data_copy['image'] = None
+                        
                         print(f"Processed: {json_file_path.name} (Q{question_data.get('question', '?')}) -> {file_id}.txt, {file_id}.json (no image)")
+                    
+                    # Save JSON file to metadata/ folder with normalized image fields
+                    json_filename = f"{file_id}.json"
+                    json_path = metadata_dir / json_filename
+                    with open(json_path, 'w', encoding='utf-8') as f:
+                        json.dump(question_data_copy, f, indent=2, ensure_ascii=False)
                     
                     processed_files.append(str(json_file_path))
                     processed_metadata_files.append(str(json_path))
