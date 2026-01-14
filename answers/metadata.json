@@ -1,0 +1,162 @@
+{
+  "creation_datetime": "2026-01-14 16:14:05",
+  "version": 0.3,
+  "exercise_count": 370,
+  "question_count": 370,
+  "questions_with_images": 253,
+  "questions_by_type": {
+    "multiple_choice_radio": 370
+  },
+  "models": [
+    {
+      "model_name": "openai/gpt-4.1-2025-04-14",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_match_rate": 1.0,
+      "input_cost_per_million_tokens": 2.0,
+      "output_cost_per_million_tokens": 8.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 19817,
+          "output_tokens": 246,
+          "total_tokens": 20063,
+          "processing_time": 35.67929005622864
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 10,
+          "questions_with_images": 10,
+          "correctly_answered_questions": 10,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
+        }
+      ]
+    },
+    {
+      "model_name": "harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "precision": 0.7243243243243244,
+      "recall": 0.7243243243243244,
+      "f1": 0.7243243243243244,
+      "exact_match_rate": 0.7243243243243244,
+      "input_cost_per_million_tokens": 3.0,
+      "output_cost_per_million_tokens": 15.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 538947,
+          "output_tokens": 33898,
+          "total_tokens": 572845,
+          "processing_time": 1506.3964881896973
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 268,
+          "precision": 0.7243243243243244,
+          "recall": 0.7243243243243244,
+          "f1": 0.7243243243243244,
+          "exact_match_rate": 0.7243243243243244
+        }
+      ]
+    },
+    {
+      "model_name": "openai/gpt-5-nano-2025-08-07",
+      "precision": 0.8351351351351352,
+      "recall": 0.8351351351351352,
+      "f1": 0.8351351351351352,
+      "exact_match_rate": 0.8351351351351352,
+      "input_cost_per_million_tokens": 0.05,
+      "output_cost_per_million_tokens": 0.4,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 562893,
+          "output_tokens": 547207,
+          "total_tokens": 1110100,
+          "processing_time": 6423.8285183906555
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 309,
+          "precision": 0.8351351351351352,
+          "recall": 0.8351351351351352,
+          "f1": 0.8351351351351352,
+          "exact_match_rate": 0.8351351351351352
+        }
+      ]
+    },
+    {
+      "model_name": "harvard/us.mistral.pixtral-large-2502-v1:0",
+      "precision": 0.5432432432432432,
+      "recall": 0.5432432432432432,
+      "f1": 0.5432432432432432,
+      "exact_match_rate": 0.5432432432432432,
+      "input_cost_per_million_tokens": 2.0,
+      "output_cost_per_million_tokens": 6.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 246088,
+          "output_tokens": 22190,
+          "total_tokens": 268278,
+          "processing_time": 866.187646150589
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 201,
+          "precision": 0.5432432432432432,
+          "recall": 0.5432432432432432,
+          "f1": 0.5432432432432432,
+          "exact_match_rate": 0.5432432432432432
+        }
+      ]
+    },
+    {
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "precision": 0.845945945945946,
+      "recall": 0.845945945945946,
+      "f1": 0.845945945945946,
+      "exact_match_rate": 0.845945945945946,
+      "input_cost_per_million_tokens": 0.25,
+      "output_cost_per_million_tokens": 2.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 492113,
+          "output_tokens": 193975,
+          "total_tokens": 686088,
+          "processing_time": 3542.844411611557
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 313,
+          "precision": 0.845945945945946,
+          "recall": 0.845945945945946,
+          "f1": 0.845945945945946,
+          "exact_match_rate": 0.845945945945946
+        }
+      ]
+    }
+  ]
+}

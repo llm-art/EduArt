@@ -10,7 +10,7 @@ __pycache__/
 .Python
 
 dataset/
-answers/
+answers/*/
 
 # IDE files
 .idea/
