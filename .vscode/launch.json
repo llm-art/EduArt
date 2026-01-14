@@ -119,17 +119,21 @@
       "console": "integratedTerminal",
       "args": [
         "--start", "1",
-        "--end", "2",
+        "--end", "10",
 
         "--force",
 
         // OpenAI models
-        //"--models", "openai/gpt-4.1-2025-04-14",
+        "--models", "openai/gpt-4.1-2025-04-14",
+        //"--models", "openai/gpt-5-2025-08-07",
+        "--models", "openai/gpt-5-mini-2025-08-07",
+        "--models", "openai/gpt-5-nano-2025-08-07",
+        //"--models", "openai/gpt-5.2-2025-12-11",
+        //"--models", "openai/gpt-5.2-pro-2025-12-11",
         
         // Anthropics
-
-        "--models", "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "--models", "harvard/us.mistral.pixtral-large-2502-v1:0",
+        //"--models", "harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        //"--models", "harvard/us.mistral.pixtral-large-2502-v1:0",
 
         //"--verbose",
         //"--question-mode", "text"

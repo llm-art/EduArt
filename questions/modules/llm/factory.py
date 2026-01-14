@@ -18,12 +18,16 @@ class LLMConfig:
         'openai': [
           "gpt-4.1-2025-04-14",
           "gpt-5-2025-08-07",
-          "o3-2025-04-16",
+          "gpt-5.2-2025-12-11",
+          "gpt-5.2-pro-2025-12-11",
+          "gpt-5-mini-2025-08-07",
+          "gpt-5-nano-2025-08-07",
         ],
         'google': [
             'gemini-2.5-flash-lite',
             'gemini-2.5-flash',
             'gemini-2.5-pro',
+            'gemini-2.5-flash-preview-09-2025',
         ],
         'anthropic': [
             'claude-sonnet-4-5-20250929',

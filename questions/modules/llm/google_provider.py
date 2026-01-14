@@ -58,7 +58,7 @@ class GoogleProvider(LLMProvider):
             except ImportError as e:
                 raise ProcessingError(f"Google Gemini dependencies not available: {e}")
     
-    def query(self, prompt: str, system_prompt: str = None, image_path: Optional[str] = None, image_paths: Optional[list] = None) -> str:
+    def query(self, prompt: str, system_prompt: str = None, image_path: Optional[str] = None, image_paths: Optional[list] = None):
         """
         Query Google Gemini model with a prompt and optional image(s).
         
@@ -69,7 +69,9 @@ class GoogleProvider(LLMProvider):
             image_paths: Optional list of paths to image files
             
         Returns:
-            Model response
+            Tuple of (response_text, token_metadata) where token_metadata contains:
+                - input_tokens: Number of prompt tokens
+                - output_tokens: Number of completion tokens
             
         Raises:
             ProcessingError: If query fails
@@ -131,7 +133,23 @@ class GoogleProvider(LLMProvider):
                 messages.append(self._human_message(content=prompt))
                 response = self._model.invoke(messages)
             
-            return response.content.strip()
+            # Extract token usage from response metadata
+            token_metadata = {
+                'input_tokens': 0,
+                'output_tokens': 0
+            }
+            
+            if hasattr(response, 'response_metadata'):
+                metadata = response.response_metadata
+                
+                # Google uses 'usage_metadata' field
+                # Structure: {"usage_metadata": {"prompt_token_count": 19, "candidates_token_count": 10, ...}}
+                usage = metadata.get('usage_metadata', {})
+                
+                token_metadata['input_tokens'] = usage.get('prompt_token_count', 0)
+                token_metadata['output_tokens'] = usage.get('candidates_token_count', 0)
+            
+            return response.content.strip(), token_metadata
         except Exception as e:
             raise ProcessingError(f"Google API error: {str(e)}")
     

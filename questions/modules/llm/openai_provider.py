@@ -54,7 +54,7 @@ class OpenAIProvider(LLMProvider):
             except ImportError as e:
                 raise ProcessingError(f"OpenAI dependencies not available: {e}")
     
-    def query(self, prompt: str, system_prompt: str = None, image_path: Optional[str] = None, image_paths: Optional[list] = None) -> str:
+    def query(self, prompt: str, system_prompt: str = None, image_path: Optional[str] = None, image_paths: Optional[list] = None):
         """
         Query OpenAI model with a prompt and optional image(s).
         
@@ -65,7 +65,10 @@ class OpenAIProvider(LLMProvider):
             image_paths: Optional list of paths to image files
             
         Returns:
-            Model response
+            Tuple of (response_text, token_metadata) where token_metadata contains:
+                - input_tokens: Number of prompt tokens
+                - output_tokens: Number of completion tokens
+                - reasoning_tokens: Number of reasoning tokens (for o1/o3 models)
             
         Raises:
             ProcessingError: If query fails
@@ -128,13 +131,31 @@ class OpenAIProvider(LLMProvider):
                 messages.append(self._human_message(content=prompt))
                 response = self._model.invoke(messages)
             
-            # Handle empty responses with warning
-            if not response.content or len(response.content.strip()) == 0:
-                # Check if this was due to token limit (common with reasoning models)
-                if hasattr(response, 'response_metadata'):
-                    metadata = response.response_metadata
+            # Extract token usage from response metadata
+            token_metadata = {
+                'input_tokens': 0,
+                'output_tokens': 0,
+                'reasoning_tokens': 0
+            }
+            
+            if hasattr(response, 'response_metadata'):
+                metadata = response.response_metadata
+                
+                # Extract token usage from the usage field
+                # Structure: {"usage": {"prompt_tokens": 19, "completion_tokens": 10, "total_tokens": 29, ...}}
+                usage = metadata.get('token_usage', metadata.get('usage', {}))
+                
+                token_metadata['input_tokens'] = usage.get('prompt_tokens', 0)
+                token_metadata['output_tokens'] = usage.get('completion_tokens', 0)
+                
+                # Extract reasoning tokens for o1/o3 models
+                completion_details = usage.get('completion_tokens_details', {})
+                token_metadata['reasoning_tokens'] = completion_details.get('reasoning_tokens', 0)
+                
+                # Handle empty responses with warning
+                if not response.content or len(response.content.strip()) == 0:
                     finish_reason = metadata.get('finish_reason', '')
-                    reasoning_tokens = metadata.get('token_usage', {}).get('completion_tokens_details', {}).get('reasoning_tokens', 0)
+                    reasoning_tokens = token_metadata['reasoning_tokens']
                     
                     if finish_reason == 'length' and reasoning_tokens > 0:
                         raise ProcessingError(
@@ -142,7 +163,7 @@ class OpenAIProvider(LLMProvider):
                             f"leaving no tokens for output. Increase MAX_TOKENS (e.g., 4096) for reasoning models."
                         )
             
-            return response.content.strip()
+            return response.content.strip(), token_metadata
         except Exception as e:
             raise ProcessingError(f"OpenAI API error: {str(e)}")
     

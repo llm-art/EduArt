@@ -3,11 +3,12 @@
 Dataset Bundler Script
 
 This script navigates all folders with a subfolder called structured/ in questions/.
-Inside each structured folder, it processes all subfolders (e.g., 2010, 1, etc.) 
+Inside each structured folder, it processes all subfolders (e.g., 2010, 1, etc.)
 and extracts JSON files to create TXT files of questions, copies JSON files to metadata/,
 and copies associated images to imgs/ folder with consistent naming.
 
 The script supports filtering by question type (default: multiple_choice_radio).
+Images are automatically optimized for Claude API compliance.
 """
 
 import os
@@ -16,10 +17,36 @@ import glob
 import shutil
 import re
 import click
+import base64
 from datetime import datetime
 from pathlib import Path
 from collections import defaultdict
+from PIL import Image
+from typing import Dict, Tuple
 
+
+# Claude API Image Optimization Configuration
+IMAGE_OPTIMIZATION_CONFIG = {
+    'enabled': True,  # Set to False to disable optimization
+    'max_base64_size': 5 * 1024 * 1024,  # 5 MB hard limit
+    'recommended_max_dimension': 1568,  # Recommended max dimension
+    'recommended_megapixels': 1.15,  # Recommended megapixels
+    'optimal_tokens': 1600,  # Optimal token count
+    'quality_start': 90,  # Starting JPEG quality
+    'quality_min': 70,  # Minimum JPEG quality
+    # Optimal sizes for common aspect ratios (from Claude docs)
+    'optimal_sizes': {
+        (1, 1): (1092, 1092),    # 1:1
+        (3, 4): (951, 1268),     # 3:4
+        (4, 3): (1268, 951),     # 4:3
+        (2, 3): (896, 1344),     # 2:3
+        (3, 2): (1344, 896),     # 3:2
+        (9, 16): (819, 1456),    # 9:16
+        (16, 9): (1456, 819),    # 16:9
+        (1, 2): (784, 1568),     # 1:2
+        (2, 1): (1568, 784),     # 2:1
+    }
+}
 
 # Report configuration - single point for modifications
 REPORT_CONFIG = {
@@ -44,6 +71,174 @@ REPORT_CONFIG = {
         }
     }
 }
+
+
+# Image Optimization Functions
+def get_base64_size(image_path: str) -> int:
+    """Get the size of the image when base64 encoded (as sent to API)"""
+    with open(image_path, 'rb') as f:
+        encoded = base64.b64encode(f.read())
+        return len(encoded)
+
+
+def calculate_image_tokens(width: int, height: int) -> int:
+    """Calculate approximate tokens: (width * height) / 750"""
+    return int((width * height) / 750)
+
+
+def get_closest_aspect_ratio(width: int, height: int) -> Tuple[int, int]:
+    """Find the closest standard aspect ratio"""
+    current_ratio = width / height
+    
+    closest_ratio = None
+    min_diff = float('inf')
+    
+    for ratio_tuple in IMAGE_OPTIMIZATION_CONFIG['optimal_sizes'].keys():
+        ratio_value = ratio_tuple[0] / ratio_tuple[1]
+        diff = abs(current_ratio - ratio_value)
+        if diff < min_diff:
+            min_diff = diff
+            closest_ratio = ratio_tuple
+    
+    return closest_ratio
+
+
+def calculate_optimal_size(width: int, height: int) -> Tuple[int, int]:
+    """
+    Calculate optimal size based on Claude's recommendations:
+    1. Try to match optimal sizes for common aspect ratios
+    2. Otherwise, scale to 1.15 megapixels within 1568px
+    """
+    aspect_ratio = get_closest_aspect_ratio(width, height)
+    
+    # Check if we're close to a standard aspect ratio (within 5%)
+    current_ratio = width / height
+    standard_ratio = aspect_ratio[0] / aspect_ratio[1]
+    
+    if abs(current_ratio - standard_ratio) / standard_ratio < 0.05:
+        # Use optimal size for this aspect ratio
+        optimal_size = IMAGE_OPTIMIZATION_CONFIG['optimal_sizes'][aspect_ratio]
+        return optimal_size
+    
+    # Otherwise, scale to recommended limits
+    current_megapixels = (width * height) / 1_000_000
+    recommended_max_dim = IMAGE_OPTIMIZATION_CONFIG['recommended_max_dimension']
+    recommended_mp = IMAGE_OPTIMIZATION_CONFIG['recommended_megapixels']
+    
+    # If already within limits, keep original size
+    if (current_megapixels <= recommended_mp and
+        width <= recommended_max_dim and
+        height <= recommended_max_dim):
+        return (width, height)
+    
+    # Scale down to fit within 1568px and 1.15 megapixels
+    scale_for_dimension = min(recommended_max_dim / max(width, height), 1.0)
+    scale_for_megapixels = min((recommended_mp * 1_000_000 / (width * height)) ** 0.5, 1.0)
+    
+    scale = min(scale_for_dimension, scale_for_megapixels)
+    
+    new_width = int(width * scale)
+    new_height = int(height * scale)
+    
+    return (new_width, new_height)
+
+
+def optimize_image_for_claude(input_path: str, output_path: str) -> Dict:
+    """
+    Optimize a single image according to Claude's guidelines.
+    Returns dict with optimization statistics.
+    """
+    if not IMAGE_OPTIMIZATION_CONFIG['enabled']:
+        # Just copy the file if optimization is disabled
+        shutil.copy2(input_path, output_path)
+        return {'optimized': False, 'copied': True}
+    
+    try:
+        # Open image
+        img = Image.open(input_path)
+        original_width, original_height = img.size
+        original_file_size = os.path.getsize(input_path)
+        original_base64_size = get_base64_size(input_path)
+        original_tokens = calculate_image_tokens(original_width, original_height)
+        
+        # Calculate optimal size
+        new_width, new_height = calculate_optimal_size(original_width, original_height)
+        
+        # Check if optimization is needed
+        max_base64 = IMAGE_OPTIMIZATION_CONFIG['max_base64_size']
+        recommended_max_dim = IMAGE_OPTIMIZATION_CONFIG['recommended_max_dimension']
+        recommended_mp = IMAGE_OPTIMIZATION_CONFIG['recommended_megapixels']
+        
+        needs_optimization = (
+            original_base64_size > max_base64 or
+            original_width > recommended_max_dim or
+            original_height > recommended_max_dim or
+            (original_width * original_height) / 1_000_000 > recommended_mp
+        )
+        
+        if not needs_optimization:
+            # Image is already optimal, just copy it
+            shutil.copy2(input_path, output_path)
+            return {
+                'optimized': False,
+                'copied': True,
+                'already_optimal': True,
+                'original_tokens': original_tokens
+            }
+        
+        # Resize if needed
+        if (new_width, new_height) != (original_width, original_height):
+            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        # Save with optimization
+        quality = IMAGE_OPTIMIZATION_CONFIG['quality_start']
+        img.save(output_path, 'JPEG', quality=quality, optimize=True)
+        
+        # Check if we need to reduce quality further to meet size limit
+        quality_min = IMAGE_OPTIMIZATION_CONFIG['quality_min']
+        while quality > quality_min:
+            current_base64_size = get_base64_size(output_path)
+            if current_base64_size <= max_base64:
+                break
+            quality -= 5
+            img.save(output_path, 'JPEG', quality=quality, optimize=True)
+        
+        # Get final stats
+        final_file_size = os.path.getsize(output_path)
+        final_base64_size = get_base64_size(output_path)
+        final_tokens = calculate_image_tokens(new_width, new_height)
+        
+        return {
+            'optimized': True,
+            'copied': False,
+            'original': {
+                'width': original_width,
+                'height': original_height,
+                'file_size_mb': round(original_file_size / 1024 / 1024, 2),
+                'base64_size_mb': round(original_base64_size / 1024 / 1024, 2),
+                'tokens': original_tokens,
+            },
+            'final': {
+                'width': new_width,
+                'height': new_height,
+                'file_size_mb': round(final_file_size / 1024 / 1024, 2),
+                'base64_size_mb': round(final_base64_size / 1024 / 1024, 2),
+                'tokens': final_tokens,
+                'quality': quality,
+            },
+            'savings': {
+                'tokens_saved': original_tokens - final_tokens,
+                'tokens_percent': round((1 - final_tokens / original_tokens) * 100, 1) if original_tokens > 0 else 0,
+                'size_saved_mb': round((original_base64_size - final_base64_size) / 1024 / 1024, 2),
+            }
+        }
+    except Exception as e:
+        # On error, try to copy the original file
+        try:
+            shutil.copy2(input_path, output_path)
+            return {'optimized': False, 'copied': True, 'error': str(e)}
+        except:
+            return {'optimized': False, 'copied': False, 'error': str(e)}
 
 
 def find_structured_folders():
@@ -563,6 +758,18 @@ def main(question_type, version, output_dir):
     # Key: absolute path to source image, Value: (file_id, extension) of first copy
     image_mapping = {}
     
+    # Track image optimization statistics
+    image_optimization_stats = {
+        'total_images': 0,
+        'optimized_count': 0,
+        'already_optimal_count': 0,
+        'reused_count': 0,
+        'total_original_tokens': 0,
+        'total_final_tokens': 0,
+        'total_tokens_saved': 0,
+        'optimizations': []
+    }
+    
     # Collect all JSON files from all structured folders first
     all_json_files = []
     for structured_path in structured_folders:
@@ -669,14 +876,19 @@ def main(question_type, version, output_dir):
                             question_data_copy['has_image'] = True
                             question_data_copy['image'] = f"imgs/{existing_file_id}{existing_ext}"
                             
+                            # Track reused image
+                            image_optimization_stats['reused_count'] += 1
+                            
                             print(f"Processed: {json_file_path.name} (Q{question_data.get('question', '?')}) -> {file_id}.txt, {file_id}.json, reusing image {existing_file_id}{existing_ext}")
                         else:
-                            # Copy image with same file_id as the text and json files
-                            # Keep original extension
-                            image_ext = image_file.suffix
+                            # Optimize and copy image with same file_id as the text and json files
+                            # Always save as .jpg after optimization
+                            image_ext = ".jpg"
                             image_filename = f"{file_id}{image_ext}"
                             image_dest_path = imgs_dir / image_filename
-                            shutil.copy2(image_file, image_dest_path)
+                            
+                            # Optimize image for Claude API
+                            optimization_result = optimize_image_for_claude(str(image_file), str(image_dest_path))
                             
                             # Track this image to avoid future duplicates
                             image_mapping[image_file_abs] = (file_id, image_ext)
@@ -685,7 +897,77 @@ def main(question_type, version, output_dir):
                             question_data_copy['has_image'] = True
                             question_data_copy['image'] = f"imgs/{file_id}{image_ext}"
                             
-                            print(f"Processed: {json_file_path.name} (Q{question_data.get('question', '?')}) -> {file_id}.txt, {file_id}.json, {file_id}{image_ext}")
+                            # Track image optimization statistics
+                            image_optimization_stats['total_images'] += 1
+                            
+                            # Add optimization info to metadata
+                            if optimization_result.get('optimized'):
+                                question_data_copy['image_optimization'] = {
+                                    'optimized': True,
+                                    'original_tokens': optimization_result['original']['tokens'],
+                                    'final_tokens': optimization_result['final']['tokens'],
+                                    'tokens_saved': optimization_result['savings']['tokens_saved'],
+                                    'tokens_saved_percent': optimization_result['savings']['tokens_percent']
+                                }
+                                
+                                # Track optimization stats
+                                image_optimization_stats['optimized_count'] += 1
+                                image_optimization_stats['total_original_tokens'] += optimization_result['original']['tokens']
+                                image_optimization_stats['total_final_tokens'] += optimization_result['final']['tokens']
+                                image_optimization_stats['total_tokens_saved'] += optimization_result['savings']['tokens_saved']
+                                
+                                # Record individual optimization
+                                image_optimization_stats['optimizations'].append({
+                                    'file_id': file_id,
+                                    'source_file': str(image_file),
+                                    'original_dimensions': f"{optimization_result['original']['width']}x{optimization_result['original']['height']}",
+                                    'final_dimensions': f"{optimization_result['final']['width']}x{optimization_result['final']['height']}",
+                                    'original_tokens': optimization_result['original']['tokens'],
+                                    'final_tokens': optimization_result['final']['tokens'],
+                                    'tokens_saved': optimization_result['savings']['tokens_saved'],
+                                    'tokens_saved_percent': optimization_result['savings']['tokens_percent'],
+                                    'original_size_mb': optimization_result['original']['base64_size_mb'],
+                                    'final_size_mb': optimization_result['final']['base64_size_mb'],
+                                    'quality': optimization_result['final']['quality']
+                                })
+                                
+                                opt_info = f" (optimized: {optimization_result['savings']['tokens_percent']:+.0f}% tokens)"
+                            elif optimization_result.get('already_optimal'):
+                                question_data_copy['image_optimization'] = {
+                                    'optimized': False,
+                                    'already_optimal': True,
+                                    'tokens': optimization_result['original_tokens']
+                                }
+                                
+                                # Track already optimal
+                                image_optimization_stats['already_optimal_count'] += 1
+                                image_optimization_stats['total_original_tokens'] += optimization_result['original_tokens']
+                                image_optimization_stats['total_final_tokens'] += optimization_result['original_tokens']
+                                
+                                # Add to optimizations list for logging (even though not optimized)
+                                # Get image info for already optimal images
+                                try:
+                                    img = Image.open(str(image_file))
+                                    width, height = img.size
+                                    file_size = os.path.getsize(str(image_file))
+                                    base64_size = get_base64_size(str(image_file))
+                                    
+                                    image_optimization_stats['optimizations'].append({
+                                        'file_id': file_id,
+                                        'source_file': str(image_file),
+                                        'final_dimensions': f"{width}x{height}",
+                                        'final_tokens': optimization_result['original_tokens'],
+                                        'final_size_mb': round(base64_size / 1024 / 1024, 2),
+                                        'quality': 'original'
+                                    })
+                                except:
+                                    pass
+                                
+                                opt_info = " (already optimal)"
+                            else:
+                                opt_info = ""
+                            
+                            print(f"Processed: {json_file_path.name} (Q{question_data.get('question', '?')}) -> {file_id}.txt, {file_id}.json, {file_id}{image_ext}{opt_info}")
                     else:
                         # No image found
                         question_data_copy['has_image'] = False
@@ -733,6 +1015,60 @@ def main(question_type, version, output_dir):
     with open(metadata_file, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
+    # Generate and write image optimization log as text file
+    if image_optimization_stats['total_images'] > 0:
+        optimization_log_file = dataset_path / 'image_optimization.log'
+        
+        with open(optimization_log_file, 'w', encoding='utf-8') as f:
+            f.write("IMAGE OPTIMIZATION LOG\n")
+            f.write("=" * 110 + "\n")
+            f.write(f"Generated: {end_time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Total images processed: {image_optimization_stats['total_images']}\n")
+            f.write(f"Optimized: {image_optimization_stats['optimized_count']} | Already optimal: {image_optimization_stats['already_optimal_count']}\n")
+            f.write("=" * 110 + "\n\n")
+            
+            # Write table header
+            f.write(f"{'Filename':<20} {'Dimensions':<18} {'Aspect Ratio':<15} {'MP':<8} {'Base64 Size (MB)':<18} {'Quality':<8}\n")
+            f.write("-" * 110 + "\n")
+            
+            # Collect all image data (both optimized and already optimal)
+            all_image_data = []
+            
+            # Add optimized images
+            for opt in image_optimization_stats['optimizations']:
+                all_image_data.append({
+                    'file_id': opt['file_id'],
+                    'dimensions': opt['final_dimensions'],
+                    'base64_size': opt['final_size_mb'],
+                    'tokens': opt['final_tokens'],
+                    'quality': opt.get('quality', 'N/A')
+                })
+            
+            # Sort by file_id
+            all_image_data.sort(key=lambda x: x['file_id'])
+            
+            # Write all image details
+            for img_data in all_image_data:
+                file_id = img_data['file_id']
+                dimensions = img_data['dimensions']
+                
+                # Calculate aspect ratio from dimensions
+                try:
+                    width, height = map(int, dimensions.split('x'))
+                    aspect_ratio = round(width / height, 2)
+                    mp = (width * height) / 1_000_000
+                except:
+                    aspect_ratio = "N/A"
+                    mp = 0.0
+                
+                base64_size = img_data['base64_size']
+                quality = img_data['quality']
+                
+                f.write(f"{file_id:<20} {dimensions:<18} {str(aspect_ratio):<15} {mp:<8.2f} {base64_size:<18.2f} {str(quality):<8}\n")
+            
+            f.write("\n" + "=" * 110 + "\n")
+            f.write(f"Total: {len(all_image_data)} images\n")
+
     print(f"\n{'='*60}")
     print(f"Processing complete!")
     print(f"{'='*60}")
@@ -747,6 +1083,23 @@ def main(question_type, version, output_dir):
     print(f"Reports generated:")
     print(f"  - README: {readme_file}")
     print(f"  - Metadata: {metadata_file}")
+    
+    # Print image optimization summary
+    if image_optimization_stats['total_images'] > 0:
+        print(f"\nImage Optimization Summary:")
+        print(f"  - Total images processed: {image_optimization_stats['total_images']}")
+        print(f"  - Optimized: {image_optimization_stats['optimized_count']}")
+        print(f"  - Already optimal: {image_optimization_stats['already_optimal_count']}")
+        print(f"  - Reused (duplicates): {image_optimization_stats['reused_count']}")
+        if image_optimization_stats['total_tokens_saved'] > 0:
+            tokens_saved_pct = round((image_optimization_stats['total_tokens_saved'] / image_optimization_stats['total_original_tokens'] * 100), 1)
+            print(f"  - Tokens saved: {image_optimization_stats['total_tokens_saved']:,} ({tokens_saved_pct}%)")
+            original_cost = image_optimization_stats['total_original_tokens'] / image_optimization_stats['total_images'] * 1000 * 3.0 / 1_000_000
+            final_cost = image_optimization_stats['total_final_tokens'] / image_optimization_stats['total_images'] * 1000 * 3.0 / 1_000_000
+            print(f"  - Cost savings: ${original_cost - final_cost:.2f} per 1K images")
+        if image_optimization_stats['optimizations']:
+            optimization_log_file = dataset_path / 'image_optimization.log'
+            print(f"  - Optimization log: {optimization_log_file}")
 
 
 if __name__ == "__main__":

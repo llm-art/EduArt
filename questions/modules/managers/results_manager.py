@@ -20,6 +20,10 @@ MODEL_COSTS = {
         'input_cost_per_million_tokens': 0.3,
         'output_cost_per_million_tokens': 2.5
     },
+    'google/gemini-2.5-flash-preview-09-2025': {
+        'input_cost_per_million_tokens': 0.3,
+        'output_cost_per_million_tokens': 2.5
+    },
     'google/gemini-2.5-pro': {
         'input_cost_per_million_tokens': 1.25,
         'output_cost_per_million_tokens': 10
@@ -35,6 +39,30 @@ MODEL_COSTS = {
     'openai/gpt-3.5-turbo': {
         'input_cost_per_million_tokens': 0.50,
         'output_cost_per_million_tokens': 1.50
+    },
+    'openai/gpt-4.1-2025-04-14': {
+        'input_cost_per_million_tokens': 2.00,
+        'output_cost_per_million_tokens': 8.00
+    },
+    'openai/gpt-5-2025-08-07': {
+        'input_cost_per_million_tokens': 1.25,
+        'output_cost_per_million_tokens': 10.00
+    },
+    'openai/gpt-5.2-2025-12-11': {
+        'input_cost_per_million_tokens': 1.75,
+        'output_cost_per_million_tokens': 14.00
+    },
+    'openai/gpt-5.2-pro-2025-12-11': {
+        'input_cost_per_million_tokens': 21.00,
+        'output_cost_per_million_tokens': 168.00
+    },
+    'openai/gpt-5-mini-2025-08-07': {
+        'input_cost_per_million_tokens': 0.25,
+        'output_cost_per_million_tokens': 2.00
+    },
+    'openai/gpt-5-nano-2025-08-07': {
+        'input_cost_per_million_tokens': 0.05,
+        'output_cost_per_million_tokens': 0.40
     },
     'anthropic/claude-3-5-sonnet-20241022': {
         'input_cost_per_million_tokens': 3.00,
@@ -876,6 +904,51 @@ This directory contains the results of evaluating Large Language Models (LLMs) o
 - **Total Questions**: {metadata.get('question_count', 0)}
 - **Questions with Images**: {metadata.get('questions_with_images', 0)}
 
+## Available Models
+
+| Model Name | Version | Input Cost ($/1M) | Output Cost ($/1M) | Reasoning |
+|------------|---------|-------------------|--------------------|-----------|
+"""
+        
+        # Add model information table
+        # Define reasoning models (o1, o3 series)
+        reasoning_models = ['o1', 'o3']
+        
+        # Get all unique models from MODEL_COSTS
+        all_model_names = set()
+        for model in metadata.get('models', []):
+            all_model_names.add(model.get('model_name', ''))
+        
+        # Sort models by provider and name
+        sorted_model_list = sorted(all_model_names)
+        
+        for model_name in sorted_model_list:
+            cost_info = MODEL_COSTS.get(model_name, {})
+            input_cost = cost_info.get('input_cost_per_million_tokens', 0)
+            output_cost = cost_info.get('output_cost_per_million_tokens', 0)
+            
+            # Extract version from model name (e.g., "2025-04-14" from "gpt-4.1-2025-04-14")
+            version = "N/A"
+            if '/' in model_name:
+                model_short = model_name.split('/')[-1]
+                # Try to extract date pattern YYYY-MM-DD
+                import re
+                date_match = re.search(r'(\d{4}-\d{2}-\d{2})', model_short)
+                if date_match:
+                    version = date_match.group(1)
+                else:
+                    # For models like "gemini-2.5-flash", extract version number
+                    version_match = re.search(r'(\d+\.\d+)', model_short)
+                    if version_match:
+                        version = version_match.group(1)
+            
+            # Check if it's a reasoning model
+            is_reasoning = any(reasoning_model in model_name.lower() for reasoning_model in reasoning_models)
+            reasoning_str = "✓" if is_reasoning else "✗"
+            
+            readme_content += f"| {model_name} | {version} | ${input_cost:.2f} | ${output_cost:.2f} | {reasoning_str} |\n"
+        
+        readme_content += f"""
 ## Directory Structure
 
 ```
