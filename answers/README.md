@@ -4,7 +4,7 @@
 
 This directory contains the results of evaluating Large Language Models (LLMs) on Italian art history questions.
 
-- **Creation Date**: 2026-01-14 16:14:05
+- **Creation Date**: 2026-01-15 17:36:52
 - **Version**: 0.3
 - **Total Exercises**: 370
 - **Total Questions**: 370
@@ -46,7 +46,7 @@ answers/
 |-------|----------|---------------|--------------|---------------|-------------|
 | harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0 | 72.4% | 268/370 | 538,947 | 33,898 | $2.1253 |
 | harvard/us.mistral.pixtral-large-2502-v1:0 | 54.3% | 201/370 | 246,088 | 22,190 | $0.6253 |
-| openai/gpt-4.1-2025-04-14 | 100.0% | 10/10 | 19,817 | 246 | $0.0416 |
+| openai/gpt-4.1-2025-04-14 | 94.1% | 348/370 | 424,750 | 10,501 | $0.9335 |
 | openai/gpt-5-mini-2025-08-07 | 84.6% | 313/370 | 492,113 | 193,975 | $0.5110 |
 | openai/gpt-5-nano-2025-08-07 | 83.5% | 309/370 | 562,893 | 547,207 | $0.2470 |
 
@@ -68,7 +68,7 @@ answers/
 
 | Question Type | Questions | With Images | Correct | Accuracy |
 |---------------|-----------|-------------|---------|----------|
-| multiple_choice_radio | 10 | 10 | 10 | 100.0% |
+| multiple_choice_radio | 370 | 253 | 348 | 94.1% |
 
 ### openai/gpt-5-mini-2025-08-07
 
