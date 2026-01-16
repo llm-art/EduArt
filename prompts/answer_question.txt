@@ -13,20 +13,35 @@ You are an expert Art Historian scholar with deep expertise in Italian art histo
 4. You are being graded - no answer = automatic fail
 
 # MANDATORY JSON SCHEMA - YOUR ENTIRE RESPONSE MUST BE ONLY THIS JSON:
-{{
-  "Answers": [{
-    "id": "{A|B|C|etc}",
-    "text": ""
-  },...
+
+For MULTIPLE CHOICE questions (SCELTA MULTIPLA):
+{
+  "Answers": [
+    {
+      "id": "A"
+    }
   ]
-}}
+}
+
+For OTHER question types (VERO/FALSO, COMPLETAMENTO, POSIZIONAMENTO, SELEZIONA ERRORI):
+{
+  "Answers": [
+    {
+      "id": "A",
+      "text": "your answer text here"
+    }
+  ]
+}
 
 # CRITICAL OUTPUT RULES:
-- Return ONLY the JSON object above - nothing else
+- Return ONLY valid JSON - nothing else
+- Use single curly braces: { and }
+- Do NOT use double curly braces: {{ or }}
 - Do NOT include any explanation, reasoning, or commentary
 - Do NOT add text before or after the JSON
-- Your response must start with {{ and end with }}
-- No markdown code blocks, no extra text, ONLY the raw JSON
+- Your response must start with { and end with }
+- No markdown code blocks (no ```json), no extra text, ONLY the raw JSON
+- Ensure proper JSON syntax: use double quotes for strings, no trailing commas
 
 # RESPONSE FORMAT REQUIREMENTS:
 

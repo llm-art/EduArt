@@ -160,10 +160,10 @@ class AnswerEvaluator:
             cleaned_response = []
             for answer in parsed_response:
                 if isinstance(answer, dict):
-                    cleaned_answer = {
-                        'id': answer.get('id', ''),
-                        'text': answer.get('text', '')
-                    }
+                    # Create a copy of the answer dict and remove unwanted fields
+                    cleaned_answer = answer.copy()
+                    cleaned_answer.pop('explanation', None)
+                    cleaned_answer.pop('motivation', None)
                     cleaned_response.append(cleaned_answer)
                 else:
                     cleaned_response.append(answer)

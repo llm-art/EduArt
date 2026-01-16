@@ -4,7 +4,7 @@
 
 This directory contains the results of evaluating Large Language Models (LLMs) on Italian art history questions.
 
-- **Creation Date**: 2026-01-15 17:36:52
+- **Creation Date**: 2026-01-15 19:16:08
 - **Version**: 0.3
 - **Total Exercises**: 370
 - **Total Questions**: 370
@@ -19,6 +19,7 @@ This directory contains the results of evaluating Large Language Models (LLMs) o
 | openai/gpt-4.1-2025-04-14 | 2025-04-14 | $2.00 | $8.00 | ✗ |
 | openai/gpt-5-mini-2025-08-07 | 2025-08-07 | $0.25 | $2.00 | ✗ |
 | openai/gpt-5-nano-2025-08-07 | 2025-08-07 | $0.05 | $0.40 | ✗ |
+| openai/gpt-5.2-2025-12-11 | 2025-12-11 | $1.75 | $14.00 | ✗ |
 
 ## Directory Structure
 
@@ -49,6 +50,7 @@ answers/
 | openai/gpt-4.1-2025-04-14 | 94.1% | 348/370 | 424,750 | 10,501 | $0.9335 |
 | openai/gpt-5-mini-2025-08-07 | 84.6% | 313/370 | 492,113 | 193,975 | $0.5110 |
 | openai/gpt-5-nano-2025-08-07 | 83.5% | 309/370 | 562,893 | 547,207 | $0.2470 |
+| openai/gpt-5.2-2025-12-11 | 88.6% | 328/370 | 528,743 | 8,521 | $1.0446 |
 
 ## Performance by Model and Question Type
 
@@ -81,5 +83,11 @@ answers/
 | Question Type | Questions | With Images | Correct | Accuracy |
 |---------------|-----------|-------------|---------|----------|
 | multiple_choice_radio | 370 | 253 | 309 | 83.5% |
+
+### openai/gpt-5.2-2025-12-11
+
+| Question Type | Questions | With Images | Correct | Accuracy |
+|---------------|-----------|-------------|---------|----------|
+| multiple_choice_radio | 370 | 253 | 328 | 88.6% |
 
 
