@@ -1,5 +1,5 @@
 {
-  "creation_datetime": "2026-01-15 19:16:08",
+  "creation_datetime": "2026-01-17 20:47:36",
   "version": 0.3,
   "exercise_count": 370,
   "question_count": 370,
@@ -8,66 +8,6 @@
     "multiple_choice_radio": 370
   },
   "models": [
-    {
-      "model_name": "openai/gpt-5-mini-2025-08-07",
-      "precision": 0.845945945945946,
-      "recall": 0.845945945945946,
-      "f1": 0.845945945945946,
-      "exact_match_rate": 0.845945945945946,
-      "input_cost_per_million_tokens": 0.25,
-      "output_cost_per_million_tokens": 2.0,
-      "ai_calls": [
-        {
-          "description": "question_answer",
-          "input_tokens": 492113,
-          "output_tokens": 193975,
-          "total_tokens": 686088,
-          "processing_time": 3542.844411611557
-        }
-      ],
-      "question_type": [
-        {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 313,
-          "precision": 0.845945945945946,
-          "recall": 0.845945945945946,
-          "f1": 0.845945945945946,
-          "exact_match_rate": 0.845945945945946
-        }
-      ]
-    },
-    {
-      "model_name": "openai/gpt-5.2-2025-12-11",
-      "precision": 0.8864864864864865,
-      "recall": 0.8864864864864865,
-      "f1": 0.8864864864864865,
-      "exact_match_rate": 0.8864864864864865,
-      "input_cost_per_million_tokens": 1.75,
-      "output_cost_per_million_tokens": 14.0,
-      "ai_calls": [
-        {
-          "description": "question_answer",
-          "input_tokens": 528743,
-          "output_tokens": 8521,
-          "total_tokens": 537264,
-          "processing_time": 601.0558631420135
-        }
-      ],
-      "question_type": [
-        {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 328,
-          "precision": 0.8864864864864865,
-          "recall": 0.8864864864864865,
-          "f1": 0.8864864864864865,
-          "exact_match_rate": 0.8864864864864865
-        }
-      ]
-    },
     {
       "model_name": "harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
       "precision": 0.7243243243243244,
@@ -95,6 +35,96 @@
           "recall": 0.7243243243243244,
           "f1": 0.7243243243243244,
           "exact_match_rate": 0.7243243243243244
+        }
+      ]
+    },
+    {
+      "model_name": "google/gemini-3-pro-preview",
+      "precision": 0.9513513513513514,
+      "recall": 0.9513513513513514,
+      "f1": 0.9513513513513514,
+      "exact_match_rate": 0.9513513513513514,
+      "input_cost_per_million_tokens": 2.0,
+      "output_cost_per_million_tokens": 12.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 521735,
+          "output_tokens": 316602,
+          "total_tokens": 838337,
+          "processing_time": 4107.6050724983215
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 352,
+          "precision": 0.9513513513513514,
+          "recall": 0.9513513513513514,
+          "f1": 0.9513513513513514,
+          "exact_match_rate": 0.9513513513513514
+        }
+      ]
+    },
+    {
+      "model_name": "google/gemini-3-flash-preview",
+      "precision": 0.9702702702702702,
+      "recall": 0.9702702702702702,
+      "f1": 0.9702702702702702,
+      "exact_match_rate": 0.9702702702702702,
+      "input_cost_per_million_tokens": 0.5,
+      "output_cost_per_million_tokens": 3.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 521735,
+          "output_tokens": 209004,
+          "total_tokens": 730739,
+          "processing_time": 1604.666640996933
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 359,
+          "precision": 0.9702702702702702,
+          "recall": 0.9702702702702702,
+          "f1": 0.9702702702702702,
+          "exact_match_rate": 0.9702702702702702
+        }
+      ]
+    },
+    {
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "precision": 0.845945945945946,
+      "recall": 0.845945945945946,
+      "f1": 0.845945945945946,
+      "exact_match_rate": 0.845945945945946,
+      "input_cost_per_million_tokens": 0.25,
+      "output_cost_per_million_tokens": 2.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 492113,
+          "output_tokens": 193975,
+          "total_tokens": 686088,
+          "processing_time": 3542.844411611557
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 313,
+          "precision": 0.845945945945946,
+          "recall": 0.845945945945946,
+          "f1": 0.845945945945946,
+          "exact_match_rate": 0.845945945945946
         }
       ]
     },
@@ -129,6 +159,36 @@
       ]
     },
     {
+      "model_name": "openai/gpt-4.1-2025-04-14",
+      "precision": 0.9351351351351351,
+      "recall": 0.9351351351351351,
+      "f1": 0.9351351351351351,
+      "exact_match_rate": 0.9351351351351351,
+      "input_cost_per_million_tokens": 2.0,
+      "output_cost_per_million_tokens": 8.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 461380,
+          "output_tokens": 7400,
+          "total_tokens": 468780,
+          "processing_time": 651.8416318893433
+        }
+      ],
+      "question_type": [
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 253,
+          "correctly_answered_questions": 346,
+          "precision": 0.9351351351351351,
+          "recall": 0.9351351351351351,
+          "f1": 0.9351351351351351,
+          "exact_match_rate": 0.9351351351351351
+        }
+      ]
+    },
+    {
       "model_name": "openai/gpt-5-nano-2025-08-07",
       "precision": 0.8351351351351352,
       "recall": 0.8351351351351352,
@@ -159,20 +219,20 @@
       ]
     },
     {
-      "model_name": "openai/gpt-4.1-2025-04-14",
-      "precision": 0.9405405405405406,
-      "recall": 0.9405405405405406,
-      "f1": 0.9405405405405406,
-      "exact_match_rate": 0.9405405405405406,
-      "input_cost_per_million_tokens": 2.0,
-      "output_cost_per_million_tokens": 8.0,
+      "model_name": "openai/gpt-5.2-2025-12-11",
+      "precision": 0.8864864864864865,
+      "recall": 0.8864864864864865,
+      "f1": 0.8864864864864865,
+      "exact_match_rate": 0.8864864864864865,
+      "input_cost_per_million_tokens": 1.75,
+      "output_cost_per_million_tokens": 14.0,
       "ai_calls": [
         {
           "description": "question_answer",
-          "input_tokens": 424750,
-          "output_tokens": 10501,
-          "total_tokens": 435251,
-          "processing_time": 763.0978569984436
+          "input_tokens": 528743,
+          "output_tokens": 8521,
+          "total_tokens": 537264,
+          "processing_time": 601.0558631420135
         }
       ],
       "question_type": [
@@ -180,11 +240,11 @@
           "type": "multiple_choice_radio",
           "number_of_questions": 370,
           "questions_with_images": 253,
-          "correctly_answered_questions": 348,
-          "precision": 0.9405405405405406,
-          "recall": 0.9405405405405406,
-          "f1": 0.9405405405405406,
-          "exact_match_rate": 0.9405405405405406
+          "correctly_answered_questions": 328,
+          "precision": 0.8864864864864865,
+          "recall": 0.8864864864864865,
+          "f1": 0.8864864864864865,
+          "exact_match_rate": 0.8864864864864865
         }
       ]
     }

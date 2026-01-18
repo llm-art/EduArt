@@ -28,6 +28,9 @@ class LLMConfig:
             'gemini-2.5-flash',
             'gemini-2.5-pro',
             'gemini-2.5-flash-preview-09-2025',
+            'gemini-3-pro-preview',
+            'gemini-3-flash-preview',
+            'gemini-3-pro-image-preview',
         ],
         'anthropic': [
             'claude-sonnet-4-5-20250929',

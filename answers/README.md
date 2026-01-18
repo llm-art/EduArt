@@ -4,7 +4,7 @@
 
 This directory contains the results of evaluating Large Language Models (LLMs) on Italian art history questions.
 
-- **Creation Date**: 2026-01-15 19:16:08
+- **Creation Date**: 2026-01-17 20:47:36
 - **Version**: 0.3
 - **Total Exercises**: 370
 - **Total Questions**: 370
@@ -14,6 +14,8 @@ This directory contains the results of evaluating Large Language Models (LLMs) o
 
 | Model Name | Version | Input Cost ($/1M) | Output Cost ($/1M) | Reasoning |
 |------------|---------|-------------------|--------------------|-----------|
+| google/gemini-3-flash-preview | N/A | $0.50 | $3.00 | ✗ |
+| google/gemini-3-pro-preview | N/A | $2.00 | $12.00 | ✗ |
 | harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0 | N/A | $3.00 | $15.00 | ✗ |
 | harvard/us.mistral.pixtral-large-2502-v1:0 | N/A | $2.00 | $6.00 | ✗ |
 | openai/gpt-4.1-2025-04-14 | 2025-04-14 | $2.00 | $8.00 | ✗ |
@@ -45,14 +47,28 @@ answers/
 
 | Model | Accuracy | Correct/Total | Input Tokens | Output Tokens | Actual Cost |
 |-------|----------|---------------|--------------|---------------|-------------|
+| google/gemini-3-flash-preview | 97.0% | 359/370 | 521,735 | 209,004 | $0.8879 |
+| google/gemini-3-pro-preview | 95.1% | 352/370 | 521,735 | 316,602 | $4.8427 |
 | harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0 | 72.4% | 268/370 | 538,947 | 33,898 | $2.1253 |
 | harvard/us.mistral.pixtral-large-2502-v1:0 | 54.3% | 201/370 | 246,088 | 22,190 | $0.6253 |
-| openai/gpt-4.1-2025-04-14 | 94.1% | 348/370 | 424,750 | 10,501 | $0.9335 |
+| openai/gpt-4.1-2025-04-14 | 93.5% | 346/370 | 461,380 | 7,400 | $0.9820 |
 | openai/gpt-5-mini-2025-08-07 | 84.6% | 313/370 | 492,113 | 193,975 | $0.5110 |
 | openai/gpt-5-nano-2025-08-07 | 83.5% | 309/370 | 562,893 | 547,207 | $0.2470 |
 | openai/gpt-5.2-2025-12-11 | 88.6% | 328/370 | 528,743 | 8,521 | $1.0446 |
 
 ## Performance by Model and Question Type
+
+### google/gemini-3-flash-preview
+
+| Question Type | Questions | With Images | Correct | Accuracy |
+|---------------|-----------|-------------|---------|----------|
+| multiple_choice_radio | 370 | 253 | 359 | 97.0% |
+
+### google/gemini-3-pro-preview
+
+| Question Type | Questions | With Images | Correct | Accuracy |
+|---------------|-----------|-------------|---------|----------|
+| multiple_choice_radio | 370 | 253 | 352 | 95.1% |
 
 ### harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0
 
@@ -70,7 +86,7 @@ answers/
 
 | Question Type | Questions | With Images | Correct | Accuracy |
 |---------------|-----------|-------------|---------|----------|
-| multiple_choice_radio | 370 | 253 | 348 | 94.1% |
+| multiple_choice_radio | 370 | 253 | 346 | 93.5% |
 
 ### openai/gpt-5-mini-2025-08-07
 

@@ -28,6 +28,18 @@ MODEL_COSTS = {
         'input_cost_per_million_tokens': 1.25,
         'output_cost_per_million_tokens': 10
     },
+    'google/gemini-3-pro-preview': {
+        'input_cost_per_million_tokens': 2.00,
+        'output_cost_per_million_tokens': 12.00
+    },
+    'google/gemini-3-flash-preview': {
+        'input_cost_per_million_tokens': 0.50,
+        'output_cost_per_million_tokens': 3.00
+    },
+    'google/gemini-3-pro-image-preview': {
+        'input_cost_per_million_tokens': 2.00,
+        'output_cost_per_million_tokens': 0.134
+    },
     'openai/gpt-4o': {
         'input_cost_per_million_tokens': 2.50,
         'output_cost_per_million_tokens': 10.00

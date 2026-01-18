@@ -139,15 +139,33 @@ class GoogleProvider(LLMProvider):
                 'output_tokens': 0
             }
             
-            if hasattr(response, 'response_metadata'):
+            # Check for usage_metadata as a direct attribute (newer LangChain versions)
+            # This is the primary location for token usage in recent Google Gemini API responses
+            if hasattr(response, 'usage_metadata'):
+                usage = response.usage_metadata
+                
+                # Extract tokens from usage_metadata
+                # The response includes: input_tokens, output_tokens, total_tokens
+                # and additional details like input_token_details (cache_read) and
+                # output_token_details (reasoning tokens for models that support it)
+                if isinstance(usage, dict):
+                    token_metadata['input_tokens'] = usage.get('input_tokens', usage.get('prompt_token_count', 0))
+                    token_metadata['output_tokens'] = usage.get('output_tokens', usage.get('candidates_token_count', 0))
+                else:
+                    # It might be an object with attributes
+                    token_metadata['input_tokens'] = getattr(usage, 'input_tokens', getattr(usage, 'prompt_token_count', 0))
+                    token_metadata['output_tokens'] = getattr(usage, 'output_tokens', getattr(usage, 'candidates_token_count', 0))
+            
+            # Also check response_metadata for backwards compatibility with older LangChain versions
+            elif hasattr(response, 'response_metadata'):
                 metadata = response.response_metadata
                 
-                # Google uses 'usage_metadata' field
-                # Structure: {"usage_metadata": {"prompt_token_count": 19, "candidates_token_count": 10, ...}}
+                # Google uses 'usage_metadata' field in response_metadata
                 usage = metadata.get('usage_metadata', {})
                 
-                token_metadata['input_tokens'] = usage.get('prompt_token_count', 0)
-                token_metadata['output_tokens'] = usage.get('candidates_token_count', 0)
+                if usage:
+                    token_metadata['input_tokens'] = usage.get('prompt_token_count', 0)
+                    token_metadata['output_tokens'] = usage.get('candidates_token_count', 0)
             
             return response.content.strip(), token_metadata
         except Exception as e:
