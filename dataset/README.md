@@ -1,10 +1,10 @@
 # Dataset Bundle Report
 
-**Creation Date & Time:** 2026-01-29 15:46:22
+**Creation Date & Time:** 2026-01-30 10:30:41
 
-**Processing Time:** 4.01 seconds
+**Processing Time:** 4.02 seconds
 
-**Version:** 0.3
+**Version:** 0.5
 
 **Number of Sources:** 63
 
@@ -116,4 +116,4 @@
 
 ---
 *Report generated automatically by dataset bundler script*
-*Last updated: 2026-01-29 15:46:27*
+*Last updated: 2026-01-30 10:30:45*
