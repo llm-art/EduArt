@@ -1,0 +1,64 @@
+{
+  "question_id": "0214",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "input_tokens": 770,
+      "output_tokens": 541,
+      "total_tokens": 1311,
+      "processing_time": 9.348503351211548,
+      "timestamp": "2026-01-30T12:03:06.715493"
+    }
+  ],
+  "question_data": {
+    "question_text": "Scegli l'affermazione corretta che individua l'autore dell'opera.",
+    "question_type": "multiple_choice_radio",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/dataset/imgs/0214.jpg",
+    "correct_answers": [
+      {
+        "id": "E",
+        "description": "Si tratta del San Sebastiano eseguito verso il 1478, al rientro dal suo soggiorno veneziano."
+      }
+    ],
+    "prompt": "Scegli l'affermazione corretta che individua l'autore dell'opera.\n\nA. Cosmè Tura.\nB. Ercole de' Roberti.\nC. Andrea Mantegna.\nD. Giovanni Bellini.\nE. Antonello da Messina."
+  },
+  "evaluation": {
+    "model_name": "openai/gpt-5-mini-2025-08-07",
+    "question_type": "multiple_choice_radio",
+    "llm_answer": {
+      "Answers": [
+        {
+          "id": "C"
+        }
+      ]
+    },
+    "correct_answer": "[{'id': 'E', 'description': 'Si tratta del San Sebastiano eseguito verso il 1478, al rientro dal suo soggiorno veneziano.'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "F1: 0.00, Precision: 0.00, Recall: 0.00, Exact Match: 0.00",
+    "processing_time": 9.348503351211548,
+    "error": "",
+    "error_type": "",
+    "timestamp": "2026-01-30T12:03:06.715493",
+    "metrics": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "exact_match": 0.0,
+      "ratio": 0.0,
+      "true_positives": 0,
+      "false_positives": 1,
+      "false_negatives": 1,
+      "total": 1
+    },
+    "error_analysis": {
+      "correct_answers": [],
+      "incorrect_answers": [
+        "C",
+        "E"
+      ]
+    }
+  }
+}

@@ -1,0 +1,197 @@
+{
+  "question_id": "0212",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "input_tokens": 834,
+      "output_tokens": 1434,
+      "total_tokens": 2268,
+      "processing_time": 24.0015127658844,
+      "timestamp": "2026-01-30T12:02:29.526338"
+    }
+  ],
+  "question_data": {
+    "question_text": "Ricostruisci il periodo scegliendo i termini corretti tra quelli proposti.\n\nNel Castello di San Giusto San Giorgio di Mantova Ferrara Andrea Mantegna affresca la cosiddetta Camera degli sposi negli anni 1465-1474. La novità del ciclo è rappresentata dallo apertura sfondamento prospettico delle pareti e della volta cupola. Sulla parete nord viene ritratta la corte dei Gonzaga Este mentre riceve la notizia della nomina a Papa Cardinale del loro figlio Ludovico Francesco .",
+    "question_type": "completion_closed",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": [
+      {
+        "id": "A",
+        "description": "San Giorgio"
+      },
+      {
+        "id": "B",
+        "description": "Mantova"
+      },
+      {
+        "id": "C",
+        "description": "sfondamento"
+      },
+      {
+        "id": "D",
+        "description": "volta"
+      },
+      {
+        "id": "E",
+        "description": "Gonzaga"
+      },
+      {
+        "id": "F",
+        "description": "Cardinale"
+      },
+      {
+        "id": "G",
+        "description": "Francesco"
+      }
+    ],
+    "prompt": "Ricostruisci il periodo scegliendo i termini corretti tra quelli proposti.\n\nNel Castello di San Giusto San Giorgio di Mantova Ferrara Andrea Mantegna affresca la cosiddetta Camera degli sposi negli anni 1465-1474. La novità del ciclo è rappresentata dallo apertura sfondamento prospettico delle pareti e della volta cupola. Sulla parete nord viene ritratta la corte dei Gonzaga Este mentre riceve la notizia della nomina a Papa Cardinale del loro figlio Ludovico Francesco .\n\nA:\n  1. San Giorgio\n  2. San Giusto\nB:\n  1. Mantova\n  2. Ferrara\nC:\n  1. sfondamento\n  2. apertura\nD:\n  1. cupola\n  2. volta\nE:\n  1. Este\n  2. Gonzaga\nF:\n  1. Cardinale\n  2. Papa\nG:\n  1. Francesco\n  2. Ludovico"
+  },
+  "evaluation": {
+    "model_name": "openai/gpt-5-mini-2025-08-07",
+    "question_type": "completion_closed",
+    "llm_answer": {
+      "Answers": [
+        {
+          "id": "A",
+          "text": "San Giorgio"
+        },
+        {
+          "id": "B",
+          "text": "Mantova"
+        },
+        {
+          "id": "C",
+          "text": "sfondamento"
+        },
+        {
+          "id": "D",
+          "text": "volta"
+        },
+        {
+          "id": "E",
+          "text": "Gonzaga"
+        },
+        {
+          "id": "F",
+          "text": "Cardinale"
+        },
+        {
+          "id": "G",
+          "text": "Francesco"
+        }
+      ]
+    },
+    "correct_answer": "[{'id': 'A', 'description': 'San Giorgio'}, {'id': 'B', 'description': 'Mantova'}, {'id': 'C', 'description': 'sfondamento'}, {'id': 'D', 'description': 'volta'}, {'id': 'E', 'description': 'Gonzaga'}, {'id': 'F', 'description': 'Cardinale'}, {'id': 'G', 'description': 'Francesco'}]",
+    "is_correct": true,
+    "score": 1.0,
+    "details": "Accuracy: 100.00% (7/7), Perfect Score: 1",
+    "processing_time": 24.0015127658844,
+    "error": "",
+    "error_type": "",
+    "timestamp": "2026-01-30T12:02:29.526338",
+    "metrics": {
+      "exact_match_accuracy": 1.0,
+      "perfect_question_score": 1.0,
+      "partial_credit_score": 1.0,
+      "correct_count": 7,
+      "total_count": 7,
+      "per_blank_accuracy": {
+        "A": {
+          "correct": true,
+          "expected": "san giorgio",
+          "got": "san giorgio"
+        },
+        "B": {
+          "correct": true,
+          "expected": "mantova",
+          "got": "mantova"
+        },
+        "C": {
+          "correct": true,
+          "expected": "sfondamento",
+          "got": "sfondamento"
+        },
+        "D": {
+          "correct": true,
+          "expected": "volta",
+          "got": "volta"
+        },
+        "E": {
+          "correct": true,
+          "expected": "gonzaga",
+          "got": "gonzaga"
+        },
+        "F": {
+          "correct": true,
+          "expected": "cardinale",
+          "got": "cardinale"
+        },
+        "G": {
+          "correct": true,
+          "expected": "francesco",
+          "got": "francesco"
+        }
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_match": 1.0,
+      "ratio": 1.0,
+      "true_positives": 7,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "total": 7
+    },
+    "error_analysis": {
+      "correct_answers": [
+        "A: san giorgio",
+        "B: mantova",
+        "C: sfondamento",
+        "D: volta",
+        "E: gonzaga",
+        "F: cardinale",
+        "G: francesco"
+      ],
+      "incorrect_answers": [],
+      "per_blank": {
+        "A": {
+          "correct": true,
+          "expected": "san giorgio",
+          "got": "san giorgio"
+        },
+        "B": {
+          "correct": true,
+          "expected": "mantova",
+          "got": "mantova"
+        },
+        "C": {
+          "correct": true,
+          "expected": "sfondamento",
+          "got": "sfondamento"
+        },
+        "D": {
+          "correct": true,
+          "expected": "volta",
+          "got": "volta"
+        },
+        "E": {
+          "correct": true,
+          "expected": "gonzaga",
+          "got": "gonzaga"
+        },
+        "F": {
+          "correct": true,
+          "expected": "cardinale",
+          "got": "cardinale"
+        },
+        "G": {
+          "correct": true,
+          "expected": "francesco",
+          "got": "francesco"
+        }
+      }
+    }
+  }
+}

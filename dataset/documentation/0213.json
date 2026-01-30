@@ -1,0 +1,170 @@
+{
+  "question_id": "0213",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "input_tokens": 766,
+      "output_tokens": 1291,
+      "total_tokens": 2057,
+      "processing_time": 26.839149713516235,
+      "timestamp": "2026-01-30T12:02:56.866224"
+    }
+  ],
+  "question_data": {
+    "question_text": "Attorno al 1450 Pietro Perugino dipinge il SanSebastiano del Louvre. Il Santo martire, in secondo piano, rappresentato legato ad una colonna, è posto esattamente al centro della tavola. Sullo sfondo oltre una bassa siepe si apre un paesaggio fatto di verdi colline punteggiate di arbusti e di lontani, azzurri picchi scoscesi. Il Santo, in quasi completa nudità, trafitto da due frecce, si mostra alla pietà dei fedeli con gli occhi rivolti a terra. L'atteggiamento aggraziato, la nudità impudica, le membra lunghe sono elementi che rinviano alla statuaria gotica.",
+    "question_type": "select_errors",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": [
+      {
+        "correct": "1490",
+        "error": "1450"
+      },
+      {
+        "correct": "primo piano",
+        "error": "secondo piano"
+      },
+      {
+        "correct": "transenna",
+        "error": "siepe"
+      },
+      {
+        "correct": "cielo",
+        "error": "terra"
+      },
+      {
+        "correct": "eroica",
+        "error": "impudica"
+      },
+      {
+        "correct": "classica",
+        "error": "gotica"
+      }
+    ],
+    "prompt": "Attorno al 1450 Pietro Perugino dipinge il SanSebastiano del Louvre. Il Santo martire, in secondo piano, rappresentato legato ad una colonna, è posto esattamente al centro della tavola. Sullo sfondo oltre una bassa siepe si apre un paesaggio fatto di verdi colline punteggiate di arbusti e di lontani, azzurri picchi scoscesi. Il Santo, in quasi completa nudità, trafitto da due frecce, si mostra alla pietà dei fedeli con gli occhi rivolti a terra. L'atteggiamento aggraziato, la nudità impudica, le membra lunghe sono elementi che rinviano alla statuaria gotica.\n"
+  },
+  "evaluation": {
+    "model_name": "openai/gpt-5-mini-2025-08-07",
+    "question_type": "select_errors",
+    "llm_answer": {
+      "Answers": [
+        {
+          "id": "A",
+          "text": "In parte corretto ma con errori: Pietro Perugino non dipinse il San Sebastiano intorno al 1450; l'opera del Louvre va datata alla fine del XV secolo (intorno agli anni 1490). È vero che il santo è posto al centro, legato a una colonna, e che lo sfondo è costituito da una bassa siepe e da un paesaggio di colline verdi con lontani picchi azzurri, tipico dei fondali perugineschi. Le membra allungate, l'atteggiamento aggraziato e la nudità idealizzata rimandano però più agli ideali classici e al linguaggio del primo Rinascimento (e alla scultura rinascimentale) che non alla statuaria gotica."
+        }
+      ]
+    },
+    "correct_answer": "[{'correct': '1490', 'error': '1450'}, {'correct': 'primo piano', 'error': 'secondo piano'}, {'correct': 'transenna', 'error': 'siepe'}, {'correct': 'cielo', 'error': 'terra'}, {'correct': 'eroica', 'error': 'impudica'}, {'correct': 'classica', 'error': 'gotica'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "Accuracy: 0.00% (0/6), Perfect Score: 0",
+    "processing_time": 26.839149713516235,
+    "error": "",
+    "error_type": "",
+    "timestamp": "2026-01-30T12:02:56.866224",
+    "metrics": {
+      "exact_match_accuracy": 0.0,
+      "perfect_question_score": 0.0,
+      "partial_credit_score": 0.0,
+      "correct_count": 0,
+      "total_count": 6,
+      "per_pair_accuracy": {
+        "A": {
+          "correct": false,
+          "error": "1450",
+          "expected_correction": "1490",
+          "got_correction": ""
+        },
+        "B": {
+          "correct": false,
+          "error": "secondo piano",
+          "expected_correction": "primo piano",
+          "got_correction": ""
+        },
+        "C": {
+          "correct": false,
+          "error": "siepe",
+          "expected_correction": "transenna",
+          "got_correction": ""
+        },
+        "D": {
+          "correct": false,
+          "error": "terra",
+          "expected_correction": "cielo",
+          "got_correction": ""
+        },
+        "E": {
+          "correct": false,
+          "error": "impudica",
+          "expected_correction": "eroica",
+          "got_correction": ""
+        },
+        "F": {
+          "correct": false,
+          "error": "gotica",
+          "expected_correction": "classica",
+          "got_correction": ""
+        }
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "exact_match": 0.0,
+      "ratio": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 6,
+      "total": 6
+    },
+    "error_analysis": {
+      "correct_answers": [],
+      "incorrect_answers": [
+        "A: '1450' (got: '', expected: '1490')",
+        "B: 'secondo piano' (got: '', expected: 'primo piano')",
+        "C: 'siepe' (got: '', expected: 'transenna')",
+        "D: 'terra' (got: '', expected: 'cielo')",
+        "E: 'impudica' (got: '', expected: 'eroica')",
+        "F: 'gotica' (got: '', expected: 'classica')"
+      ],
+      "per_pair": {
+        "A": {
+          "correct": false,
+          "error": "1450",
+          "expected_correction": "1490",
+          "got_correction": ""
+        },
+        "B": {
+          "correct": false,
+          "error": "secondo piano",
+          "expected_correction": "primo piano",
+          "got_correction": ""
+        },
+        "C": {
+          "correct": false,
+          "error": "siepe",
+          "expected_correction": "transenna",
+          "got_correction": ""
+        },
+        "D": {
+          "correct": false,
+          "error": "terra",
+          "expected_correction": "cielo",
+          "got_correction": ""
+        },
+        "E": {
+          "correct": false,
+          "error": "impudica",
+          "expected_correction": "eroica",
+          "got_correction": ""
+        },
+        "F": {
+          "correct": false,
+          "error": "gotica",
+          "expected_correction": "classica",
+          "got_correction": ""
+        }
+      }
+    }
+  }
+}

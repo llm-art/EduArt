@@ -1,0 +1,170 @@
+{
+  "question_id": "0222",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "input_tokens": 756,
+      "output_tokens": 1380,
+      "total_tokens": 2136,
+      "processing_time": 19.70045042037964,
+      "timestamp": "2026-01-30T12:08:22.591496"
+    }
+  ],
+  "question_data": {
+    "question_text": "Ercole de' Cossa dipinge il Dittico Bentivoglio, verso il 1474-1477 durante il suo soggiorno romano. Le due tavole ritraggono Giovanni II Bentivoglio (1462-1506) e Giuditta Sforza. I due giovani poco più che trentenni, hanno per sfondo un identico, pesante muro color verde cupo. Come nel poco precedente esempio di Raffaello, che ritrae Federico da Montepulciano e la moglie Battista Sforza, sorellastra di Ginevra, le due tavole propongono l'uno di fronte all'altra i due giovani, sposatisi nel 1464.",
+    "question_type": "select_errors",
+    "has_image": false,
+    "image_path": null,
+    "correct_answers": [
+      {
+        "correct": "Roberti",
+        "error": "Cossa"
+      },
+      {
+        "correct": "bolognese",
+        "error": "romano"
+      },
+      {
+        "correct": "Ginevra",
+        "error": "Giuditta"
+      },
+      {
+        "correct": "tendaggio",
+        "error": "muro"
+      },
+      {
+        "correct": "Piero della Francesca",
+        "error": "Raffaello"
+      },
+      {
+        "correct": "Montefeltro",
+        "error": "Montepulciano"
+      }
+    ],
+    "prompt": "Ercole de' Cossa dipinge il Dittico Bentivoglio, verso il 1474-1477 durante il suo soggiorno romano. Le due tavole ritraggono Giovanni II Bentivoglio (1462-1506) e Giuditta Sforza. I due giovani poco più che trentenni, hanno per sfondo un identico, pesante muro color verde cupo. Come nel poco precedente esempio di Raffaello, che ritrae Federico da Montepulciano e la moglie Battista Sforza, sorellastra di Ginevra, le due tavole propongono l'uno di fronte all'altra i due giovani, sposatisi nel 1464.\n"
+  },
+  "evaluation": {
+    "model_name": "openai/gpt-5-mini-2025-08-07",
+    "question_type": "select_errors",
+    "llm_answer": {
+      "Answers": [
+        {
+          "id": "A",
+          "text": "FALSE"
+        }
+      ]
+    },
+    "correct_answer": "[{'correct': 'Roberti', 'error': 'Cossa'}, {'correct': 'bolognese', 'error': 'romano'}, {'correct': 'Ginevra', 'error': 'Giuditta'}, {'correct': 'tendaggio', 'error': 'muro'}, {'correct': 'Piero della Francesca', 'error': 'Raffaello'}, {'correct': 'Montefeltro', 'error': 'Montepulciano'}]",
+    "is_correct": false,
+    "score": 0.0,
+    "details": "Accuracy: 0.00% (0/6), Perfect Score: 0",
+    "processing_time": 19.70045042037964,
+    "error": "",
+    "error_type": "",
+    "timestamp": "2026-01-30T12:08:22.591496",
+    "metrics": {
+      "exact_match_accuracy": 0.0,
+      "perfect_question_score": 0.0,
+      "partial_credit_score": 0.0,
+      "correct_count": 0,
+      "total_count": 6,
+      "per_pair_accuracy": {
+        "A": {
+          "correct": false,
+          "error": "cossa",
+          "expected_correction": "roberti",
+          "got_correction": ""
+        },
+        "B": {
+          "correct": false,
+          "error": "romano",
+          "expected_correction": "bolognese",
+          "got_correction": ""
+        },
+        "C": {
+          "correct": false,
+          "error": "giuditta",
+          "expected_correction": "ginevra",
+          "got_correction": ""
+        },
+        "D": {
+          "correct": false,
+          "error": "muro",
+          "expected_correction": "tendaggio",
+          "got_correction": ""
+        },
+        "E": {
+          "correct": false,
+          "error": "raffaello",
+          "expected_correction": "piero della francesca",
+          "got_correction": ""
+        },
+        "F": {
+          "correct": false,
+          "error": "montepulciano",
+          "expected_correction": "montefeltro",
+          "got_correction": ""
+        }
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "exact_match": 0.0,
+      "ratio": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 6,
+      "total": 6
+    },
+    "error_analysis": {
+      "correct_answers": [],
+      "incorrect_answers": [
+        "A: 'cossa' (got: '', expected: 'roberti')",
+        "B: 'romano' (got: '', expected: 'bolognese')",
+        "C: 'giuditta' (got: '', expected: 'ginevra')",
+        "D: 'muro' (got: '', expected: 'tendaggio')",
+        "E: 'raffaello' (got: '', expected: 'piero della francesca')",
+        "F: 'montepulciano' (got: '', expected: 'montefeltro')"
+      ],
+      "per_pair": {
+        "A": {
+          "correct": false,
+          "error": "cossa",
+          "expected_correction": "roberti",
+          "got_correction": ""
+        },
+        "B": {
+          "correct": false,
+          "error": "romano",
+          "expected_correction": "bolognese",
+          "got_correction": ""
+        },
+        "C": {
+          "correct": false,
+          "error": "giuditta",
+          "expected_correction": "ginevra",
+          "got_correction": ""
+        },
+        "D": {
+          "correct": false,
+          "error": "muro",
+          "expected_correction": "tendaggio",
+          "got_correction": ""
+        },
+        "E": {
+          "correct": false,
+          "error": "raffaello",
+          "expected_correction": "piero della francesca",
+          "got_correction": ""
+        },
+        "F": {
+          "correct": false,
+          "error": "montepulciano",
+          "expected_correction": "montefeltro",
+          "got_correction": ""
+        }
+      }
+    }
+  }
+}

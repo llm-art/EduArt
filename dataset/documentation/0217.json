@@ -1,0 +1,78 @@
+{
+  "question_id": "0217",
+  "ai_calls": [
+    {
+      "description": "question answering",
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "input_tokens": 944,
+      "output_tokens": 1704,
+      "total_tokens": 2648,
+      "processing_time": 29.444355964660645,
+      "timestamp": "2026-01-30T12:05:26.650587"
+    }
+  ],
+  "question_data": {
+    "question_text": "Individua le affermazioni corrette riferite all'opera rappresentata.",
+    "question_type": "multiple_choice_check",
+    "has_image": true,
+    "image_path": "/home/vitadmin/gspinaci/datasets/dataset/imgs/0217.jpg",
+    "correct_answers": [
+      {
+        "id": "C",
+        "description": "La prospettiva unifica l'ambiente del trittico."
+      },
+      {
+        "id": "D",
+        "description": "L'opera è ancora in situ, cioè nella Chiesa per cui è stata creata."
+      },
+      {
+        "id": "F",
+        "description": "I santi ai lati sono omonimi dei fratelli Pesaro, committenti della pala."
+      }
+    ],
+    "prompt": "Individua le affermazioni corrette riferite all'opera rappresentata.\n\nA. L'ambientazione è all'interno di una Chiesa.\nB. L'autore è Andrea Mantegna.\nC. La prospettiva unifica l'ambiente del trittico.\nD. L'opera è ancora in situ, cioè nella Chiesa per cui è stata creata.\nE. La cornice è un assemblaggio di varie parti di altri polittici.\nF. I santi ai lati sono omonimi dei fratelli Pesaro, committenti della pala."
+  },
+  "evaluation": {
+    "model_name": "openai/gpt-5-mini-2025-08-07",
+    "question_type": "multiple_choice_check",
+    "llm_answer": {
+      "Answers": [
+        {
+          "id": "A"
+        },
+        {
+          "id": "C"
+        }
+      ]
+    },
+    "correct_answer": "[{'id': 'C', 'description': \"La prospettiva unifica l'ambiente del trittico.\"}, {'id': 'D', 'description': \"L'opera è ancora in situ, cioè nella Chiesa per cui è stata creata.\"}, {'id': 'F', 'description': 'I santi ai lati sono omonimi dei fratelli Pesaro, committenti della pala.'}]",
+    "is_correct": false,
+    "score": 0.4,
+    "details": "F1: 0.40, Precision: 0.50, Recall: 0.33, Exact Match: 0.00",
+    "processing_time": 29.444355964660645,
+    "error": "",
+    "error_type": "",
+    "timestamp": "2026-01-30T12:05:26.650587",
+    "metrics": {
+      "precision": 0.5,
+      "recall": 0.3333333333333333,
+      "f1": 0.4,
+      "exact_match": 0.0,
+      "ratio": 0.3333333333333333,
+      "true_positives": 1,
+      "false_positives": 1,
+      "false_negatives": 2,
+      "total": 3
+    },
+    "error_analysis": {
+      "correct_answers": [
+        "C"
+      ],
+      "incorrect_answers": [
+        "D",
+        "F",
+        "A"
+      ]
+    }
+  }
+}
