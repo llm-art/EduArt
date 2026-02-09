@@ -1,0 +1,26 @@
+Nella Pietà, che l'artista esegue attorno al 1535-1540, il formato rettangolare del dipinto, è completamente saturato da [A] figure. Il lungo corpo di Cristo esangue è piegato in [B], quasi che la tela non potesse contenerlo. Contro il fondo nero dell'antro del sepolcro, la luce colpisce con crudezza i corpi. Impietosamente fa risaltare il nudo di Gesù, dalla [C] rossastra, e porta alla ribalta la schiena possente di [D] e quella delicata della Maddalena. La Vergine quasi sparisce sotto le coltri delle vesti. Il [E], nei toni dell'arancio, e il verde si confondono e si sovrappongono, in arditi accostamenti mai sperimentati prima, quasi a voler [F] un ultimo, violento [G] vitale prima della deposizione di Gesù nell'antro buio del [H].
+
+A:
+  1. quattro
+  2. cinque
+B:
+  1. diagonale
+  2. verticale
+C:
+  1. chioma
+  2. barba
+D:
+  1. San Giovanni
+  2. San Pietro
+E:
+  1. rosso
+  2. viola
+F:
+  1. soffocare
+  2. materializzare
+G:
+  1. grido
+  2. slancio
+H:
+  1. vestibolo
+  2. sepolcro
