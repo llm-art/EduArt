@@ -1,9 +1,10 @@
 {
-  "creation_datetime": "2026-01-30 10:30:41",
-  "processing_time_seconds": 4.023148,
-  "version": 0.5,
+  "creation_datetime": "2026-02-10 18:10:19",
+  "processing_time_seconds": 9170.683377,
+  "version": 0.4,
   "source_count": 63,
   "question_count": 883,
+  "questions_with_images": 441,
   "questions_by_type": {
     "multiple_choice_radio": 370,
     "multiple_choice_check": 119,
@@ -12,6 +13,29 @@
     "select_errors": 53,
     "positioning": 108,
     "completion_open": 76
+  },
+  "categorization": {
+    "art_historical": {
+      "subject_matter_and_iconography": 447,
+      "style_and_period": 605,
+      "object_and_work_type": 547,
+      "materials_and_techniques": 329,
+      "authorship": 526
+    },
+    "cultural_tradition": {
+      "western": 857,
+      "middle_east": 22,
+      "eastern": 4
+    },
+    "disciplinary_domain": {
+      "art_history": 709,
+      "architectural_history": 174
+    },
+    "epistemic_level": {
+      "factual_identification": 738,
+      "contextual_knowledge": 87,
+      "interpretive_reasoning": 58
+    }
   },
   "sources": [
     "ap_art_history/2010",
@@ -80,6 +104,14 @@
   ],
   "ai_calls": [
     {
+      "description": "question categorization",
+      "model_name": "Openaiprovider unknown",
+      "input_tokens": 248292,
+      "output_tokens": 495860,
+      "total_tokens": 744152,
+      "processing_time": 9164.419970750809
+    },
+    {
       "description": "text extraction",
       "model_name": "Google gemini-2.5-flash-lite",
       "input_tokens": 6476321,
@@ -88,5 +120,5 @@
       "processing_time": 2022.6078491210938
     }
   ],
-  "last_updated": "2026-01-30 10:30:45"
+  "last_updated": "2026-02-10 20:43:10"
 }

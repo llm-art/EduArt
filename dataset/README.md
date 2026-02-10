@@ -1,14 +1,16 @@
 # Dataset Bundle Report
 
-**Creation Date & Time:** 2026-01-30 10:30:41
+**Creation Date & Time:** 2026-02-10 18:10:19
 
-**Processing Time:** 4.02 seconds
+**Processing Time:** 9170.68 seconds
 
-**Version:** 0.5
+**Version:** 0.4
 
 **Number of Sources:** 63
 
 **Number of Questions:** 883
+
+**Questions with Images:** 441
 
 **Total Cost:** $0.7217
 
@@ -28,6 +30,42 @@
   - Example: ![select_errors example](documentation/select_errors_example.png) (from myzanichelli/1, exercise 1, question 10)
 - **true_false:** 85
   - Example: ![true_false example](documentation/true_false_example.png) (from myzanichelli/1, exercise 1, question 7)
+
+## Categorization Statistics
+
+### Art Historical
+
+| Value | Count |
+|-------|-------|
+| style_and_period | 605 |
+| object_and_work_type | 547 |
+| authorship | 526 |
+| subject_matter_and_iconography | 447 |
+| materials_and_techniques | 329 |
+
+### Cultural Tradition
+
+| Value | Count |
+|-------|-------|
+| western | 857 |
+| middle_east | 22 |
+| eastern | 4 |
+
+### Disciplinary Domain
+
+| Value | Count |
+|-------|-------|
+| art_history | 709 |
+| architectural_history | 174 |
+
+### Epistemic Level
+
+| Value | Count |
+|-------|-------|
+| factual_identification | 738 |
+| contextual_knowledge | 87 |
+| interpretive_reasoning | 58 |
+
 
 ## Sources
 
@@ -97,6 +135,13 @@
 
 ## AI Calls Summary
 
+### Question Categorization
+- **Model:** Openaiprovider unknown
+- **Input Tokens:** 248,292
+- **Output Tokens:** 495,860
+- **Total Tokens:** 744,152
+- **Processing Time:** 9164.42 seconds
+
 ### Text Extraction
 - **Model:** Google gemini-2.5-flash-lite
 - **Input Tokens:** 6,476,321
@@ -107,6 +152,11 @@
 
 ## Cost Breakdown
 
+### question categorization (Openaiprovider unknown)
+- **Input Tokens:** 248,292 ($0.0000)
+- **Output Tokens:** 495,860 ($0.0000)
+- **Total Cost:** $0.0000
+
 ### text extraction (Google gemini-2.5-flash-lite)
 - **Input Tokens:** 6,476,321 ($0.6476)
 - **Output Tokens:** 185,151 ($0.0741)
@@ -116,4 +166,4 @@
 
 ---
 *Report generated automatically by dataset bundler script*
-*Last updated: 2026-01-30 10:30:45*
+*Last updated: 2026-02-10 20:43:10*
