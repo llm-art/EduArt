@@ -4,10 +4,15 @@ import json
 import re
 from typing import Dict, List, Any, Optional
 from ..core.exceptions import ProcessingError
+from .level1_evaluators import Level1Evaluator
 
 
 class AnswerEvaluator:
     """Evaluator for comparing LLM responses with correct answers."""
+    
+    def __init__(self):
+        """Initialize the evaluator with Level 1 evaluator."""
+        self.level1_evaluator = Level1Evaluator()
     
     # Question-type specific thresholds for determining correctness
     QUESTION_TYPE_THRESHOLDS = {
@@ -293,11 +298,23 @@ class AnswerEvaluator:
         Returns:
             Evaluation result dictionary
         """
+        # Use Level 1 evaluators for specialized question types
+        if question_type == 'true_false':
+            return self.level1_evaluator.evaluate_true_false(parsed_response, answers)
+        elif question_type == 'completion_closed':
+            return self.level1_evaluator.evaluate_completion_closed(parsed_response, answers)
+        elif question_type == 'completion_open':
+            return self.level1_evaluator.evaluate_completion_open(parsed_response, answers)
+        elif question_type == 'positioning':
+            return self.level1_evaluator.evaluate_positioning(parsed_response, answers)
+        elif question_type == 'select_errors':
+            return self.level1_evaluator.evaluate_select_errors(parsed_response, answers)
+        
+        # Fallback to original implementation for other types
         # Helper function to clean text by removing numeric prefixes
         def clean_text(text: str) -> str:
             """Remove numeric prefix pattern like '1. ' or '2. ' from text and normalize."""
             cleaned = re.sub(r'^\d+\.\s*', '', text.strip())
-
             return cleaned.lower()
         
         # Build lookup dictionary from user response: {id: text}

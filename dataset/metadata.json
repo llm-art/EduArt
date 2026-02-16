@@ -1,7 +1,7 @@
 {
-  "creation_datetime": "2026-02-10 18:10:19",
-  "processing_time_seconds": 9170.683377,
-  "version": 0.4,
+  "creation_datetime": "2026-02-10 22:15:50",
+  "processing_time_seconds": 7946.673118,
+  "version": 0.6,
   "source_count": 63,
   "question_count": 883,
   "questions_with_images": 441,
@@ -16,25 +16,25 @@
   },
   "categorization": {
     "art_historical": {
-      "subject_matter_and_iconography": 447,
-      "style_and_period": 605,
-      "object_and_work_type": 547,
-      "materials_and_techniques": 329,
-      "authorship": 526
+      "subject_matter_and_iconography": 448,
+      "style_and_period": 595,
+      "object_and_work_type": 546,
+      "materials_and_techniques": 316,
+      "authorship": 524
     },
     "cultural_tradition": {
-      "western": 857,
-      "middle_east": 22,
-      "eastern": 4
+      "western": 859,
+      "middle_east": 19,
+      "eastern": 5
     },
     "disciplinary_domain": {
-      "art_history": 709,
-      "architectural_history": 174
+      "art_history": 710,
+      "architectural_history": 173
     },
     "epistemic_level": {
-      "factual_identification": 738,
-      "contextual_knowledge": 87,
-      "interpretive_reasoning": 58
+      "factual_identification": 732,
+      "contextual_knowledge": 97,
+      "interpretive_reasoning": 54
     }
   },
   "sources": [
@@ -107,9 +107,9 @@
       "description": "question categorization",
       "model_name": "Openaiprovider unknown",
       "input_tokens": 248292,
-      "output_tokens": 495860,
-      "total_tokens": 744152,
-      "processing_time": 9164.419970750809
+      "output_tokens": 508651,
+      "total_tokens": 756943,
+      "processing_time": 7941.473968267441
     },
     {
       "description": "text extraction",
@@ -120,5 +120,5 @@
       "processing_time": 2022.6078491210938
     }
   ],
-  "last_updated": "2026-02-10 20:43:10"
+  "last_updated": "2026-02-11 00:28:16"
 }

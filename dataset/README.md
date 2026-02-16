@@ -1,10 +1,10 @@
 # Dataset Bundle Report
 
-**Creation Date & Time:** 2026-02-10 18:10:19
+**Creation Date & Time:** 2026-02-10 22:15:50
 
-**Processing Time:** 9170.68 seconds
+**Processing Time:** 7946.67 seconds
 
-**Version:** 0.4
+**Version:** 0.6
 
 **Number of Sources:** 63
 
@@ -37,34 +37,34 @@
 
 | Value | Count |
 |-------|-------|
-| style_and_period | 605 |
-| object_and_work_type | 547 |
-| authorship | 526 |
-| subject_matter_and_iconography | 447 |
-| materials_and_techniques | 329 |
+| style_and_period | 595 |
+| object_and_work_type | 546 |
+| authorship | 524 |
+| subject_matter_and_iconography | 448 |
+| materials_and_techniques | 316 |
 
 ### Cultural Tradition
 
 | Value | Count |
 |-------|-------|
-| western | 857 |
-| middle_east | 22 |
-| eastern | 4 |
+| western | 859 |
+| middle_east | 19 |
+| eastern | 5 |
 
 ### Disciplinary Domain
 
 | Value | Count |
 |-------|-------|
-| art_history | 709 |
-| architectural_history | 174 |
+| art_history | 710 |
+| architectural_history | 173 |
 
 ### Epistemic Level
 
 | Value | Count |
 |-------|-------|
-| factual_identification | 738 |
-| contextual_knowledge | 87 |
-| interpretive_reasoning | 58 |
+| factual_identification | 732 |
+| contextual_knowledge | 97 |
+| interpretive_reasoning | 54 |
 
 
 ## Sources
@@ -138,9 +138,9 @@
 ### Question Categorization
 - **Model:** Openaiprovider unknown
 - **Input Tokens:** 248,292
-- **Output Tokens:** 495,860
-- **Total Tokens:** 744,152
-- **Processing Time:** 9164.42 seconds
+- **Output Tokens:** 508,651
+- **Total Tokens:** 756,943
+- **Processing Time:** 7941.47 seconds
 
 ### Text Extraction
 - **Model:** Google gemini-2.5-flash-lite
@@ -154,7 +154,7 @@
 
 ### question categorization (Openaiprovider unknown)
 - **Input Tokens:** 248,292 ($0.0000)
-- **Output Tokens:** 495,860 ($0.0000)
+- **Output Tokens:** 508,651 ($0.0000)
 - **Total Cost:** $0.0000
 
 ### text extraction (Google gemini-2.5-flash-lite)
@@ -166,4 +166,4 @@
 
 ---
 *Report generated automatically by dataset bundler script*
-*Last updated: 2026-02-10 20:43:10*
+*Last updated: 2026-02-11 00:28:16*

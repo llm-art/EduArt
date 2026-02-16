@@ -1039,11 +1039,23 @@ answers/
         for model in sorted_models:
             model_name = model.get('model_name', 'Unknown')
             readme_content += f"### {model_name}\n\n"
-            readme_content += "| Question Type | Questions | With Images | Correct | Accuracy |\n"
-            readme_content += "|---------------|-----------|-------------|---------|----------|\n"
             
-            # Sort question types alphabetically
+            # Check if any question type has precision/recall/f1 metrics
             question_types = sorted(model.get('question_type', []), key=lambda x: x.get('type', ''))
+            has_metrics = any(
+                type_data.get('precision') is not None or
+                type_data.get('recall') is not None or
+                type_data.get('f1') is not None
+                for type_data in question_types
+            )
+            
+            # Use extended table format if metrics are available
+            if has_metrics:
+                readme_content += "| Question Type | Questions | With Images | Correct | Accuracy | Precision | Recall | F1 |\n"
+                readme_content += "|---------------|-----------|-------------|---------|----------|-----------|--------|----|\n"
+            else:
+                readme_content += "| Question Type | Questions | With Images | Correct | Accuracy |\n"
+                readme_content += "|---------------|-----------|-------------|---------|----------|\n"
             
             for type_data in question_types:
                 qtype = type_data.get('type', 'Unknown')
@@ -1052,7 +1064,22 @@ answers/
                 correct = type_data.get('correctly_answered_questions', 0)
                 accuracy = (correct / questions * 100) if questions > 0 else 0
                 
-                readme_content += f"| {qtype} | {questions} | {with_images} | {correct} | {accuracy:.1f}% |\n"
+                # Build base row
+                row = f"| {qtype} | {questions} | {with_images} | {correct} | {accuracy:.1f}%"
+                
+                # Add metrics columns if available and not select_errors
+                if has_metrics:
+                    if qtype != 'select_errors':
+                        precision = type_data.get('precision', 0)
+                        recall = type_data.get('recall', 0)
+                        f1 = type_data.get('f1', 0)
+                        row += f" | {precision:.3f} | {recall:.3f} | {f1:.3f}"
+                    else:
+                        # For select_errors, show dashes
+                        row += " | - | - | -"
+                
+                row += " |\n"
+                readme_content += row
             
             readme_content += "\n"
         
