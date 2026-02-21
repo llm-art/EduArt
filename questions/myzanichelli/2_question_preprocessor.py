@@ -67,7 +67,7 @@ def main(force_ocr, verbose, exercise, all, min_question, max_question, use_lang
             exercise = tuple(range(1, 58))
         # Handle default case when no exercises are specified
         elif not exercise:
-            exercise = (1,)  # Default to exercise 1
+            exercise = tuple(range(1, 58))  # Default to all exercises
         
         print("=== Enhanced Multi-Model Exam Question Processor (Refactored) ===")
         print(f"Configuration: {Config.get_model_info()}")

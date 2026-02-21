@@ -33,6 +33,8 @@ STRICT REQUIREMENTS:
 - Use null for missing data, not empty strings
 - Extract the main text passage with errors from the TOP section
 - **CRITICAL**: The answers array MUST contain objects with "correct" and "error" pairs
+- **CRITICAL**: ONLY create pairs where the error word is DIFFERENT from the correct word
+- DO NOT create pairs where error == correct (those are not actual errors!)
 - You MUST identify EVERY error-correction pair by comparing top and bottom sections
 - Set choices to null for this question type
 

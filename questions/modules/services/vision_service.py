@@ -256,10 +256,10 @@ class VisionModelService:
             
             # Call vision model
             response = self.chat(str(image_path), system_prompt, user_prompt, "text extraction")
-            
-            # Parse JSON response
-            question_data = self._parse_json_response(response)
-            
+
+            # Parse JSON response with validation for this question type
+            question_data = self._parse_json_response(response, question_type)
+
             # Check if the LLM detected no actual question (e.g., cover page)
             if not question_data.get('has_question', True):
                 reason = question_data.get('reason', 'no question detected')
@@ -376,35 +376,196 @@ class VisionModelService:
         
         return response
 
-            
-        
-    
-    def _parse_json_response(self, text: str) -> Dict[str, Any]:
+    def _repair_json(self, text: str) -> str:
         """
-        Parse JSON response with fallback handling.
-        
+        Attempt to repair malformed JSON by fixing common issues.
+
+        Args:
+            text: Malformed JSON text
+
+        Returns:
+            Repaired JSON text
+        """
+        # Fix unescaped newlines in string values
+        # This regex finds strings and escapes unescaped newlines within them
+        import re
+
+        # Try to fix unterminated strings by finding and completing them
+        # This is a simple heuristic - look for unclosed quotes
+        lines = text.split('\n')
+        fixed_lines = []
+
+        for line in lines:
+            # If line has an odd number of unescaped quotes, it might be unterminated
+            # Count quotes that aren't escaped
+            quote_count = len(re.findall(r'(?<!\\)"', line))
+
+            # If odd number of quotes, try to close the string at the end
+            if quote_count % 2 == 1:
+                # Find the last quote and add a closing quote before any trailing comma/brace
+                line = re.sub(r'([^"\\]*)$', r'"\1', line, count=1)
+
+            fixed_lines.append(line)
+
+        repaired = '\n'.join(fixed_lines)
+
+        # Replace actual newlines within string values with \n
+        # This is tricky - we need to find strings and escape newlines
+        repaired = repaired.replace('\n', '\\n')
+        repaired = repaired.replace('\\n', '\n', 1)  # Keep structural newlines
+
+        return repaired
+
+    def _parse_json_response(self, text: str, question_type: str = None) -> Dict[str, Any]:
+        """
+        Parse JSON response with schema validation.
+
         Args:
             text: Raw response text from vision model
-            
+            question_type: Type of question for validation (optional)
+
         Returns:
-            Parsed JSON dictionary
+            Parsed and validated JSON dictionary
         """
         if isinstance(text, list):
             text = text[0] if text else ""
-        
+
         if not text or text.strip() == "":
             return {"type": "unknown"}
-        
+
         # Remove Markdown code block if present
         text = re.sub(r"^(?:```(?:json)?\s*)", "", text)
         text = re.sub(r"```\s*$", "", text, flags=re.MULTILINE)
-        
+
         try:
             result = json.loads(text)
-            return result
         except json.JSONDecodeError as e:
-            print(f"JSON parsing failed: {e}")
-            return {"type": "unknown", "parsing_error": "failed_json_decode"}
+            print(f"❌ JSON parsing failed: {e}")
+            print(f"Attempting JSON repair...")
+
+            # Try to repair common JSON issues
+            try:
+                repaired_text = self._repair_json(text)
+                result = json.loads(repaired_text)
+                print(f"✓ JSON repaired successfully")
+            except Exception as repair_error:
+                print(f"❌ JSON repair also failed: {repair_error}")
+                return {"type": "unknown", "parsing_error": str(e)}
+
+        # Validate schema if question type is provided
+        if question_type:
+            result = self._validate_schema(result, question_type)
+
+        return result
+
+    def _validate_schema(self, data: Dict, question_type: str) -> Dict:
+        """
+        Validate JSON schema and fix common issues.
+
+        Args:
+            data: Parsed JSON data
+            question_type: Type of question being validated
+
+        Returns:
+            Validated and potentially corrected data
+        """
+        # Check required fields
+        required = ['type', 'question_title', 'question_text', 'answers']
+        missing_fields = [f for f in required if f not in data]
+        if missing_fields:
+            print(f"⚠️  WARNING: Missing required fields: {missing_fields}")
+
+        # Type-specific validation
+        if question_type in ['positioning', 'completion_closed', 'completion_open']:
+            data = self._validate_placeholders(data)
+
+        if question_type == 'completion_closed':
+            data = self._validate_binary_choices(data)
+
+        if question_type == 'select_errors':
+            data = self._filter_duplicate_errors(data)
+
+        return data
+
+    def _validate_placeholders(self, data: Dict) -> Dict:
+        """
+        Validate and fix placeholder format to ensure [A], [B], etc.
+
+        Args:
+            data: Question data dictionary
+
+        Returns:
+            Data with corrected placeholders
+        """
+        question_text = data.get('question_text', '')
+
+        # Check for [A] format
+        if not re.search(r'\[A\]', question_text):
+            print("⚠️  WARNING: Placeholders not in [A] format, attempting auto-fix...")
+
+            # Fix common issues for letters A-H
+            for letter in 'ABCDEFGH':
+                # Fix standalone letters: A -> [A]
+                question_text = re.sub(rf'\b{letter}\b(?!\])', f'[{letter}]', question_text)
+                # Fix curly braces: {A} -> [A]
+                question_text = re.sub(rf'\{{{letter}\}}', f'[{letter}]', question_text)
+                # Fix parentheses: (A) -> [A]
+                question_text = re.sub(rf'\({letter}\)', f'[{letter}]', question_text)
+
+            data['question_text'] = question_text
+            print(f"✓ Fixed placeholder format")
+
+        return data
+
+    def _validate_binary_choices(self, data: Dict) -> Dict:
+        """
+        Validate completion_closed has exactly 2 options per choice.
+
+        Args:
+            data: Question data dictionary
+
+        Returns:
+            Data (warnings printed for violations)
+        """
+        choices = data.get('choices', [])
+
+        for choice in choices:
+            if isinstance(choice, dict) and 'options' in choice:
+                if len(choice['options']) != 2:
+                    print(f"⚠️  WARNING: Choice {choice.get('id')} has {len(choice['options'])} options (expected 2)")
+
+        return data
+
+    def _filter_duplicate_errors(self, data: Dict) -> Dict:
+        """
+        Filter select_errors pairs where error == correct (not real errors).
+
+        Args:
+            data: Question data dictionary
+
+        Returns:
+            Data with duplicate error-correction pairs removed
+        """
+        answers = data.get('answers', [])
+        original_count = len(answers)
+
+        filtered = []
+        for pair in answers:
+            if isinstance(pair, dict):
+                error = pair.get('error', '').strip().lower()
+                correct = pair.get('correct', '').strip().lower()
+
+                if error == correct:
+                    print(f"⚠️  Skipping duplicate: error==correct=='{pair.get('error')}'")
+                elif error and correct:
+                    filtered.append(pair)
+
+        data['answers'] = filtered
+
+        if len(filtered) != original_count:
+            print(f"✓ Filtered select_errors: {original_count} → {len(filtered)} pairs")
+
+        return data
     
     def process_question_with_detected_type(self, image_path: str, ocr_text: str, html_text: str,
                         question_type: str, exercise: int, question: int, track_metadata: bool = True) -> QuestionData:
@@ -444,7 +605,8 @@ class VisionModelService:
             if 'radio' in text_data['type'] or 'check' in text_data['type']:
               question_type = text_data['type']
 
-            question_image = Path(str(image_path).replace(".png", ".jpg").replace("raw", "imgs").replace('screenshot/', ''))
+            # Construct image path: raw/X/screenshot/Y.png -> raw/X/imgs/Y.jpg
+            question_image = Path(str(image_path).replace(".png", ".jpg").replace("/screenshot/", "/imgs/"))
             
             # Step 3: Combine data into QuestionData object
             combined_data = {**type_data, **text_data}
@@ -504,8 +666,8 @@ class VisionModelService:
                 image_path, question_type, ocr_text, html_text
             )
 
-
-            question_image = Path(str(image_path).replace(".png", ".jpg").replace("raw", "imgs"))
+            # Construct image path: raw/X/screenshot/Y.png -> raw/X/imgs/Y.jpg
+            question_image = Path(str(image_path).replace(".png", ".jpg").replace("/screenshot/", "/imgs/"))
             
             # Step 3: Combine data into QuestionData object
             combined_data = {**type_data, **text_data}
