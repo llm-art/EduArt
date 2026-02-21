@@ -99,13 +99,17 @@ def get_previous_version(dataset_dir):
 
 def collect_statistics_from_metadata(metadata_files):
   """Collect statistics about the dataset from processed metadata files."""
-  categorization_fields = ['art_historical', 'cultural_tradition', 'disciplinary_domain', 'epistemic_level']
+  categorization_fields = ['art_historical', 'cultural_tradition', 'disciplinary_domain', 'epistemic_level', 'language']
   stats = {
       'sources': set(),
       'total_questions': 0,
       'questions_by_type': defaultdict(int),
       'questions_with_images': 0,
       'categorization': {field: defaultdict(int) for field in categorization_fields},
+      # Cross-tabulation: category_value × question_type
+      'categorization_by_type': {field: defaultdict(lambda: defaultdict(int)) for field in categorization_fields},
+      # has_image × question_type
+      'images_by_type': defaultdict(lambda: {'with_image': 0, 'without_image': 0}),
       'ai_calls': {}
   }
 
@@ -135,8 +139,12 @@ def collect_statistics_from_metadata(metadata_files):
           stats['total_questions'] += 1
 
           # Count questions with images
-          if question.get("has_image"):
+          has_image = question.get("has_image", False)
+          if has_image:
             stats['questions_with_images'] += 1
+            stats['images_by_type'][question_type]['with_image'] += 1
+          else:
+            stats['images_by_type'][question_type]['without_image'] += 1
 
           # Count categorization fields
           for field in categorization_fields:
@@ -145,8 +153,10 @@ def collect_statistics_from_metadata(metadata_files):
               if isinstance(value, list):
                 for item in value:
                   stats['categorization'][field][item] += 1
+                  stats['categorization_by_type'][field][item][question_type] += 1
               else:
                 stats['categorization'][field][value] += 1
+                stats['categorization_by_type'][field][value][question_type] += 1
 
         # Process AI calls if present
         ai_calls = json_data.get("ai_calls", [])
@@ -261,7 +271,7 @@ def generate_report(start_time, end_time, stats, dataset_dir, version, first_que
       example_info = first_question_by_type[question_type]
       report_content += f"  - Example: ![{question_type} example]({example_info['screenshot_path']}) (from {example_info['source']}, exercise {example_info['exercise']}, question {example_info['question']})\n"
 
-  # Add categorization statistics section
+  # Add categorization statistics section with cross-tabulation by question type
   if any(stats['categorization'][field] for field in stats['categorization']):
     report_content += f"""
 ## Categorization Statistics
@@ -272,16 +282,81 @@ def generate_report(start_time, end_time, stats, dataset_dir, version, first_que
         'cultural_tradition': 'Cultural Tradition',
         'disciplinary_domain': 'Disciplinary Domain',
         'epistemic_level': 'Epistemic Level',
+        'language': 'Language',
     }
-    for field, counts in stats['categorization'].items():
-      if counts:
+
+    # Get all question types present in the dataset
+    all_question_types = sorted(stats['questions_by_type'].keys())
+
+    for field in ['art_historical', 'cultural_tradition', 'disciplinary_domain', 'epistemic_level', 'language']:
+      if field in stats['categorization'] and stats['categorization'][field]:
         label = field_labels.get(field, field)
         report_content += f"### {label}\n\n"
-        report_content += f"| Value | Count |\n"
-        report_content += f"|-------|-------|\n"
-        for value, count in sorted(counts.items(), key=lambda x: -x[1]):
-          report_content += f"| {value} | {count} |\n"
+
+        # Build table header
+        header = "| Value |"
+        separator = "|-------|"
+        for qtype in all_question_types:
+          header += f" {qtype} |"
+          separator += "-------|"
+        header += " Total |\n"
+        separator += "-------|\n"
+
+        report_content += header
+        report_content += separator
+
+        # Get all values for this field, sorted by total count (descending)
+        values_with_counts = [(value, count) for value, count in stats['categorization'][field].items()]
+        values_with_counts.sort(key=lambda x: -x[1])
+
+        # Build table rows
+        for value, total_count in values_with_counts:
+          row = f"| {value} |"
+          for qtype in all_question_types:
+            count = stats['categorization_by_type'][field][value][qtype]
+            row += f" {count} |"
+          row += f" {total_count} |\n"
+          report_content += row
+
         report_content += "\n"
+
+    # Add image statistics table
+    if stats['images_by_type']:
+      report_content += f"### With/Without Image\n\n"
+
+      # Build table header
+      header = "| Has Image |"
+      separator = "|-----------|"
+      for qtype in all_question_types:
+        header += f" {qtype} |"
+        separator += "-------|"
+      header += " Total |\n"
+      separator += "-------|\n"
+
+      report_content += header
+      report_content += separator
+
+      # Row for "With Image"
+      row_with = "| Yes |"
+      total_with = 0
+      for qtype in all_question_types:
+        count = stats['images_by_type'][qtype]['with_image']
+        row_with += f" {count} |"
+        total_with += count
+      row_with += f" {total_with} |\n"
+      report_content += row_with
+
+      # Row for "Without Image"
+      row_without = "| No |"
+      total_without = 0
+      for qtype in all_question_types:
+        count = stats['images_by_type'][qtype]['without_image']
+        row_without += f" {count} |"
+        total_without += count
+      row_without += f" {total_without} |\n"
+      report_content += row_without
+
+      report_content += "\n"
 
   # Add sources section
   if stats['sources']:
@@ -360,6 +435,12 @@ def generate_metadata(start_time, end_time, stats, dataset_dir, version):
       "questions_with_images": stats['questions_with_images'],
       "questions_by_type": dict(stats['questions_by_type']),
       "categorization": {field: dict(counts) for field, counts in stats['categorization'].items() if counts},
+      "categorization_by_type": {
+          field: {value: dict(type_counts) for value, type_counts in value_counts.items()}
+          for field, value_counts in stats['categorization_by_type'].items()
+          if value_counts
+      },
+      "images_by_type": {qtype: dict(counts) for qtype, counts in stats['images_by_type'].items()},
       "sources": sorted(list(stats['sources'])),
       "ai_calls": ai_calls_list,
       "last_updated": end_time.strftime('%Y-%m-%d %H:%M:%S')

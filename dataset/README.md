@@ -1,18 +1,18 @@
 # Dataset Bundle Report
 
-**Creation Date & Time:** 2026-02-10 22:15:50
+**Creation Date & Time:** 2026-02-21 18:33:01
 
-**Processing Time:** 7946.67 seconds
+**Processing Time:** 6196.14 seconds
 
-**Version:** 0.6
+**Version:** 1.8
 
 **Number of Sources:** 63
 
-**Number of Questions:** 883
+**Number of Questions:** 880
 
-**Questions with Images:** 441
+**Questions with Images:** 440
 
-**Total Cost:** $0.7217
+**Total Cost:** $0.0000
 
 ## Questions by Type
 
@@ -20,7 +20,7 @@
   - Example: ![completion_closed example](documentation/completion_closed_example.png) (from myzanichelli/1, exercise 1, question 9)
 - **completion_open:** 76
   - Example: ![completion_open example](documentation/completion_open_example.png) (from myzanichelli/1, exercise 1, question 20)
-- **multiple_choice_check:** 119
+- **multiple_choice_check:** 116
   - Example: ![multiple_choice_check example](documentation/multiple_choice_check_example.png) (from myzanichelli/1, exercise 1, question 4)
 - **multiple_choice_radio:** 370
   - Example: ![multiple_choice_radio example](documentation/multiple_choice_radio_example.png) (from myzanichelli/1, exercise 1, question 1)
@@ -35,36 +35,50 @@
 
 ### Art Historical
 
-| Value | Count |
-|-------|-------|
-| style_and_period | 595 |
-| object_and_work_type | 546 |
-| authorship | 524 |
-| subject_matter_and_iconography | 448 |
-| materials_and_techniques | 316 |
+| Value | completion_closed | completion_open | multiple_choice_check | multiple_choice_radio | positioning | select_errors | true_false | Total |
+|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| style_and_period | 57 | 70 | 100 | 150 | 85 | 45 | 63 | 570 |
+| authorship | 53 | 59 | 94 | 119 | 99 | 43 | 60 | 527 |
+| subject_matter_and_iconography | 47 | 51 | 88 | 121 | 29 | 38 | 56 | 430 |
+| object_and_work_type | 31 | 46 | 48 | 123 | 60 | 20 | 30 | 358 |
+| materials_and_techniques | 14 | 30 | 38 | 61 | 47 | 4 | 25 | 219 |
 
 ### Cultural Tradition
 
-| Value | Count |
-|-------|-------|
-| western | 859 |
-| middle_east | 19 |
-| eastern | 5 |
+| Value | completion_closed | completion_open | multiple_choice_check | multiple_choice_radio | positioning | select_errors | true_false | Total |
+|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| western | 72 | 76 | 116 | 345 | 108 | 53 | 85 | 855 |
+| middle_east | 0 | 0 | 0 | 23 | 0 | 0 | 0 | 23 |
+| eastern | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 |
 
 ### Disciplinary Domain
 
-| Value | Count |
-|-------|-------|
-| art_history | 710 |
-| architectural_history | 173 |
+| Value | completion_closed | completion_open | multiple_choice_check | multiple_choice_radio | positioning | select_errors | true_false | Total |
+|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| art_history | 63 | 63 | 102 | 282 | 87 | 40 | 76 | 713 |
+| architectural_history | 9 | 13 | 14 | 88 | 21 | 13 | 9 | 167 |
 
 ### Epistemic Level
 
-| Value | Count |
-|-------|-------|
-| factual_identification | 732 |
-| contextual_knowledge | 97 |
-| interpretive_reasoning | 54 |
+| Value | completion_closed | completion_open | multiple_choice_check | multiple_choice_radio | positioning | select_errors | true_false | Total |
+|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| factual_identification | 39 | 39 | 25 | 280 | 75 | 22 | 44 | 524 |
+| contextual_knowledge | 32 | 35 | 82 | 75 | 33 | 18 | 38 | 313 |
+| interpretive_reasoning | 1 | 2 | 9 | 15 | 0 | 13 | 3 | 43 |
+
+### Language
+
+| Value | completion_closed | completion_open | multiple_choice_check | multiple_choice_radio | positioning | select_errors | true_false | Total |
+|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| it | 72 | 76 | 116 | 167 | 108 | 53 | 85 | 677 |
+| en | 0 | 0 | 0 | 203 | 0 | 0 | 0 | 203 |
+
+### With/Without Image
+
+| Has Image | completion_closed | completion_open | multiple_choice_check | multiple_choice_radio | positioning | select_errors | true_false | Total |
+|-----------|-------|-------|-------|-------|-------|-------|-------|-------|
+| Yes | 23 | 10 | 92 | 253 | 9 | 16 | 37 | 440 |
+| No | 49 | 66 | 24 | 117 | 99 | 37 | 48 | 440 |
 
 
 ## Sources
@@ -136,34 +150,34 @@
 ## AI Calls Summary
 
 ### Question Categorization
-- **Model:** Openaiprovider unknown
-- **Input Tokens:** 248,292
-- **Output Tokens:** 508,651
-- **Total Tokens:** 756,943
-- **Processing Time:** 7941.47 seconds
+- **Model:** Googleprovider unknown
+- **Input Tokens:** 253,694
+- **Output Tokens:** 913,449
+- **Total Tokens:** 1,167,143
+- **Processing Time:** 6191.71 seconds
 
 ### Text Extraction
-- **Model:** Google gemini-2.5-flash-lite
-- **Input Tokens:** 6,476,321
-- **Output Tokens:** 185,151
-- **Total Tokens:** 6,661,472
-- **Processing Time:** 2022.61 seconds
+- **Model:** Google gemini-3-flash-preview
+- **Input Tokens:** 6,452,944
+- **Output Tokens:** 178,362
+- **Total Tokens:** 6,631,306
+- **Processing Time:** 8011.72 seconds
 
 
 ## Cost Breakdown
 
-### question categorization (Openaiprovider unknown)
-- **Input Tokens:** 248,292 ($0.0000)
-- **Output Tokens:** 508,651 ($0.0000)
+### question categorization (Googleprovider unknown)
+- **Input Tokens:** 253,694 ($0.0000)
+- **Output Tokens:** 913,449 ($0.0000)
 - **Total Cost:** $0.0000
 
-### text extraction (Google gemini-2.5-flash-lite)
-- **Input Tokens:** 6,476,321 ($0.6476)
-- **Output Tokens:** 185,151 ($0.0741)
-- **Total Cost:** $0.7217
+### text extraction (Google gemini-3-flash-preview)
+- **Input Tokens:** 6,452,944 ($0.0000)
+- **Output Tokens:** 178,362 ($0.0000)
+- **Total Cost:** $0.0000
 
-**Grand Total:** $0.7217
+**Grand Total:** $0.0000
 
 ---
 *Report generated automatically by dataset bundler script*
-*Last updated: 2026-02-11 00:28:16*
+*Last updated: 2026-02-21 20:16:18*

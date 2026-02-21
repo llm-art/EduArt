@@ -361,8 +361,9 @@ class QuestionProcessor:
             "has_image": question_data.has_image
         }
 
-        if data_dict["has_image"] :
-            data_dict["image"] = data_dict['image'].replace("raw","imgs").replace(".png",".jpg")
+        if data_dict["has_image"]:
+            # Clean up image path: raw/X/screenshot/Y.png -> raw/X/imgs/Y.jpg
+            data_dict["image"] = data_dict['image'].replace(".png", ".jpg").replace("/screenshot/", "/imgs/")
 
         # Add AI metadata if tracking is enabled and calls exist
         if self.config.metadata_ai and question_data.ai_calls:
@@ -407,15 +408,15 @@ class QuestionProcessor:
             serialized = []
             for choice in choices:
                 if hasattr(choice, 'id') and hasattr(choice, 'text'):
-                    # Choice object
+                    # Choice object - only include id and text
                     serialized.append({
                         "id": choice.id,
-                        "text": choice.text,
-                        "is_correct": getattr(choice, 'is_correct', None)
+                        "text": choice.text
                     })
                 elif isinstance(choice, dict):
-                    # Already a dict
-                    serialized.append(choice)
+                    # Already a dict - remove is_correct if present
+                    cleaned_choice = {k: v for k, v in choice.items() if k != 'is_correct'}
+                    serialized.append(cleaned_choice)
                 else:
                     # String or other format
                     serialized.append(choice)
