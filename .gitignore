@@ -9,7 +9,9 @@ __pycache__/
 *.pyd
 .Python
 
-dataset/
+dataset/data/
+dataset/imgs/
+dataset/metadata/
 answers/*/
 
 # IDE files
