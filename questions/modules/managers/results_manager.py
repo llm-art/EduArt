@@ -1,8 +1,8 @@
 """Results manager for storing and exporting evaluation results."""
 
-import os
 import csv
 import json
+import os
 import shutil
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -230,6 +230,11 @@ class ResultsManager:
                     'question_id': data.get('question_id', question_id),
                     'model_name': eval_data.get('model_name', model_name),
                     'question_type': eval_data.get('question_type', ''),
+                    'language': eval_data.get('language', data.get('question_data', {}).get('language', '')),
+                    'disciplinary_domain': eval_data.get('disciplinary_domain', data.get('question_data', {}).get('disciplinary_domain', '')),
+                    'epistemic_level': eval_data.get('epistemic_level', data.get('question_data', {}).get('epistemic_level', '')),
+                    'art_historical': eval_data.get('art_historical', data.get('question_data', {}).get('art_historical', [])),
+                    'cultural_tradition': eval_data.get('cultural_tradition', data.get('question_data', {}).get('cultural_tradition', '')),
                     'llm_answer': eval_data.get('llm_answer', ''),
                     'correct_answer': eval_data.get('correct_answer', ''),
                     'is_correct': eval_data.get('is_correct'),
@@ -245,13 +250,13 @@ class ResultsManager:
                     'error_analysis': eval_data.get('error_analysis', {}),
                     'motivation': eval_data.get('motivation', '')
                 }
-                
+
                 # Try to get token info from ai_calls if available
                 if 'ai_calls' in data and data['ai_calls']:
                     latest_call = data['ai_calls'][-1]
                     result['input_tokens'] = latest_call.get('input_tokens', 0)
                     result['output_tokens'] = latest_call.get('output_tokens', 0)
-                
+
                 return result
         except Exception as e:
             print(f"Warning: Failed to load existing result for {question_id}/{model_name}: {e}")
@@ -303,6 +308,12 @@ class ResultsManager:
             'timestamp': datetime.now().isoformat(),
             'input_tokens': input_tokens,
             'output_tokens': output_tokens,
+            # Classification dimensions (from question metadata)
+            'language': (question_data or {}).get('language', ''),
+            'disciplinary_domain': (question_data or {}).get('disciplinary_domain', ''),
+            'epistemic_level': (question_data or {}).get('epistemic_level', ''),
+            'art_historical': (question_data or {}).get('art_historical', []),
+            'cultural_tradition': (question_data or {}).get('cultural_tradition', ''),
             # Enhanced metrics
             'metrics': evaluation.get('metrics', {}),
             'error_analysis': evaluation.get('error_analysis', {}),
@@ -381,6 +392,11 @@ class ResultsManager:
             evaluation_data = {
                 'model_name': result['model_name'],
                 'question_type': result['question_type'],
+                'language': result.get('language', ''),
+                'disciplinary_domain': result.get('disciplinary_domain', ''),
+                'epistemic_level': result.get('epistemic_level', ''),
+                'art_historical': result.get('art_historical', []),
+                'cultural_tradition': result.get('cultural_tradition', ''),
                 'llm_answer': result['llm_answer'],  # Keep as dict/object, not string
                 'correct_answer': result['correct_answer'],
                 'is_correct': result['is_correct'],
@@ -445,6 +461,55 @@ class ResultsManager:
         except Exception as e:
             raise ProcessingError(f"Failed to export results to CSV: {e}")
     
+    def _breakdown_metrics(self, results: List[Dict], dimension: str) -> List[Dict]:
+        """
+        Return per-value metrics for a given dimension key (e.g. 'language', 'disciplinary_domain').
+        Each entry: {dimension: value, precision, recall, f1, exact_match_rate,
+                     total_questions, correctly_answered_questions}
+        """
+        values = sorted(set(r.get(dimension, '') or 'unknown' for r in results))
+        rows = []
+        for val in values:
+            subset = [r for r in results if (r.get(dimension) or 'unknown') == val]
+            metrics = self.calculate_precision_recall_f1(subset)
+            correctly_answered = sum(1 for r in subset if r.get('is_correct', False))
+            rows.append({
+                dimension: val,
+                'total_questions': len(subset),
+                'correctly_answered_questions': correctly_answered,
+                'precision': metrics.get('precision', 0),
+                'recall': metrics.get('recall', 0),
+                'f1': metrics.get('f1', 0),
+                'exact_match_rate': metrics.get('exact_match_rate', 0),
+            })
+        return rows
+
+    def _breakdown_metrics_multivalue(self, results: List[Dict], dimension: str) -> List[Dict]:
+        """
+        Return per-value metrics for a multi-value dimension (e.g. 'art_historical', stored as a list).
+        A result can contribute to multiple categories.
+        """
+        all_values = sorted(set(
+            v for r in results
+            for v in (r.get(dimension) or [])
+            if v
+        ))
+        rows = []
+        for val in all_values:
+            subset = [r for r in results if val in (r.get(dimension) or [])]
+            metrics = self.calculate_precision_recall_f1(subset)
+            correctly_answered = sum(1 for r in subset if r.get('is_correct', False))
+            rows.append({
+                dimension: val,
+                'total_questions': len(subset),
+                'correctly_answered_questions': correctly_answered,
+                'precision': metrics.get('precision', 0),
+                'recall': metrics.get('recall', 0),
+                'f1': metrics.get('f1', 0),
+                'exact_match_rate': metrics.get('exact_match_rate', 0),
+            })
+        return rows
+
     def calculate_precision_recall_f1(self, results_subset: List[Dict]) -> Dict[str, float]:
         """
         Calculate comprehensive metrics for a subset of results using enhanced evaluation data.
@@ -696,6 +761,11 @@ class ResultsManager:
                                 'question_id': data.get('question_id', json_file.stem),
                                 'model_name': eval_data.get('model_name', model_name),
                                 'question_type': eval_data.get('question_type', ''),
+                                'language': eval_data.get('language', data.get('question_data', {}).get('language', '')),
+                                'disciplinary_domain': eval_data.get('disciplinary_domain', data.get('question_data', {}).get('disciplinary_domain', '')),
+                                'epistemic_level': eval_data.get('epistemic_level', data.get('question_data', {}).get('epistemic_level', '')),
+                                'art_historical': eval_data.get('art_historical', data.get('question_data', {}).get('art_historical', [])),
+                                'cultural_tradition': eval_data.get('cultural_tradition', data.get('question_data', {}).get('cultural_tradition', '')),
                                 'llm_answer': eval_data.get('llm_answer', ''),
                                 'correct_answer': eval_data.get('correct_answer', ''),
                                 'is_correct': eval_data.get('is_correct'),
@@ -864,7 +934,12 @@ class ResultsManager:
                     'total_tokens': total_input_tokens + total_output_tokens,
                     'processing_time': total_processing_time
                 }],
-                'question_type': question_types
+                'question_type': question_types,
+                'by_language': self._breakdown_metrics(model_results, 'language'),
+                'by_disciplinary_domain': self._breakdown_metrics(model_results, 'disciplinary_domain'),
+                'by_epistemic_level': self._breakdown_metrics(model_results, 'epistemic_level'),
+                'by_cultural_tradition': self._breakdown_metrics(model_results, 'cultural_tradition'),
+                'by_art_historical': self._breakdown_metrics_multivalue(model_results, 'art_historical'),
             })
         
         metadata = {
@@ -1080,13 +1155,331 @@ answers/
                 
                 row += " |\n"
                 readme_content += row
-            
+
+            # Disciplinary domain breakdown
+            by_domain = model.get('by_disciplinary_domain', [])
+            if by_domain:
+                readme_content += "\n**By Disciplinary Domain**\n\n"
+                readme_content += "| Disciplinary Domain | Questions | Correct | Accuracy | Precision | Recall | F1 |\n"
+                readme_content += "|---------------------|-----------|---------|----------|-----------|--------|----|\n"
+                for row_data in by_domain:
+                    domain = row_data.get('disciplinary_domain', 'unknown')
+                    n = row_data.get('total_questions', 0)
+                    correct = row_data.get('correctly_answered_questions', 0)
+                    accuracy = (correct / n * 100) if n > 0 else 0
+                    readme_content += (
+                        f"| {domain} | {n} | {correct} | {accuracy:.1f}% "
+                        f"| {row_data.get('precision', 0):.3f} "
+                        f"| {row_data.get('recall', 0):.3f} "
+                        f"| {row_data.get('f1', 0):.3f} |\n"
+                    )
+
+            # Language breakdown
+            by_lang = model.get('by_language', [])
+            if by_lang:
+                readme_content += "\n**By Language**\n\n"
+                readme_content += "| Language | Questions | Correct | Accuracy | Precision | Recall | F1 |\n"
+                readme_content += "|----------|-----------|---------|----------|-----------|--------|----|\n"
+                for row_data in by_lang:
+                    lang = row_data.get('language', 'unknown')
+                    n = row_data.get('total_questions', 0)
+                    correct = row_data.get('correctly_answered_questions', 0)
+                    accuracy = (correct / n * 100) if n > 0 else 0
+                    readme_content += (
+                        f"| {lang} | {n} | {correct} | {accuracy:.1f}% "
+                        f"| {row_data.get('precision', 0):.3f} "
+                        f"| {row_data.get('recall', 0):.3f} "
+                        f"| {row_data.get('f1', 0):.3f} |\n"
+                    )
+
+            # Epistemic level breakdown
+            by_epistemic = model.get('by_epistemic_level', [])
+            if by_epistemic:
+                readme_content += "\n**By Epistemic Level**\n\n"
+                readme_content += "| Epistemic Level | Questions | Correct | Accuracy | Precision | Recall | F1 |\n"
+                readme_content += "|-----------------|-----------|---------|----------|-----------|--------|----|\n"
+                for row_data in by_epistemic:
+                    val = row_data.get('epistemic_level', 'unknown')
+                    n = row_data.get('total_questions', 0)
+                    correct = row_data.get('correctly_answered_questions', 0)
+                    accuracy = (correct / n * 100) if n > 0 else 0
+                    readme_content += (
+                        f"| {val} | {n} | {correct} | {accuracy:.1f}% "
+                        f"| {row_data.get('precision', 0):.3f} "
+                        f"| {row_data.get('recall', 0):.3f} "
+                        f"| {row_data.get('f1', 0):.3f} |\n"
+                    )
+
+            # Cultural tradition breakdown
+            by_cultural = model.get('by_cultural_tradition', [])
+            if by_cultural:
+                readme_content += "\n**By Cultural Tradition**\n\n"
+                readme_content += "| Cultural Tradition | Questions | Correct | Accuracy | Precision | Recall | F1 |\n"
+                readme_content += "|--------------------|-----------|---------|----------|-----------|--------|----|\n"
+                for row_data in by_cultural:
+                    val = row_data.get('cultural_tradition', 'unknown')
+                    n = row_data.get('total_questions', 0)
+                    correct = row_data.get('correctly_answered_questions', 0)
+                    accuracy = (correct / n * 100) if n > 0 else 0
+                    readme_content += (
+                        f"| {val} | {n} | {correct} | {accuracy:.1f}% "
+                        f"| {row_data.get('precision', 0):.3f} "
+                        f"| {row_data.get('recall', 0):.3f} "
+                        f"| {row_data.get('f1', 0):.3f} |\n"
+                    )
+
+            # Art historical breakdown
+            by_art = model.get('by_art_historical', [])
+            if by_art:
+                readme_content += "\n**By Art Historical Category**\n\n"
+                readme_content += "| Art Historical | Questions | Correct | Accuracy | Precision | Recall | F1 |\n"
+                readme_content += "|----------------|-----------|---------|----------|-----------|--------|----|\n"
+                for row_data in by_art:
+                    val = row_data.get('art_historical', 'unknown')
+                    n = row_data.get('total_questions', 0)
+                    correct = row_data.get('correctly_answered_questions', 0)
+                    accuracy = (correct / n * 100) if n > 0 else 0
+                    readme_content += (
+                        f"| {val} | {n} | {correct} | {accuracy:.1f}% "
+                        f"| {row_data.get('precision', 0):.3f} "
+                        f"| {row_data.get('recall', 0):.3f} "
+                        f"| {row_data.get('f1', 0):.3f} |\n"
+                    )
+
             readme_content += "\n"
-        
+
         readme_content += "\n"
-        
+
         return readme_content
     
+    def export_metrics_csvs(self):
+        """
+        Export evaluation metrics as CSV files into each model's own folder.
+
+        Files written to answers/<model_folder>/:
+          metrics_summary.csv              – overall metrics for this model
+          metrics_by_question_type.csv     – breakdown by question type
+          metrics_by_language.csv          – breakdown by language
+          metrics_by_disciplinary_domain.csv – breakdown by disciplinary domain
+          metrics_per_question.csv         – one row per question for this model
+        """
+        all_results = self._load_all_model_results()
+        if not all_results:
+            print("No results to export as CSV.")
+            return
+
+        def _write_csv(path: Path, fieldnames: List[str], rows: List[Dict]):
+            with open(path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+                writer.writeheader()
+                writer.writerows(rows)
+
+        def _model_cost(model_name, input_tok, output_tok):
+            info = MODEL_COSTS.get(model_name, {})
+            return (
+                input_tok * info.get('input_cost_per_million_tokens', 0) / 1_000_000
+                + output_tok * info.get('output_cost_per_million_tokens', 0) / 1_000_000
+            )
+
+        model_names = sorted(set(r['model_name'] for r in all_results))
+
+        for model in model_names:
+            safe_name = model.replace('/', '_').replace('\\', '_')
+            model_dir = self.answers_data_dir / safe_name / 'metrics'
+            model_dir.mkdir(parents=True, exist_ok=True)
+
+            subset = [r for r in all_results if r['model_name'] == model]
+
+            # ── 1. Summary ──────────────────────────────────────────────────
+            m = self.calculate_precision_recall_f1(subset)
+            in_tok = sum(r.get('input_tokens', 0) for r in subset)
+            out_tok = sum(r.get('output_tokens', 0) for r in subset)
+            correct = sum(1 for r in subset if r.get('is_correct', False))
+            _write_csv(
+                model_dir / 'metrics_summary.csv',
+                ['model_name', 'total_questions', 'correctly_answered', 'accuracy',
+                 'precision', 'recall', 'f1', 'exact_match_rate',
+                 'total_input_tokens', 'total_output_tokens', 'estimated_cost_usd'],
+                [{
+                    'model_name': model,
+                    'total_questions': len(subset),
+                    'correctly_answered': correct,
+                    'accuracy': round(correct / len(subset), 4) if subset else 0,
+                    'precision': round(m.get('precision', 0), 4),
+                    'recall': round(m.get('recall', 0), 4),
+                    'f1': round(m.get('f1', 0), 4),
+                    'exact_match_rate': round(m.get('exact_match_rate', 0), 4),
+                    'total_input_tokens': in_tok,
+                    'total_output_tokens': out_tok,
+                    'estimated_cost_usd': round(_model_cost(model, in_tok, out_tok), 6),
+                }],
+            )
+
+            # ── 2. By question type ─────────────────────────────────────────
+            qt_rows = []
+            for qtype in sorted(set(r['question_type'] for r in subset)):
+                ts = [r for r in subset if r['question_type'] == qtype]
+                tm = self.calculate_precision_recall_f1(ts)
+                tc = sum(1 for r in ts if r.get('is_correct', False))
+                qt_rows.append({
+                    'question_type': qtype,
+                    'total_questions': len(ts),
+                    'correctly_answered': tc,
+                    'accuracy': round(tc / len(ts), 4) if ts else 0,
+                    'precision': round(tm.get('precision', 0), 4),
+                    'recall': round(tm.get('recall', 0), 4),
+                    'f1': round(tm.get('f1', 0), 4),
+                    'exact_match_rate': round(tm.get('exact_match_rate', 0), 4),
+                })
+            _write_csv(
+                model_dir / 'metrics_by_question_type.csv',
+                ['question_type', 'total_questions', 'correctly_answered',
+                 'accuracy', 'precision', 'recall', 'f1', 'exact_match_rate'],
+                qt_rows,
+            )
+
+            # ── 3. By language ──────────────────────────────────────────────
+            lang_rows = []
+            for row_data in self._breakdown_metrics(subset, 'language'):
+                n = row_data['total_questions']
+                c = row_data['correctly_answered_questions']
+                lang_rows.append({
+                    'language': row_data.get('language', ''),
+                    'total_questions': n,
+                    'correctly_answered': c,
+                    'accuracy': round(c / n, 4) if n else 0,
+                    'precision': round(row_data.get('precision', 0), 4),
+                    'recall': round(row_data.get('recall', 0), 4),
+                    'f1': round(row_data.get('f1', 0), 4),
+                    'exact_match_rate': round(row_data.get('exact_match_rate', 0), 4),
+                })
+            _write_csv(
+                model_dir / 'metrics_by_language.csv',
+                ['language', 'total_questions', 'correctly_answered',
+                 'accuracy', 'precision', 'recall', 'f1', 'exact_match_rate'],
+                lang_rows,
+            )
+
+            # ── 4. By disciplinary domain ───────────────────────────────────
+            domain_rows = []
+            for row_data in self._breakdown_metrics(subset, 'disciplinary_domain'):
+                n = row_data['total_questions']
+                c = row_data['correctly_answered_questions']
+                domain_rows.append({
+                    'disciplinary_domain': row_data.get('disciplinary_domain', ''),
+                    'total_questions': n,
+                    'correctly_answered': c,
+                    'accuracy': round(c / n, 4) if n else 0,
+                    'precision': round(row_data.get('precision', 0), 4),
+                    'recall': round(row_data.get('recall', 0), 4),
+                    'f1': round(row_data.get('f1', 0), 4),
+                    'exact_match_rate': round(row_data.get('exact_match_rate', 0), 4),
+                })
+            _write_csv(
+                model_dir / 'metrics_by_disciplinary_domain.csv',
+                ['disciplinary_domain', 'total_questions', 'correctly_answered',
+                 'accuracy', 'precision', 'recall', 'f1', 'exact_match_rate'],
+                domain_rows,
+            )
+
+            # ── 5. By epistemic level ───────────────────────────────────────
+            epistemic_rows = []
+            for row_data in self._breakdown_metrics(subset, 'epistemic_level'):
+                n = row_data['total_questions']
+                c = row_data['correctly_answered_questions']
+                epistemic_rows.append({
+                    'epistemic_level': row_data.get('epistemic_level', ''),
+                    'total_questions': n,
+                    'correctly_answered': c,
+                    'accuracy': round(c / n, 4) if n else 0,
+                    'precision': round(row_data.get('precision', 0), 4),
+                    'recall': round(row_data.get('recall', 0), 4),
+                    'f1': round(row_data.get('f1', 0), 4),
+                    'exact_match_rate': round(row_data.get('exact_match_rate', 0), 4),
+                })
+            _write_csv(
+                model_dir / 'metrics_by_epistemic_level.csv',
+                ['epistemic_level', 'total_questions', 'correctly_answered',
+                 'accuracy', 'precision', 'recall', 'f1', 'exact_match_rate'],
+                epistemic_rows,
+            )
+
+            # ── 6. By cultural tradition ────────────────────────────────────
+            cultural_rows = []
+            for row_data in self._breakdown_metrics(subset, 'cultural_tradition'):
+                n = row_data['total_questions']
+                c = row_data['correctly_answered_questions']
+                cultural_rows.append({
+                    'cultural_tradition': row_data.get('cultural_tradition', ''),
+                    'total_questions': n,
+                    'correctly_answered': c,
+                    'accuracy': round(c / n, 4) if n else 0,
+                    'precision': round(row_data.get('precision', 0), 4),
+                    'recall': round(row_data.get('recall', 0), 4),
+                    'f1': round(row_data.get('f1', 0), 4),
+                    'exact_match_rate': round(row_data.get('exact_match_rate', 0), 4),
+                })
+            _write_csv(
+                model_dir / 'metrics_by_cultural_tradition.csv',
+                ['cultural_tradition', 'total_questions', 'correctly_answered',
+                 'accuracy', 'precision', 'recall', 'f1', 'exact_match_rate'],
+                cultural_rows,
+            )
+
+            # ── 7. By art historical (multi-value) ──────────────────────────
+            art_rows = []
+            for row_data in self._breakdown_metrics_multivalue(subset, 'art_historical'):
+                n = row_data['total_questions']
+                c = row_data['correctly_answered_questions']
+                art_rows.append({
+                    'art_historical': row_data.get('art_historical', ''),
+                    'total_questions': n,
+                    'correctly_answered': c,
+                    'accuracy': round(c / n, 4) if n else 0,
+                    'precision': round(row_data.get('precision', 0), 4),
+                    'recall': round(row_data.get('recall', 0), 4),
+                    'f1': round(row_data.get('f1', 0), 4),
+                    'exact_match_rate': round(row_data.get('exact_match_rate', 0), 4),
+                })
+            _write_csv(
+                model_dir / 'metrics_by_art_historical.csv',
+                ['art_historical', 'total_questions', 'correctly_answered',
+                 'accuracy', 'precision', 'recall', 'f1', 'exact_match_rate'],
+                art_rows,
+            )
+
+            # ── 8. Per question ─────────────────────────────────────────────
+            pq_rows = [
+                {
+                    'question_id': r['question_id'],
+                    'question_type': r.get('question_type', ''),
+                    'language': r.get('language', ''),
+                    'disciplinary_domain': r.get('disciplinary_domain', ''),
+                    'epistemic_level': r.get('epistemic_level', ''),
+                    'cultural_tradition': r.get('cultural_tradition', ''),
+                    'art_historical': '|'.join(r.get('art_historical') or []),
+                    'is_correct': r.get('is_correct'),
+                    'score': r.get('score'),
+                    'details': r.get('details', ''),
+                    'input_tokens': r.get('input_tokens', 0),
+                    'output_tokens': r.get('output_tokens', 0),
+                    'processing_time': round(r.get('processing_time', 0), 3),
+                    'error': r.get('error', ''),
+                    'timestamp': r.get('timestamp', ''),
+                }
+                for r in sorted(subset, key=lambda x: x['question_id'])
+            ]
+            _write_csv(
+                model_dir / 'metrics_per_question.csv',
+                ['question_id', 'question_type', 'language', 'disciplinary_domain',
+                 'epistemic_level', 'cultural_tradition', 'art_historical',
+                 'is_correct', 'score', 'details',
+                 'input_tokens', 'output_tokens', 'processing_time', 'error', 'timestamp'],
+                pq_rows,
+            )
+
+            print(f"  CSV files written to: {model_dir.parent.name}/metrics/")
+
     def save_answers_readme(self):
         """Save README.md in the answers folder."""
         try:
@@ -1104,6 +1497,7 @@ answers/
         """Generate and save all answers folder outputs."""
         self.save_answers_metadata()
         self.save_answers_readme()
+        self.export_metrics_csvs()
         
         # Count files in all model folders
         total_files = 0
@@ -1117,6 +1511,7 @@ answers/
         print(f"\nAnswers folder structure created at: {self.answers_dir}")
         print(f"- metadata.json: Comprehensive evaluation metadata")
         print(f"- README.md: Human-readable summary and analysis")
-        print(f"- Model folders: Individual question results organized by model ({total_files} total files)")
+        print(f"- Model folders: Individual question results + CSV metrics ({total_files} total JSON files)")
         for folder_info in model_folders:
             print(folder_info)
+        print(f"  Each model folder also contains: query_log.jsonl + metrics/ (8 CSV files)")

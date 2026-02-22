@@ -118,27 +118,35 @@ class AnswerEvaluator:
             # Clean and extract JSON from response
             original_response = llm_response
             llm_response = llm_response.replace("```json","").replace("```", "").strip()
-            
+
             # Fix common JSON formatting issues from LLMs
             # Remove double braces that some LLMs add
             llm_response = re.sub(r'^\{\{', '{', llm_response)
             llm_response = re.sub(r'\}\}$', '}', llm_response)
-            
+
             # Attempt to fix incomplete JSON responses
             # Count opening and closing braces and brackets
             open_braces = llm_response.count('{')
             close_braces = llm_response.count('}')
             open_brackets = llm_response.count('[')
             close_brackets = llm_response.count(']')
-            
+
             # Add missing closing brackets/braces
             if close_brackets < open_brackets:
                 llm_response += ']' * (open_brackets - close_brackets)
             if close_braces < open_braces:
                 llm_response += '}' * (open_braces - close_braces)
-            
-            # Try to parse the JSON
-            response_data = json.loads(llm_response)
+
+            # Try to parse the JSON; if it fails, extract the JSON block from
+            # the response (handles models that add reasoning text before/after JSON)
+            try:
+                response_data = json.loads(llm_response)
+            except json.JSONDecodeError:
+                json_start = llm_response.find('{')
+                json_end = llm_response.rfind('}')
+                if json_start >= 0 and json_end > json_start:
+                    llm_response = llm_response[json_start:json_end + 1]
+                response_data = json.loads(llm_response)
             parsed_response = response_data.get('Answers', [])
             
             # Route to appropriate evaluation function based on question type

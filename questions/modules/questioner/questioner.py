@@ -1,7 +1,9 @@
 """Main LLM questioner orchestrator class."""
 
+import json
 import os
 import time
+from datetime import datetime
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 
@@ -74,6 +76,18 @@ class LLMQuestioner:
         except Exception as e:
             raise ConfigurationError(f"Failed to initialize components: {e}")
     
+    def _write_log_entry(self, model_name: str, entry: Dict[str, Any]):
+        """Append a log entry as a JSON line to the model's query_log.jsonl file."""
+        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
+        log_dir = self.config.base_dir / 'answers' / safe_model_name
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_path = log_dir / 'query_log.jsonl'
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+        except Exception as e:
+            print(f"Warning: Failed to write log entry for {model_name}: {e}")
+
     def process_questions(self, start: Optional[int] = None, end: Optional[int] = None,
                           question_types: Optional[List[str]] = None,
                           output_file: str = 'llm_evaluation_results.csv',
@@ -224,12 +238,34 @@ class LLMQuestioner:
                         print(f"    Response received: {len(llm_response)} characters")
                         if input_tokens > 0 or output_tokens > 0:
                             print(f"    Tokens: input={input_tokens}, output={output_tokens}")
-                        
+
                         # Evaluate the response
                         evaluation = evaluator.evaluate_response(question_type, llm_response, correct_answers)
-                        
+
+                        # Log the successful query
+                        self._write_log_entry(model_name, {
+                            'timestamp': datetime.now().isoformat(),
+                            'question_id': question_id,
+                            'model_name': model_name,
+                            'question_type': question_type,
+                            'has_image': has_image,
+                            'image_path': image_path,
+                            'system_prompt': system_prompt,
+                            'request': prompt,
+                            'response': llm_response,
+                            'input_tokens': input_tokens,
+                            'output_tokens': output_tokens,
+                            'processing_time': time.time() - start_time,
+                            'evaluation': {
+                                'is_correct': evaluation.get('is_correct'),
+                                'score': evaluation.get('score'),
+                                'details': evaluation.get('details', ''),
+                            },
+                            'error': None,
+                        })
+
                         successful_operations += 1
-                    
+
                     except Exception as e:
                         error_type = e.__class__.__name__
                         error_msg = str(e)
@@ -238,6 +274,24 @@ class LLMQuestioner:
                         failed_operations += 1
                         input_tokens = 0
                         output_tokens = 0
+
+                        # Log the failed query
+                        self._write_log_entry(model_name, {
+                            'timestamp': datetime.now().isoformat(),
+                            'question_id': question_id,
+                            'model_name': model_name,
+                            'question_type': question_type,
+                            'has_image': has_image,
+                            'image_path': image_path,
+                            'system_prompt': system_prompt,
+                            'request': prompt,
+                            'response': llm_response,
+                            'input_tokens': 0,
+                            'output_tokens': 0,
+                            'processing_time': time.time() - start_time,
+                            'evaluation': None,
+                            'error': formatted_error,
+                        })
                     
                     processing_time = time.time() - start_time
                     
@@ -261,7 +315,12 @@ class LLMQuestioner:
                             'has_image': has_image,
                             'image_path': image_path,
                             'correct_answers': correct_answers,
-                            'prompt': prompt
+                            'prompt': prompt,
+                            'language': question_data.get('language', ''),
+                            'disciplinary_domain': question_data.get('disciplinary_domain', ''),
+                            'epistemic_level': question_data.get('epistemic_level', ''),
+                            'art_historical': question_data.get('art_historical', []),
+                            'cultural_tradition': question_data.get('cultural_tradition', ''),
                         },
                         input_tokens=int(input_tokens),
                         output_tokens=int(output_tokens),
