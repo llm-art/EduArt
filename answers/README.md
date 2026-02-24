@@ -4,7 +4,7 @@
 
 This directory contains the results of evaluating Large Language Models (LLMs) on Italian art history questions.
 
-- **Creation Date**: 2026-02-22 15:14:59
+- **Creation Date**: 2026-02-24 12:33:28
 - **Version**: 0.3
 - **Total Exercises**: 860
 - **Total Questions**: 860
@@ -40,20 +40,20 @@ answers/
 
 ## Question Types Distribution
 
-- **multiple_choice_radio**: 370 questions
-- **multiple_choice_check**: 116 questions
-- **true_false**: 72 questions
-- **completion_closed**: 70 questions
-- **select_errors**: 48 questions
 - **positioning**: 108 questions
+- **true_false**: 72 questions
+- **select_errors**: 48 questions
+- **multiple_choice_check**: 116 questions
 - **completion_open**: 76 questions
+- **multiple_choice_radio**: 370 questions
+- **completion_closed**: 70 questions
 
 ## Model Performance Summary
 
 | Model | Accuracy | Correct/Total | Input Tokens | Output Tokens | Actual Cost |
 |-------|----------|---------------|--------------|---------------|-------------|
 | google/gemini-3-flash-preview | 73.4% | 608/860 | 1,121,319 | 1,196,610 | $4.1505 |
-| google/gemini-3-pro-preview | 92.8% | 235/253 | 424,722 | 277,089 | $4.1745 |
+| google/gemini-3-pro-preview | 65.5% | 159/241 | 283,245 | 548,612 | $7.1498 |
 | harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0 | 65.5% | 564/860 | 1,084,355 | 83,907 | $4.5117 |
 | harvard/us.mistral.pixtral-large-2502-v1:0 | 35.6% | 313/860 | 796,928 | 99,169 | $2.1889 |
 | openai/gpt-4.1-2025-04-14 | 63.9% | 562/860 | 917,966 | 55,484 | $2.2798 |
@@ -118,53 +118,50 @@ answers/
 
 | Question Type | Questions | With Images | Correct | Accuracy | Precision | Recall | F1 |
 |---------------|-----------|-------------|---------|----------|-----------|--------|----|
-| completion_closed | 5 | 3 | 4 | 80.0% | 0.800 | 0.800 | 0.800 |
-| completion_open | 5 | 1 | 1 | 20.0% | 0.333 | 0.333 | 0.333 |
-| multiple_choice_check | 13 | 12 | 11 | 84.6% | 0.885 | 0.821 | 0.846 |
-| multiple_choice_radio | 213 | 209 | 211 | 99.1% | 0.991 | 0.991 | 0.991 |
-| positioning | 8 | 0 | 8 | 100.0% | 1.000 | 1.000 | 1.000 |
-| select_errors | 4 | 0 | 0 | 0.0% | - | - | - |
-| true_false | 5 | 4 | 0 | 0.0% | 0.320 | 0.320 | 0.320 |
+| completion_closed | 22 | 10 | 17 | 77.3% | 0.886 | 0.886 | 0.886 |
+| completion_open | 35 | 5 | 15 | 42.9% | 0.750 | 0.750 | 0.750 |
+| multiple_choice_check | 43 | 35 | 39 | 90.7% | 0.932 | 0.884 | 0.900 |
+| multiple_choice_radio | 52 | 19 | 49 | 94.2% | 0.942 | 0.942 | 0.942 |
+| positioning | 45 | 1 | 37 | 82.2% | 0.856 | 0.856 | 0.856 |
+| select_errors | 15 | 6 | 0 | 0.0% | - | - | - |
+| true_false | 29 | 8 | 2 | 6.9% | 0.290 | 0.290 | 0.290 |
 
 **By Disciplinary Domain**
 
 | Disciplinary Domain | Questions | Correct | Accuracy | Precision | Recall | F1 |
 |---------------------|-----------|---------|----------|-----------|--------|----|
-| architectural_history | 55 | 54 | 98.2% | 0.982 | 0.982 | 0.982 |
-| art_history | 198 | 181 | 91.4% | 0.934 | 0.930 | 0.932 |
+| architectural_history | 53 | 39 | 73.6% | 0.780 | 0.780 | 0.780 |
+| art_history | 188 | 120 | 63.8% | 0.747 | 0.735 | 0.739 |
 
 **By Language**
 
 | Language | Questions | Correct | Accuracy | Precision | Recall | F1 |
 |----------|-----------|---------|----------|-----------|--------|----|
-| en | 203 | 203 | 100.0% | 1.000 | 1.000 | 1.000 |
-| it | 50 | 32 | 64.0% | 0.710 | 0.693 | 0.700 |
+| it | 241 | 159 | 66.0% | 0.754 | 0.745 | 0.748 |
 
 **By Epistemic Level**
 
 | Epistemic Level | Questions | Correct | Accuracy | Precision | Recall | F1 |
 |-----------------|-----------|---------|----------|-----------|--------|----|
-| contextual_knowledge | 66 | 57 | 86.4% | 0.914 | 0.906 | 0.909 |
-| factual_identification | 173 | 166 | 96.0% | 0.963 | 0.961 | 0.962 |
-| interpretive_reasoning | 14 | 12 | 85.7% | 0.857 | 0.857 | 0.857 |
+| contextual_knowledge | 106 | 71 | 67.0% | 0.762 | 0.741 | 0.749 |
+| factual_identification | 127 | 83 | 65.4% | 0.751 | 0.751 | 0.751 |
+| interpretive_reasoning | 8 | 5 | 62.5% | 0.698 | 0.708 | 0.699 |
 
 **By Cultural Tradition**
 
 | Cultural Tradition | Questions | Correct | Accuracy | Precision | Recall | F1 |
 |--------------------|-----------|---------|----------|-----------|--------|----|
-| eastern | 1 | 1 | 100.0% | 1.000 | 1.000 | 1.000 |
-| middle_east | 23 | 23 | 100.0% | 1.000 | 1.000 | 1.000 |
-| western | 229 | 211 | 92.1% | 0.939 | 0.935 | 0.937 |
+| western | 241 | 159 | 66.0% | 0.754 | 0.745 | 0.748 |
 
 **By Art Historical Category**
 
 | Art Historical | Questions | Correct | Accuracy | Precision | Recall | F1 |
 |----------------|-----------|---------|----------|-----------|--------|----|
-| authorship | 78 | 62 | 79.5% | 0.843 | 0.832 | 0.837 |
-| materials_and_techniques | 53 | 47 | 88.7% | 0.925 | 0.925 | 0.925 |
-| object_and_work_type | 82 | 73 | 89.0% | 0.925 | 0.925 | 0.925 |
-| style_and_period | 114 | 96 | 84.2% | 0.876 | 0.868 | 0.871 |
-| subject_matter_and_iconography | 98 | 84 | 85.7% | 0.890 | 0.883 | 0.885 |
+| authorship | 179 | 115 | 64.2% | 0.729 | 0.721 | 0.723 |
+| materials_and_techniques | 56 | 39 | 69.6% | 0.781 | 0.769 | 0.774 |
+| object_and_work_type | 111 | 71 | 64.0% | 0.736 | 0.732 | 0.733 |
+| style_and_period | 186 | 122 | 65.6% | 0.753 | 0.741 | 0.745 |
+| subject_matter_and_iconography | 128 | 78 | 60.9% | 0.717 | 0.705 | 0.708 |
 
 ### harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0
 
