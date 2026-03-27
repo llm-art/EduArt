@@ -8,9 +8,9 @@ Each question type uses a specific metric depending on the task:
 
 - **Single-choice questions** → Exact Match (binary, cleanest metric).
 - **Multi-choice and error detection** → F1 score (balances precision and recall).
-- **True/False** → evaluated per statement (not per item) to avoid bias from longer questions.
+- **True/False** → evaluated per statement, e.g., one item has 4 to 6 statements.
 - **Positioning and completion tasks** → accuracy per element/blank.
-- **Open-text completion** is stricter (exact matching), so results should be interpreted with caution.
+- **Open-text completion** exact matching.
 
 ## Leaderboard (Macro-Averaged Score)
 
