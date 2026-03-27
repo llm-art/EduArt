@@ -2,15 +2,33 @@
 
 import os
 import json
+import threading
+import time
+import logging
 import requests
 from typing import Optional
 from pathlib import Path
 from .base import LLMProvider
 from ..core.exceptions import ProcessingError
 
+logger = logging.getLogger(__name__)
+
+# HTTP status codes worth retrying
+_RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+
+# Models with low rate limits — enforce minimum delay between requests (seconds)
+_RATE_LIMITED_MODELS = {
+    'us.mistral.pixtral-large-2502-v1:0': 5.0,
+}
+
 
 class HarvardBedrockProvider(LLMProvider):
     """Harvard AIS Bedrock LLM provider using REST API with vision support."""
+
+    # Class-level rate limiter shared across instances
+    _rate_locks: dict = {}
+    _last_request_time: dict = {}
+    _RATE_LIMIT_LOCK = threading.Lock()
     
     # API base URLs
     API_BASE_URLS = {
@@ -20,10 +38,11 @@ class HarvardBedrockProvider(LLMProvider):
     
     def __init__(self, model_name: str, api_key: Optional[str] = None,
                  api_version: str = 'v2', temperature: float = 0.0,
-                 max_tokens: int = 512, timeout: int = 30):
+                 max_tokens: int = 512, timeout: int = 60,
+                 max_retries: int = 3, retry_base_delay: float = 5.0):
         """
         Initialize Harvard Bedrock provider.
-        
+
         Args:
             model_name: Bedrock model name (e.g., 'us.anthropic.claude-opus-4-5-20251101-v1:0')
             api_key: API key (defaults to environment variable HARVARD_API_KEY)
@@ -31,6 +50,8 @@ class HarvardBedrockProvider(LLMProvider):
             temperature: Sampling temperature
             max_tokens: Maximum tokens to generate
             timeout: Request timeout in seconds
+            max_retries: Maximum number of retries on transient errors (504, 429, etc.)
+            retry_base_delay: Base delay in seconds between retries (exponential backoff)
         """
         super().__init__(model_name)
         self.api_key = api_key or os.getenv('HARVARD_API_KEY')
@@ -38,6 +59,8 @@ class HarvardBedrockProvider(LLMProvider):
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
+        self.max_retries = max_retries
+        self.retry_base_delay = retry_base_delay
         
         # Validate API version
         if self.api_version not in self.API_BASE_URLS:
@@ -96,51 +119,107 @@ class HarvardBedrockProvider(LLMProvider):
                 # V1 uses simple base URL
                 url = self.API_BASE_URLS['v1']  # Always use v1 endpoint for these models
             
-            # Make API request
+            # Rate limit for throttled models (e.g. Pixtral)
+            self._wait_for_rate_limit()
+
+            # Make API request with retry
             headers = {
                 'Content-Type': 'application/json',
                 'x-api-key': self.api_key
             }
-            
-            response = requests.post(
-                url,
-                headers=headers,
-                json=payload,
-                timeout=self.timeout
-            )
-            
-            # Check for errors
-            if response.status_code != 200:
-                error_msg = f"API request failed with status {response.status_code}"
+
+            last_error = None
+            for attempt in range(1, self.max_retries + 1):
                 try:
-                    error_data = response.json()
-                    error_msg += f": {error_data.get('message', error_data)}"
-                except:
-                    error_msg += f": {response.text}"
-                raise ProcessingError(error_msg)
-            
-            # Parse response
-            result = response.json()
-            response_text = self._extract_response_text(result)
-            token_metadata = self._extract_token_usage(result)
-            
-            # Clean up Pixtral responses that may have unwanted text before JSON
-            if 'mistral' in self.model_name.lower() and '{{' in response_text:
-                # Find the start of the JSON (look for {{ which is the escaped { in the response)
-                json_start = response_text.find('{{')
-                if json_start > 0:
-                    # Remove everything before the JSON
-                    response_text = response_text[json_start:]
-            
-            return response_text, token_metadata
-            
-        except requests.exceptions.Timeout:
-            raise ProcessingError(f"Request timed out after {self.timeout} seconds")
-        except requests.exceptions.RequestException as e:
-            raise ProcessingError(f"Harvard Bedrock API error: {str(e)}")
+                    response = requests.post(
+                        url,
+                        headers=headers,
+                        json=payload,
+                        timeout=self.timeout
+                    )
+
+                    if response.status_code == 200:
+                        # Success — parse and return
+                        result = response.json()
+                        response_text = self._extract_response_text(result)
+                        token_metadata = self._extract_token_usage(result)
+
+                        # Clean up Pixtral responses that may have unwanted text before JSON
+                        if 'mistral' in self.model_name.lower() and '{{' in response_text:
+                            json_start = response_text.find('{{')
+                            if json_start > 0:
+                                response_text = response_text[json_start:]
+
+                        return response_text, token_metadata
+
+                    # Retryable server error
+                    if response.status_code in _RETRYABLE_STATUS_CODES:
+                        try:
+                            error_data = response.json()
+                            detail = error_data.get('message', error_data)
+                        except Exception:
+                            detail = response.text
+                        last_error = f"API request failed with status {response.status_code}: {detail}"
+                        if attempt < self.max_retries:
+                            delay = self.retry_base_delay * (2 ** (attempt - 1))
+                            logger.warning("Attempt %d/%d failed (%d), retrying in %.0fs…",
+                                           attempt, self.max_retries, response.status_code, delay)
+                            time.sleep(delay)
+                            continue
+
+                    # Non-retryable HTTP error — fail immediately
+                    error_msg = f"API request failed with status {response.status_code}"
+                    try:
+                        error_data = response.json()
+                        error_msg += f": {error_data.get('message', error_data)}"
+                    except Exception:
+                        error_msg += f": {response.text}"
+                    raise ProcessingError(error_msg)
+
+                except requests.exceptions.Timeout:
+                    last_error = f"Request timed out after {self.timeout} seconds"
+                    if attempt < self.max_retries:
+                        delay = self.retry_base_delay * (2 ** (attempt - 1))
+                        logger.warning("Attempt %d/%d timed out, retrying in %.0fs…",
+                                       attempt, self.max_retries, delay)
+                        time.sleep(delay)
+                        continue
+
+                except requests.exceptions.RequestException as e:
+                    last_error = f"Harvard Bedrock API error: {str(e)}"
+                    if attempt < self.max_retries:
+                        delay = self.retry_base_delay * (2 ** (attempt - 1))
+                        logger.warning("Attempt %d/%d network error, retrying in %.0fs…",
+                                       attempt, self.max_retries, delay)
+                        time.sleep(delay)
+                        continue
+
+            # All retries exhausted
+            raise ProcessingError(f"Failed after {self.max_retries} attempts: {last_error}")
+
+        except ProcessingError:
+            raise
         except Exception as e:
             raise ProcessingError(f"Unexpected error: {str(e)}")
     
+    def _wait_for_rate_limit(self):
+        """Enforce per-model rate limiting for throttled models."""
+        min_interval = _RATE_LIMITED_MODELS.get(self.model_name)
+        if min_interval is None:
+            return
+
+        with self._RATE_LIMIT_LOCK:
+            if self.model_name not in self._rate_locks:
+                self._rate_locks[self.model_name] = threading.Lock()
+                self._last_request_time[self.model_name] = 0.0
+
+        with self._rate_locks[self.model_name]:
+            now = time.monotonic()
+            elapsed = now - self._last_request_time[self.model_name]
+            if elapsed < min_interval:
+                time.sleep(min_interval - elapsed)
+            self._last_request_time[self.model_name] = time.monotonic()
+
     def _build_v2_payload(self, prompt: str, system_prompt: Optional[str],
                           images: list) -> dict:
         """Build payload for API v2 (Anthropic Messages API format)."""

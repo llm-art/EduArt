@@ -1,61 +1,41 @@
 {
-  "creation_datetime": "2026-02-24 12:33:28",
+  "creation_datetime": "2026-03-22 17:37:06",
   "version": 0.3,
-  "exercise_count": 860,
-  "question_count": 860,
-  "questions_with_images": 426,
+  "exercise_count": 872,
+  "question_count": 872,
+  "questions_with_images": 385,
   "questions_by_type": {
-    "positioning": 108,
-    "true_false": 72,
-    "select_errors": 48,
-    "multiple_choice_check": 116,
-    "completion_open": 76,
-    "multiple_choice_radio": 370,
-    "completion_closed": 70
+    "multiple_choice_radio": 404,
+    "select_errors": 96,
+    "positioning": 198,
+    "completion_closed": 132,
+    "completion_open": 134,
+    "true_false": 84,
+    "multiple_choice_check": 116
   },
   "models": [
     {
-      "model_name": "openai/gpt-4.1-2025-04-14",
-      "precision": 0.7994025325486,
-      "recall": 0.8061649129064861,
-      "f1": 0.8009125497889539,
-      "exact_match_rate": 0.6392009987515606,
-      "input_cost_per_million_tokens": 2.0,
-      "output_cost_per_million_tokens": 8.0,
+      "model_name": "openai/gpt-5-mini-2025-08-07",
+      "precision": 0.7816090919995201,
+      "recall": 0.7822178241573707,
+      "f1": 0.7800977569869256,
+      "exact_match_rate": 0.6196473551637279,
+      "input_cost_per_million_tokens": 0.25,
+      "output_cost_per_million_tokens": 2.0,
       "ai_calls": [
         {
           "description": "question_answer",
-          "input_tokens": 917966,
-          "output_tokens": 55484,
-          "total_tokens": 973450,
-          "processing_time": 1236.4626314640045
+          "input_tokens": 967675,
+          "output_tokens": 734559,
+          "total_tokens": 1702234,
+          "processing_time": 13694.899210453033
         }
       ],
       "question_type": [
         {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 351,
-          "precision": 0.9486486486486486,
-          "recall": 0.9486486486486486,
-          "f1": 0.9486486486486486,
-          "exact_match_rate": 0.9486486486486486
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 72,
-          "questions_with_images": 28,
-          "correctly_answered_questions": 6,
-          "precision": 0.400462962962963,
-          "recall": 0.400462962962963,
-          "f1": 0.400462962962963,
-          "exact_match_rate": 0.08333333333333333
-        },
-        {
           "type": "select_errors",
           "number_of_questions": 48,
-          "questions_with_images": 13,
+          "questions_with_images": 0,
           "correctly_answered_questions": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -63,113 +43,133 @@
           "exact_match_rate": 0.0
         },
         {
-          "type": "completion_closed",
-          "number_of_questions": 70,
-          "questions_with_images": 21,
-          "correctly_answered_questions": 42,
-          "precision": 0.8513775510204081,
-          "recall": 0.8513775510204081,
-          "f1": 0.8513775510204081,
-          "exact_match_rate": 0.6
-        },
-        {
           "type": "positioning",
           "number_of_questions": 108,
-          "questions_with_images": 9,
-          "correctly_answered_questions": 64,
-          "precision": 0.8469907407407404,
-          "recall": 0.8469907407407404,
-          "f1": 0.8469907407407404,
-          "exact_match_rate": 0.5925925925925926
+          "questions_with_images": 0,
+          "correctly_answered_questions": 65,
+          "precision": 0.8271604938271605,
+          "recall": 0.8271604938271605,
+          "f1": 0.8271604938271605,
+          "exact_match_rate": 0.6018518518518519
         },
         {
           "type": "completion_open",
           "number_of_questions": 76,
-          "questions_with_images": 10,
-          "correctly_answered_questions": 17,
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1": 1.0,
-          "exact_match_rate": 1.0
+          "questions_with_images": 0,
+          "correctly_answered_questions": 9,
+          "precision": 0.9,
+          "recall": 0.9,
+          "f1": 0.9,
+          "exact_match_rate": 0.9
+        },
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 335,
+          "precision": 0.9054054054054054,
+          "recall": 0.9054054054054054,
+          "f1": 0.9054054054054054,
+          "exact_match_rate": 0.9054054054054054
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 72,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 7,
+          "precision": 0.47129629629629627,
+          "recall": 0.47129629629629627,
+          "f1": 0.47129629629629627,
+          "exact_match_rate": 0.09722222222222222
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 35,
+          "precision": 0.8140136054421768,
+          "recall": 0.8140136054421768,
+          "f1": 0.8140136054421768,
+          "exact_match_rate": 0.5
         },
         {
           "type": "multiple_choice_check",
           "number_of_questions": 116,
-          "questions_with_images": 92,
-          "correctly_answered_questions": 82,
-          "precision": 0.7966954022988507,
-          "recall": 0.8433908045977015,
-          "f1": 0.807122331691297,
-          "exact_match_rate": 0.27586206896551724
+          "questions_with_images": 0,
+          "correctly_answered_questions": 83,
+          "precision": 0.830603448275862,
+          "recall": 0.8347701149425288,
+          "f1": 0.820258620689655,
+          "exact_match_rate": 0.35344827586206895
         }
       ],
       "by_language": [
         {
           "language": "en",
           "total_questions": 203,
-          "correctly_answered_questions": 201,
-          "precision": 0.9901477832512315,
-          "recall": 0.9901477832512315,
-          "f1": 0.9901477832512315,
-          "exact_match_rate": 0.9901477832512315
+          "correctly_answered_questions": 200,
+          "precision": 0.9852216748768473,
+          "recall": 0.9852216748768473,
+          "f1": 0.9852216748768473,
+          "exact_match_rate": 0.9852216748768473
         },
         {
           "language": "it",
           "total_questions": 657,
-          "correctly_answered_questions": 361,
-          "precision": 0.7346512183468704,
-          "recall": 0.7437091893613633,
-          "f1": 0.7366738334129634,
-          "exact_match_rate": 0.520066889632107
+          "correctly_answered_questions": 334,
+          "precision": 0.7116710982193216,
+          "recall": 0.7124889211183627,
+          "f1": 0.7096406413665294,
+          "exact_match_rate": 0.494077834179357
         }
       ],
       "by_disciplinary_domain": [
         {
           "disciplinary_domain": "architectural_history",
           "total_questions": 167,
-          "correctly_answered_questions": 120,
-          "precision": 0.8262054507337525,
-          "recall": 0.8318658280922433,
-          "f1": 0.8284965558550463,
-          "exact_match_rate": 0.7358490566037735
+          "correctly_answered_questions": 123,
+          "precision": 0.8256813417190777,
+          "recall": 0.8267295597484278,
+          "f1": 0.8257711889787362,
+          "exact_match_rate": 0.7547169811320755
         },
         {
           "disciplinary_domain": "art_history",
           "total_questions": 693,
-          "correctly_answered_questions": 442,
-          "precision": 0.7927644266429312,
-          "recall": 0.7997997329773033,
-          "f1": 0.7940809968847348,
-          "exact_match_rate": 0.6152647975077882
+          "correctly_answered_questions": 411,
+          "precision": 0.7705736782902135,
+          "recall": 0.7710723659542557,
+          "f1": 0.7686614173228343,
+          "exact_match_rate": 0.5858267716535434
         }
       ],
       "by_epistemic_level": [
         {
           "epistemic_level": "contextual_knowledge",
           "total_questions": 313,
-          "correctly_answered_questions": 162,
-          "precision": 0.7324872448979592,
-          "recall": 0.741832482993197,
-          "f1": 0.7335076530612251,
-          "exact_match_rate": 0.45714285714285713
+          "correctly_answered_questions": 161,
+          "precision": 0.7573988735279059,
+          "recall": 0.7591312510667348,
+          "f1": 0.7545485577743648,
+          "exact_match_rate": 0.4731182795698925
         },
         {
           "epistemic_level": "factual_identification",
           "total_questions": 504,
-          "correctly_answered_questions": 381,
-          "precision": 0.861440972222222,
-          "recall": 0.865052083333333,
-          "f1": 0.8624578373015869,
-          "exact_match_rate": 0.7666666666666667
+          "correctly_answered_questions": 354,
+          "precision": 0.816490857946554,
+          "recall": 0.8150843881856538,
+          "f1": 0.8150341571227646,
+          "exact_match_rate": 0.7236286919831224
         },
         {
           "epistemic_level": "interpretive_reasoning",
           "total_questions": 43,
           "correctly_answered_questions": 19,
-          "precision": 0.5300813008130082,
-          "recall": 0.5560975609756098,
-          "f1": 0.5407084785133566,
-          "exact_match_rate": 0.3902439024390244
+          "precision": 0.543089430894309,
+          "recall": 0.5593495934959349,
+          "f1": 0.5500580720092916,
+          "exact_match_rate": 0.4146341463414634
         }
       ],
       "by_cultural_tradition": [
@@ -194,103 +194,83 @@
         {
           "cultural_tradition": "western",
           "total_questions": 835,
-          "correctly_answered_questions": 537,
-          "precision": 0.7929399852724598,
-          "recall": 0.7999202258222881,
-          "f1": 0.794498649975454,
-          "exact_match_rate": 0.6275773195876289
+          "correctly_answered_questions": 509,
+          "precision": 0.7745092575391663,
+          "recall": 0.7751377794290666,
+          "f1": 0.7729487893987241,
+          "exact_match_rate": 0.6072821846553966
         }
       ],
       "by_art_historical": [
         {
           "art_historical": "authorship",
           "total_questions": 527,
-          "correctly_answered_questions": 284,
-          "precision": 0.7265864765864763,
-          "recall": 0.7370854370854368,
-          "f1": 0.7296208296208293,
-          "exact_match_rate": 0.5135135135135135
+          "correctly_answered_questions": 263,
+          "precision": 0.708082178018887,
+          "recall": 0.7107193088205748,
+          "f1": 0.7072533654812134,
+          "exact_match_rate": 0.4978902953586498
         },
         {
           "art_historical": "materials_and_techniques",
           "total_questions": 219,
-          "correctly_answered_questions": 131,
-          "precision": 0.81043713781809,
-          "recall": 0.8251637692113882,
-          "f1": 0.8145691609977326,
-          "exact_match_rate": 0.5873015873015873
+          "correctly_answered_questions": 130,
+          "precision": 0.817625313283208,
+          "recall": 0.8167481203007517,
+          "f1": 0.8145175438596494,
+          "exact_match_rate": 0.5947368421052631
         },
         {
           "art_historical": "object_and_work_type",
           "total_questions": 357,
-          "correctly_answered_questions": 224,
-          "precision": 0.8081175595238097,
-          "recall": 0.8161383928571428,
-          "f1": 0.81077380952381,
-          "exact_match_rate": 0.64375
+          "correctly_answered_questions": 218,
+          "precision": 0.7859583896650143,
+          "recall": 0.7867470331981372,
+          "f1": 0.7850645936608084,
+          "exact_match_rate": 0.6529968454258676
         },
         {
           "art_historical": "style_and_period",
           "total_questions": 570,
-          "correctly_answered_questions": 308,
-          "precision": 0.7425189920326106,
-          "recall": 0.7507874745228832,
-          "f1": 0.7440105614230128,
-          "exact_match_rate": 0.5155642023346303
+          "correctly_answered_questions": 298,
+          "precision": 0.7341783380018676,
+          "recall": 0.7343090569561159,
+          "f1": 0.7315873015873017,
+          "exact_match_rate": 0.5098039215686274
         },
         {
           "art_historical": "subject_matter_and_iconography",
           "total_questions": 411,
-          "correctly_answered_questions": 228,
-          "precision": 0.7363354037267082,
-          "recall": 0.7501940993788822,
-          "f1": 0.7402562111801246,
-          "exact_match_rate": 0.5108695652173914
+          "correctly_answered_questions": 227,
+          "precision": 0.742167919799499,
+          "recall": 0.7472002374356946,
+          "f1": 0.7416270940509172,
+          "exact_match_rate": 0.5318559556786704
         }
       ]
     },
     {
-      "model_name": "openai/gpt-5.2-2025-12-11",
-      "precision": 0.6147540983606558,
-      "recall": 0.6184110970996219,
-      "f1": 0.6152254848976157,
-      "exact_match_rate": 0.5132408575031526,
-      "input_cost_per_million_tokens": 1.75,
-      "output_cost_per_million_tokens": 14.0,
+      "model_name": "google/gemini-3-pro-preview",
+      "precision": 0.7491553358055213,
+      "recall": 0.742562834775443,
+      "f1": 0.7449879333686505,
+      "exact_match_rate": 0.6872682323856613,
+      "input_cost_per_million_tokens": 2.0,
+      "output_cost_per_million_tokens": 12.0,
       "ai_calls": [
         {
           "description": "question_answer",
-          "input_tokens": 970317,
-          "output_tokens": 52211,
-          "total_tokens": 1022528,
-          "processing_time": 1335.692228794098
+          "input_tokens": 1000670,
+          "output_tokens": 1393526,
+          "total_tokens": 2394196,
+          "processing_time": 31403.74927520752
         }
       ],
       "question_type": [
         {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 326,
-          "precision": 0.8810810810810811,
-          "recall": 0.8810810810810811,
-          "f1": 0.8810810810810811,
-          "exact_match_rate": 0.8810810810810811
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 72,
-          "questions_with_images": 28,
-          "correctly_answered_questions": 9,
-          "precision": 0.4060185185185184,
-          "recall": 0.4060185185185184,
-          "f1": 0.4060185185185184,
-          "exact_match_rate": 0.125
-        },
-        {
           "type": "select_errors",
-          "number_of_questions": 48,
-          "questions_with_images": 13,
+          "number_of_questions": 46,
+          "questions_with_images": 0,
           "correctly_answered_questions": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -298,113 +278,133 @@
           "exact_match_rate": 0.0
         },
         {
-          "type": "completion_closed",
-          "number_of_questions": 70,
-          "questions_with_images": 21,
-          "correctly_answered_questions": 2,
-          "precision": 0.02857142857142857,
-          "recall": 0.02857142857142857,
-          "f1": 0.02857142857142857,
-          "exact_match_rate": 0.02857142857142857
-        },
-        {
           "type": "positioning",
-          "number_of_questions": 108,
-          "questions_with_images": 9,
-          "correctly_answered_questions": 25,
-          "precision": 0.29629629629629634,
-          "recall": 0.29629629629629634,
-          "f1": 0.29629629629629634,
-          "exact_match_rate": 0.23148148148148148
+          "number_of_questions": 103,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 84,
+          "precision": 0.8446601941747572,
+          "recall": 0.8446601941747572,
+          "f1": 0.8446601941747572,
+          "exact_match_rate": 0.8155339805825242
         },
         {
           "type": "completion_open",
-          "number_of_questions": 76,
-          "questions_with_images": 10,
-          "correctly_answered_questions": 9,
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1": 1.0,
-          "exact_match_rate": 1.0
+          "number_of_questions": 74,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 20,
+          "precision": 0.47619047619047616,
+          "recall": 0.47619047619047616,
+          "f1": 0.47619047619047616,
+          "exact_match_rate": 0.47619047619047616
+        },
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 369,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 333,
+          "precision": 0.9024390243902439,
+          "recall": 0.9024390243902439,
+          "f1": 0.9024390243902439,
+          "exact_match_rate": 0.9024390243902439
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 5,
+          "precision": 0.29428571428571426,
+          "recall": 0.29428571428571426,
+          "f1": 0.29428571428571426,
+          "exact_match_rate": 0.07142857142857142
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 69,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 42,
+          "precision": 0.7265700483091785,
+          "recall": 0.7265700483091785,
+          "f1": 0.7265700483091785,
+          "exact_match_rate": 0.6086956521739131
         },
         {
           "type": "multiple_choice_check",
-          "number_of_questions": 116,
-          "questions_with_images": 92,
-          "correctly_answered_questions": 69,
-          "precision": 0.7695402298850575,
-          "recall": 0.7945402298850579,
-          "f1": 0.7727627257799672,
-          "exact_match_rate": 0.3103448275862069
+          "number_of_questions": 110,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 94,
+          "precision": 0.8666666666666666,
+          "recall": 0.8181818181818182,
+          "f1": 0.8360173160173157,
+          "exact_match_rate": 0.6545454545454545
         }
       ],
       "by_language": [
         {
           "language": "en",
           "total_questions": 203,
-          "correctly_answered_questions": 192,
-          "precision": 0.9458128078817734,
-          "recall": 0.9458128078817734,
-          "f1": 0.9458128078817734,
-          "exact_match_rate": 0.9458128078817734
+          "correctly_answered_questions": 203,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
         },
         {
           "language": "it",
-          "total_questions": 657,
-          "correctly_answered_questions": 248,
-          "precision": 0.5008474576271187,
-          "recall": 0.5057627118644067,
-          "f1": 0.5014810330912026,
-          "exact_match_rate": 0.3644067796610169
+          "total_questions": 638,
+          "correctly_answered_questions": 375,
+          "precision": 0.6651265126512651,
+          "recall": 0.6563256325632564,
+          "f1": 0.6595630991670597,
+          "exact_match_rate": 0.5825082508250825
         }
       ],
       "by_disciplinary_domain": [
         {
           "disciplinary_domain": "architectural_history",
-          "total_questions": 167,
-          "correctly_answered_questions": 101,
-          "precision": 0.6721868365180468,
-          "recall": 0.6780254777070066,
-          "f1": 0.6743251440703671,
-          "exact_match_rate": 0.6050955414012739
+          "total_questions": 165,
+          "correctly_answered_questions": 127,
+          "precision": 0.7987577639751553,
+          "recall": 0.7987577639751553,
+          "f1": 0.7987577639751553,
+          "exact_match_rate": 0.7888198757763976
         },
         {
           "disciplinary_domain": "art_history",
-          "total_questions": 693,
-          "correctly_answered_questions": 339,
-          "precision": 0.6005765199161427,
-          "recall": 0.6036949685534594,
-          "f1": 0.6006364180892481,
-          "exact_match_rate": 0.49056603773584906
+          "total_questions": 676,
+          "correctly_answered_questions": 451,
+          "precision": 0.7368312757201646,
+          "recall": 0.7286008230452675,
+          "f1": 0.7316284538506762,
+          "exact_match_rate": 0.6620370370370371
         }
       ],
       "by_epistemic_level": [
         {
           "epistemic_level": "contextual_knowledge",
-          "total_questions": 313,
-          "correctly_answered_questions": 125,
-          "precision": 0.5391666666666667,
-          "recall": 0.5444642857142857,
-          "f1": 0.5389625850340138,
-          "exact_match_rate": 0.35714285714285715
+          "total_questions": 303,
+          "correctly_answered_questions": 193,
+          "precision": 0.7169570267131242,
+          "recall": 0.6995354239256678,
+          "f1": 0.7062054089928654,
+          "exact_match_rate": 0.6097560975609756
         },
         {
           "epistemic_level": "factual_identification",
-          "total_questions": 504,
-          "correctly_answered_questions": 299,
-          "precision": 0.670939265536723,
-          "recall": 0.6725282485875707,
-          "f1": 0.6712469733656174,
-          "exact_match_rate": 0.6207627118644068
+          "total_questions": 495,
+          "correctly_answered_questions": 363,
+          "precision": 0.7872999304105776,
+          "recall": 0.7864300626304802,
+          "f1": 0.786688537627995,
+          "exact_match_rate": 0.7515657620041754
         },
         {
           "epistemic_level": "interpretive_reasoning",
           "total_questions": 43,
-          "correctly_answered_questions": 16,
-          "precision": 0.48414634146341456,
-          "recall": 0.5004065040650406,
-          "f1": 0.4911149825783972,
-          "exact_match_rate": 0.34146341463414637
+          "correctly_answered_questions": 22,
+          "precision": 0.5391472868217053,
+          "recall": 0.5410852713178295,
+          "f1": 0.539313399778516,
+          "exact_match_rate": 0.4883720930232558
         }
       ],
       "by_cultural_tradition": [
@@ -428,59 +428,59 @@
         },
         {
           "cultural_tradition": "western",
-          "total_questions": 835,
-          "correctly_answered_questions": 415,
-          "precision": 0.6022135416666666,
-          "recall": 0.6059895833333335,
-          "f1": 0.6027002728174601,
-          "exact_match_rate": 0.4973958333333333
+          "total_questions": 816,
+          "correctly_answered_questions": 553,
+          "precision": 0.7411564625850342,
+          "recall": 0.734353741496599,
+          "f1": 0.7368561710398448,
+          "exact_match_rate": 0.6772959183673469
         }
       ],
       "by_art_historical": [
         {
           "art_historical": "authorship",
-          "total_questions": 527,
-          "correctly_answered_questions": 194,
-          "precision": 0.48833685694150797,
-          "recall": 0.49482029598308647,
-          "f1": 0.48951978254303846,
-          "exact_match_rate": 0.3488372093023256
+          "total_questions": 510,
+          "correctly_answered_questions": 300,
+          "precision": 0.6610425240054869,
+          "recall": 0.6555555555555556,
+          "f1": 0.6573976092494612,
+          "exact_match_rate": 0.588477366255144
         },
         {
           "art_historical": "materials_and_techniques",
-          "total_questions": 219,
-          "correctly_answered_questions": 91,
-          "precision": 0.5679012345679012,
-          "recall": 0.5705467372134039,
-          "f1": 0.5676492819349963,
-          "exact_match_rate": 0.43915343915343913
+          "total_questions": 214,
+          "correctly_answered_questions": 148,
+          "precision": 0.7635313531353135,
+          "recall": 0.7503300330033005,
+          "f1": 0.7556105610561056,
+          "exact_match_rate": 0.693069306930693
         },
         {
           "art_historical": "object_and_work_type",
-          "total_questions": 357,
-          "correctly_answered_questions": 166,
-          "precision": 0.5965498938428874,
-          "recall": 0.6018577494692143,
-          "f1": 0.5977782832878374,
-          "exact_match_rate": 0.49044585987261147
+          "total_questions": 348,
+          "correctly_answered_questions": 236,
+          "precision": 0.7378419452887538,
+          "recall": 0.7355623100303951,
+          "f1": 0.7363438992618324,
+          "exact_match_rate": 0.7051671732522796
         },
         {
           "art_historical": "style_and_period",
-          "total_questions": 570,
-          "correctly_answered_questions": 226,
-          "precision": 0.5296332678454484,
-          "recall": 0.5332023575638504,
-          "f1": 0.5294555150154364,
-          "exact_match_rate": 0.3850687622789784
+          "total_questions": 552,
+          "correctly_answered_questions": 340,
+          "precision": 0.6960559796437661,
+          "recall": 0.6858778625954198,
+          "f1": 0.6896219556524903,
+          "exact_match_rate": 0.6068702290076335
         },
         {
           "art_historical": "subject_matter_and_iconography",
-          "total_questions": 411,
-          "correctly_answered_questions": 168,
-          "precision": 0.5575506445672191,
-          "recall": 0.5632596685082871,
-          "f1": 0.5580833991054989,
-          "exact_match_rate": 0.39226519337016574
+          "total_questions": 399,
+          "correctly_answered_questions": 238,
+          "precision": 0.6746201966041109,
+          "recall": 0.6679177837354782,
+          "f1": 0.6701391548576537,
+          "exact_match_rate": 0.6005361930294906
         }
       ]
     },
@@ -503,29 +503,9 @@
       ],
       "question_type": [
         {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 357,
-          "precision": 0.9648648648648649,
-          "recall": 0.9648648648648649,
-          "f1": 0.9648648648648649,
-          "exact_match_rate": 0.9648648648648649
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 72,
-          "questions_with_images": 28,
-          "correctly_answered_questions": 9,
-          "precision": 0.4023148148148148,
-          "recall": 0.4023148148148148,
-          "f1": 0.4023148148148148,
-          "exact_match_rate": 0.125
-        },
-        {
           "type": "select_errors",
           "number_of_questions": 48,
-          "questions_with_images": 13,
+          "questions_with_images": 0,
           "correctly_answered_questions": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -533,19 +513,9 @@
           "exact_match_rate": 0.0
         },
         {
-          "type": "completion_closed",
-          "number_of_questions": 70,
-          "questions_with_images": 21,
-          "correctly_answered_questions": 50,
-          "precision": 0.844642857142857,
-          "recall": 0.844642857142857,
-          "f1": 0.844642857142857,
-          "exact_match_rate": 0.7142857142857143
-        },
-        {
           "type": "positioning",
           "number_of_questions": 108,
-          "questions_with_images": 9,
+          "questions_with_images": 0,
           "correctly_answered_questions": 76,
           "precision": 0.7631172839506172,
           "recall": 0.7631172839506172,
@@ -555,7 +525,7 @@
         {
           "type": "completion_open",
           "number_of_questions": 76,
-          "questions_with_images": 10,
+          "questions_with_images": 0,
           "correctly_answered_questions": 11,
           "precision": 0.6111111111111112,
           "recall": 0.6111111111111112,
@@ -563,9 +533,39 @@
           "exact_match_rate": 0.6111111111111112
         },
         {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 357,
+          "precision": 0.9648648648648649,
+          "recall": 0.9648648648648649,
+          "f1": 0.9648648648648649,
+          "exact_match_rate": 0.9648648648648649
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 72,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 9,
+          "precision": 0.4023148148148148,
+          "recall": 0.4023148148148148,
+          "f1": 0.4023148148148148,
+          "exact_match_rate": 0.125
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 50,
+          "precision": 0.844642857142857,
+          "recall": 0.844642857142857,
+          "f1": 0.844642857142857,
+          "exact_match_rate": 0.7142857142857143
+        },
+        {
           "type": "multiple_choice_check",
           "number_of_questions": 116,
-          "questions_with_images": 92,
+          "questions_with_images": 0,
           "correctly_answered_questions": 105,
           "precision": 0.9367816091954024,
           "recall": 0.9511494252873564,
@@ -720,6 +720,241 @@
       ]
     },
     {
+      "model_name": "openai/gpt-4.1-2025-04-14",
+      "precision": 0.7994025325486,
+      "recall": 0.8061649129064861,
+      "f1": 0.8009125497889539,
+      "exact_match_rate": 0.6392009987515606,
+      "input_cost_per_million_tokens": 2.0,
+      "output_cost_per_million_tokens": 8.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 917966,
+          "output_tokens": 55484,
+          "total_tokens": 973450,
+          "processing_time": 1236.4626314640045
+        }
+      ],
+      "question_type": [
+        {
+          "type": "select_errors",
+          "number_of_questions": 48,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "exact_match_rate": 0.0
+        },
+        {
+          "type": "positioning",
+          "number_of_questions": 108,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 64,
+          "precision": 0.8469907407407404,
+          "recall": 0.8469907407407404,
+          "f1": 0.8469907407407404,
+          "exact_match_rate": 0.5925925925925926
+        },
+        {
+          "type": "completion_open",
+          "number_of_questions": 76,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 17,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
+        },
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 351,
+          "precision": 0.9486486486486486,
+          "recall": 0.9486486486486486,
+          "f1": 0.9486486486486486,
+          "exact_match_rate": 0.9486486486486486
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 72,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 6,
+          "precision": 0.400462962962963,
+          "recall": 0.400462962962963,
+          "f1": 0.400462962962963,
+          "exact_match_rate": 0.08333333333333333
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 42,
+          "precision": 0.8513775510204081,
+          "recall": 0.8513775510204081,
+          "f1": 0.8513775510204081,
+          "exact_match_rate": 0.6
+        },
+        {
+          "type": "multiple_choice_check",
+          "number_of_questions": 116,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 82,
+          "precision": 0.7966954022988507,
+          "recall": 0.8433908045977015,
+          "f1": 0.807122331691297,
+          "exact_match_rate": 0.27586206896551724
+        }
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "total_questions": 203,
+          "correctly_answered_questions": 201,
+          "precision": 0.9901477832512315,
+          "recall": 0.9901477832512315,
+          "f1": 0.9901477832512315,
+          "exact_match_rate": 0.9901477832512315
+        },
+        {
+          "language": "it",
+          "total_questions": 657,
+          "correctly_answered_questions": 361,
+          "precision": 0.7346512183468704,
+          "recall": 0.7437091893613633,
+          "f1": 0.7366738334129634,
+          "exact_match_rate": 0.520066889632107
+        }
+      ],
+      "by_disciplinary_domain": [
+        {
+          "disciplinary_domain": "architectural_history",
+          "total_questions": 167,
+          "correctly_answered_questions": 120,
+          "precision": 0.8262054507337525,
+          "recall": 0.8318658280922433,
+          "f1": 0.8284965558550463,
+          "exact_match_rate": 0.7358490566037735
+        },
+        {
+          "disciplinary_domain": "art_history",
+          "total_questions": 693,
+          "correctly_answered_questions": 442,
+          "precision": 0.7927644266429312,
+          "recall": 0.7997997329773033,
+          "f1": 0.7940809968847348,
+          "exact_match_rate": 0.6152647975077882
+        }
+      ],
+      "by_epistemic_level": [
+        {
+          "epistemic_level": "contextual_knowledge",
+          "total_questions": 313,
+          "correctly_answered_questions": 162,
+          "precision": 0.7324872448979592,
+          "recall": 0.741832482993197,
+          "f1": 0.7335076530612251,
+          "exact_match_rate": 0.45714285714285713
+        },
+        {
+          "epistemic_level": "factual_identification",
+          "total_questions": 504,
+          "correctly_answered_questions": 381,
+          "precision": 0.861440972222222,
+          "recall": 0.865052083333333,
+          "f1": 0.8624578373015869,
+          "exact_match_rate": 0.7666666666666667
+        },
+        {
+          "epistemic_level": "interpretive_reasoning",
+          "total_questions": 43,
+          "correctly_answered_questions": 19,
+          "precision": 0.5300813008130082,
+          "recall": 0.5560975609756098,
+          "f1": 0.5407084785133566,
+          "exact_match_rate": 0.3902439024390244
+        }
+      ],
+      "by_cultural_tradition": [
+        {
+          "cultural_tradition": "eastern",
+          "total_questions": 2,
+          "correctly_answered_questions": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
+        },
+        {
+          "cultural_tradition": "middle_east",
+          "total_questions": 23,
+          "correctly_answered_questions": 23,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
+        },
+        {
+          "cultural_tradition": "western",
+          "total_questions": 835,
+          "correctly_answered_questions": 537,
+          "precision": 0.7929399852724598,
+          "recall": 0.7999202258222881,
+          "f1": 0.794498649975454,
+          "exact_match_rate": 0.6275773195876289
+        }
+      ],
+      "by_art_historical": [
+        {
+          "art_historical": "authorship",
+          "total_questions": 527,
+          "correctly_answered_questions": 284,
+          "precision": 0.7265864765864763,
+          "recall": 0.7370854370854368,
+          "f1": 0.7296208296208293,
+          "exact_match_rate": 0.5135135135135135
+        },
+        {
+          "art_historical": "materials_and_techniques",
+          "total_questions": 219,
+          "correctly_answered_questions": 131,
+          "precision": 0.81043713781809,
+          "recall": 0.8251637692113882,
+          "f1": 0.8145691609977326,
+          "exact_match_rate": 0.5873015873015873
+        },
+        {
+          "art_historical": "object_and_work_type",
+          "total_questions": 357,
+          "correctly_answered_questions": 224,
+          "precision": 0.8081175595238097,
+          "recall": 0.8161383928571428,
+          "f1": 0.81077380952381,
+          "exact_match_rate": 0.64375
+        },
+        {
+          "art_historical": "style_and_period",
+          "total_questions": 570,
+          "correctly_answered_questions": 308,
+          "precision": 0.7425189920326106,
+          "recall": 0.7507874745228832,
+          "f1": 0.7440105614230128,
+          "exact_match_rate": 0.5155642023346303
+        },
+        {
+          "art_historical": "subject_matter_and_iconography",
+          "total_questions": 411,
+          "correctly_answered_questions": 228,
+          "precision": 0.7363354037267082,
+          "recall": 0.7501940993788822,
+          "f1": 0.7402562111801246,
+          "exact_match_rate": 0.5108695652173914
+        }
+      ]
+    },
+    {
       "model_name": "harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
       "precision": 0.8065199856605123,
       "recall": 0.8081929258529005,
@@ -738,29 +973,9 @@
       ],
       "question_type": [
         {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 345,
-          "precision": 0.9324324324324325,
-          "recall": 0.9324324324324325,
-          "f1": 0.9324324324324325,
-          "exact_match_rate": 0.9324324324324325
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 72,
-          "questions_with_images": 28,
-          "correctly_answered_questions": 8,
-          "precision": 0.47106481481481466,
-          "recall": 0.47106481481481466,
-          "f1": 0.47106481481481466,
-          "exact_match_rate": 0.1111111111111111
-        },
-        {
           "type": "select_errors",
           "number_of_questions": 48,
-          "questions_with_images": 13,
+          "questions_with_images": 0,
           "correctly_answered_questions": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -768,19 +983,9 @@
           "exact_match_rate": 0.0
         },
         {
-          "type": "completion_closed",
-          "number_of_questions": 70,
-          "questions_with_images": 21,
-          "correctly_answered_questions": 40,
-          "precision": 0.8642346938775509,
-          "recall": 0.8642346938775509,
-          "f1": 0.8642346938775509,
-          "exact_match_rate": 0.5714285714285714
-        },
-        {
           "type": "positioning",
           "number_of_questions": 108,
-          "questions_with_images": 9,
+          "questions_with_images": 0,
           "correctly_answered_questions": 79,
           "precision": 0.8677469135802468,
           "recall": 0.8677469135802468,
@@ -790,7 +995,7 @@
         {
           "type": "completion_open",
           "number_of_questions": 76,
-          "questions_with_images": 10,
+          "questions_with_images": 0,
           "correctly_answered_questions": 13,
           "precision": 1.0,
           "recall": 1.0,
@@ -798,9 +1003,39 @@
           "exact_match_rate": 1.0
         },
         {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 345,
+          "precision": 0.9324324324324325,
+          "recall": 0.9324324324324325,
+          "f1": 0.9324324324324325,
+          "exact_match_rate": 0.9324324324324325
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 72,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 8,
+          "precision": 0.47106481481481466,
+          "recall": 0.47106481481481466,
+          "f1": 0.47106481481481466,
+          "exact_match_rate": 0.1111111111111111
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 40,
+          "precision": 0.8642346938775509,
+          "recall": 0.8642346938775509,
+          "f1": 0.8642346938775509,
+          "exact_match_rate": 0.5714285714285714
+        },
+        {
           "type": "multiple_choice_check",
           "number_of_questions": 116,
-          "questions_with_images": 92,
+          "questions_with_images": 0,
           "correctly_answered_questions": 79,
           "precision": 0.8333333333333335,
           "recall": 0.8448275862068968,
@@ -909,29 +1144,9 @@
       ],
       "question_type": [
         {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 218,
-          "precision": 0.5891891891891892,
-          "recall": 0.5891891891891892,
-          "f1": 0.5891891891891892,
-          "exact_match_rate": 0.5891891891891892
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 72,
-          "questions_with_images": 28,
-          "correctly_answered_questions": 5,
-          "precision": 0.3912037037037037,
-          "recall": 0.3912037037037037,
-          "f1": 0.3912037037037037,
-          "exact_match_rate": 0.06944444444444445
-        },
-        {
           "type": "select_errors",
           "number_of_questions": 48,
-          "questions_with_images": 13,
+          "questions_with_images": 0,
           "correctly_answered_questions": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -939,19 +1154,9 @@
           "exact_match_rate": 0.0
         },
         {
-          "type": "completion_closed",
-          "number_of_questions": 70,
-          "questions_with_images": 21,
-          "correctly_answered_questions": 11,
-          "precision": 0.2747448979591837,
-          "recall": 0.2747448979591837,
-          "f1": 0.2747448979591837,
-          "exact_match_rate": 0.15714285714285714
-        },
-        {
           "type": "positioning",
           "number_of_questions": 108,
-          "questions_with_images": 9,
+          "questions_with_images": 0,
           "correctly_answered_questions": 30,
           "precision": 0.7595348324514989,
           "recall": 0.7595348324514989,
@@ -961,7 +1166,7 @@
         {
           "type": "completion_open",
           "number_of_questions": 76,
-          "questions_with_images": 10,
+          "questions_with_images": 0,
           "correctly_answered_questions": 9,
           "precision": 0.9,
           "recall": 0.9,
@@ -969,9 +1174,39 @@
           "exact_match_rate": 0.9
         },
         {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 218,
+          "precision": 0.5891891891891892,
+          "recall": 0.5891891891891892,
+          "f1": 0.5891891891891892,
+          "exact_match_rate": 0.5891891891891892
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 72,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 5,
+          "precision": 0.3912037037037037,
+          "recall": 0.3912037037037037,
+          "f1": 0.3912037037037037,
+          "exact_match_rate": 0.06944444444444445
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 11,
+          "precision": 0.2747448979591837,
+          "recall": 0.2747448979591837,
+          "f1": 0.2747448979591837,
+          "exact_match_rate": 0.15714285714285714
+        },
+        {
           "type": "multiple_choice_check",
           "number_of_questions": 116,
-          "questions_with_images": 92,
+          "questions_with_images": 0,
           "correctly_answered_questions": 40,
           "precision": 0.613146551724138,
           "recall": 0.688218390804598,
@@ -1126,369 +1361,295 @@
       ]
     },
     {
-      "model_name": "google/gemini-3-pro-preview",
-      "precision": 0.7543510324483776,
-      "recall": 0.7451327433628318,
-      "f1": 0.7482511588706281,
-      "exact_match_rate": 0.6548672566371682,
-      "input_cost_per_million_tokens": 2.0,
-      "output_cost_per_million_tokens": 12.0,
+      "model_name": "google/gemini-3.1-flash-lite-preview",
+      "precision": 0.6256398252184767,
+      "recall": 0.6256398252184767,
+      "f1": 0.6256398252184767,
+      "exact_match_rate": 0.5861423220973783,
+      "input_cost_per_million_tokens": 0,
+      "output_cost_per_million_tokens": 0,
       "ai_calls": [
         {
           "description": "question_answer",
-          "input_tokens": 283245,
-          "output_tokens": 548612,
-          "total_tokens": 831857,
-          "processing_time": 5660.384491205215
+          "input_tokens": 796925,
+          "output_tokens": 107438,
+          "total_tokens": 904363,
+          "processing_time": 1085.9823770523071
         }
       ],
       "question_type": [
         {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 52,
-          "questions_with_images": 19,
-          "correctly_answered_questions": 49,
-          "precision": 0.9423076923076923,
-          "recall": 0.9423076923076923,
-          "f1": 0.9423076923076923,
-          "exact_match_rate": 0.9423076923076923
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 29,
-          "questions_with_images": 8,
-          "correctly_answered_questions": 2,
-          "precision": 0.2896551724137931,
-          "recall": 0.2896551724137931,
-          "f1": 0.2896551724137931,
-          "exact_match_rate": 0.06896551724137931
-        },
-        {
           "type": "select_errors",
-          "number_of_questions": 15,
-          "questions_with_images": 6,
+          "number_of_questions": 49,
+          "questions_with_images": 14,
           "correctly_answered_questions": 0,
           "precision": 0.0,
           "recall": 0.0,
           "f1": 0.0,
           "exact_match_rate": 0.0
-        },
-        {
-          "type": "completion_closed",
-          "number_of_questions": 22,
-          "questions_with_images": 10,
-          "correctly_answered_questions": 17,
-          "precision": 0.8863636363636364,
-          "recall": 0.8863636363636364,
-          "f1": 0.8863636363636364,
-          "exact_match_rate": 0.7727272727272727
-        },
-        {
-          "type": "positioning",
-          "number_of_questions": 45,
-          "questions_with_images": 1,
-          "correctly_answered_questions": 37,
-          "precision": 0.8555555555555555,
-          "recall": 0.8555555555555555,
-          "f1": 0.8555555555555555,
-          "exact_match_rate": 0.8222222222222222
-        },
-        {
-          "type": "completion_open",
-          "number_of_questions": 35,
-          "questions_with_images": 5,
-          "correctly_answered_questions": 15,
-          "precision": 0.75,
-          "recall": 0.75,
-          "f1": 0.75,
-          "exact_match_rate": 0.75
-        },
-        {
-          "type": "multiple_choice_check",
-          "number_of_questions": 43,
-          "questions_with_images": 35,
-          "correctly_answered_questions": 39,
-          "precision": 0.932170542635659,
-          "recall": 0.8837209302325582,
-          "f1": 0.900110741971207,
-          "exact_match_rate": 0.6511627906976745
-        }
-      ],
-      "by_language": [
-        {
-          "language": "it",
-          "total_questions": 241,
-          "correctly_answered_questions": 159,
-          "precision": 0.7543510324483776,
-          "recall": 0.7451327433628318,
-          "f1": 0.7482511588706281,
-          "exact_match_rate": 0.6548672566371682
-        }
-      ],
-      "by_disciplinary_domain": [
-        {
-          "disciplinary_domain": "architectural_history",
-          "total_questions": 53,
-          "correctly_answered_questions": 39,
-          "precision": 0.7803921568627452,
-          "recall": 0.7803921568627452,
-          "f1": 0.7803921568627452,
-          "exact_match_rate": 0.7647058823529411
-        },
-        {
-          "disciplinary_domain": "art_history",
-          "total_questions": 188,
-          "correctly_answered_questions": 120,
-          "precision": 0.7467619047619046,
-          "recall": 0.7348571428571429,
-          "f1": 0.7388843537414964,
-          "exact_match_rate": 0.6228571428571429
-        }
-      ],
-      "by_epistemic_level": [
-        {
-          "epistemic_level": "contextual_knowledge",
-          "total_questions": 106,
-          "correctly_answered_questions": 71,
-          "precision": 0.7623762376237624,
-          "recall": 0.7409240924092411,
-          "f1": 0.7486562942008483,
-          "exact_match_rate": 0.6039603960396039
-        },
-        {
-          "epistemic_level": "factual_identification",
-          "total_questions": 127,
-          "correctly_answered_questions": 83,
-          "precision": 0.751282051282051,
-          "recall": 0.751282051282051,
-          "f1": 0.751282051282051,
-          "exact_match_rate": 0.7094017094017094
-        },
-        {
-          "epistemic_level": "interpretive_reasoning",
-          "total_questions": 8,
-          "correctly_answered_questions": 5,
-          "precision": 0.6979166666666666,
-          "recall": 0.7083333333333333,
-          "f1": 0.6988095238095238,
-          "exact_match_rate": 0.5
-        }
-      ],
-      "by_cultural_tradition": [
-        {
-          "cultural_tradition": "western",
-          "total_questions": 241,
-          "correctly_answered_questions": 159,
-          "precision": 0.7543510324483776,
-          "recall": 0.7451327433628318,
-          "f1": 0.7482511588706281,
-          "exact_match_rate": 0.6548672566371682
-        }
-      ],
-      "by_art_historical": [
-        {
-          "art_historical": "authorship",
-          "total_questions": 179,
-          "correctly_answered_questions": 115,
-          "precision": 0.729265873015873,
-          "recall": 0.7208333333333334,
-          "f1": 0.7234410430839001,
-          "exact_match_rate": 0.6309523809523809
-        },
-        {
-          "art_historical": "materials_and_techniques",
-          "total_questions": 56,
-          "correctly_answered_questions": 39,
-          "precision": 0.781132075471698,
-          "recall": 0.7685534591194969,
-          "f1": 0.7735849056603774,
-          "exact_match_rate": 0.6981132075471698
-        },
-        {
-          "art_historical": "object_and_work_type",
-          "total_questions": 111,
-          "correctly_answered_questions": 71,
-          "precision": 0.7361386138613862,
-          "recall": 0.7320132013201321,
-          "f1": 0.7332390381895333,
-          "exact_match_rate": 0.6732673267326733
-        },
-        {
-          "art_historical": "style_and_period",
-          "total_questions": 186,
-          "correctly_answered_questions": 122,
-          "precision": 0.753238095238095,
-          "recall": 0.7413333333333333,
-          "f1": 0.7453605442176868,
-          "exact_match_rate": 0.6342857142857142
-        },
-        {
-          "art_historical": "subject_matter_and_iconography",
-          "total_questions": 128,
-          "correctly_answered_questions": 78,
-          "precision": 0.7166666666666666,
-          "recall": 0.7045584045584046,
-          "f1": 0.7083028083028081,
-          "exact_match_rate": 0.5897435897435898
-        }
-      ]
-    },
-    {
-      "model_name": "openai/gpt-5-mini-2025-08-07",
-      "precision": 0.7816090919995201,
-      "recall": 0.7822178241573707,
-      "f1": 0.7800977569869256,
-      "exact_match_rate": 0.6196473551637279,
-      "input_cost_per_million_tokens": 0.25,
-      "output_cost_per_million_tokens": 2.0,
-      "ai_calls": [
-        {
-          "description": "question_answer",
-          "input_tokens": 967675,
-          "output_tokens": 734559,
-          "total_tokens": 1702234,
-          "processing_time": 13694.899210453033
-        }
-      ],
-      "question_type": [
-        {
-          "type": "multiple_choice_radio",
-          "number_of_questions": 370,
-          "questions_with_images": 253,
-          "correctly_answered_questions": 335,
-          "precision": 0.9054054054054054,
-          "recall": 0.9054054054054054,
-          "f1": 0.9054054054054054,
-          "exact_match_rate": 0.9054054054054054
-        },
-        {
-          "type": "true_false",
-          "number_of_questions": 72,
-          "questions_with_images": 28,
-          "correctly_answered_questions": 7,
-          "precision": 0.47129629629629627,
-          "recall": 0.47129629629629627,
-          "f1": 0.47129629629629627,
-          "exact_match_rate": 0.09722222222222222
-        },
-        {
-          "type": "select_errors",
-          "number_of_questions": 48,
-          "questions_with_images": 13,
-          "correctly_answered_questions": 0,
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "exact_match_rate": 0.0
-        },
-        {
-          "type": "completion_closed",
-          "number_of_questions": 70,
-          "questions_with_images": 21,
-          "correctly_answered_questions": 35,
-          "precision": 0.8140136054421768,
-          "recall": 0.8140136054421768,
-          "f1": 0.8140136054421768,
-          "exact_match_rate": 0.5
         },
         {
           "type": "positioning",
           "number_of_questions": 108,
           "questions_with_images": 9,
-          "correctly_answered_questions": 65,
-          "precision": 0.8271604938271605,
-          "recall": 0.8271604938271605,
-          "f1": 0.8271604938271605,
-          "exact_match_rate": 0.6018518518518519
+          "correctly_answered_questions": 28,
+          "precision": 0.44645061728395075,
+          "recall": 0.44645061728395075,
+          "f1": 0.44645061728395075,
+          "exact_match_rate": 0.25925925925925924
         },
         {
           "type": "completion_open",
-          "number_of_questions": 76,
+          "number_of_questions": 75,
           "questions_with_images": 10,
           "correctly_answered_questions": 9,
-          "precision": 0.9,
-          "recall": 0.9,
-          "f1": 0.9,
-          "exact_match_rate": 0.9
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
         },
         {
-          "type": "multiple_choice_check",
-          "number_of_questions": 116,
-          "questions_with_images": 92,
-          "correctly_answered_questions": 83,
-          "precision": 0.830603448275862,
-          "recall": 0.8347701149425288,
-          "f1": 0.820258620689655,
-          "exact_match_rate": 0.35344827586206895
+          "type": "multiple_choice_radio",
+          "number_of_questions": 276,
+          "questions_with_images": 207,
+          "correctly_answered_questions": 268,
+          "precision": 0.9710144927536232,
+          "recall": 0.9710144927536232,
+          "f1": 0.9710144927536232,
+          "exact_match_rate": 0.9710144927536232
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 23,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "exact_match_rate": 0.0
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 69,
+          "questions_with_images": 21,
+          "correctly_answered_questions": 8,
+          "precision": 0.1286231884057971,
+          "recall": 0.1286231884057971,
+          "f1": 0.1286231884057971,
+          "exact_match_rate": 0.11594202898550725
         }
       ],
       "by_language": [
         {
           "language": "en",
           "total_questions": 203,
-          "correctly_answered_questions": 200,
-          "precision": 0.9852216748768473,
-          "recall": 0.9852216748768473,
-          "f1": 0.9852216748768473,
-          "exact_match_rate": 0.9852216748768473
+          "correctly_answered_questions": 199,
+          "precision": 0.9802955665024631,
+          "recall": 0.9802955665024631,
+          "f1": 0.9802955665024631,
+          "exact_match_rate": 0.9802955665024631
+        },
+        {
+          "language": "it",
+          "total_questions": 397,
+          "correctly_answered_questions": 114,
+          "precision": 0.40813192346424976,
+          "recall": 0.40813192346424976,
+          "f1": 0.40813192346424976,
+          "exact_match_rate": 0.34441087613293053
+        }
+      ],
+      "by_disciplinary_domain": [
+        {
+          "disciplinary_domain": "unknown",
+          "total_questions": 600,
+          "correctly_answered_questions": 313,
+          "precision": 0.6256398252184767,
+          "recall": 0.6256398252184767,
+          "f1": 0.6256398252184767,
+          "exact_match_rate": 0.5861423220973783
+        }
+      ],
+      "by_epistemic_level": [
+        {
+          "epistemic_level": "unknown",
+          "total_questions": 600,
+          "correctly_answered_questions": 313,
+          "precision": 0.6256398252184767,
+          "recall": 0.6256398252184767,
+          "f1": 0.6256398252184767,
+          "exact_match_rate": 0.5861423220973783
+        }
+      ],
+      "by_cultural_tradition": [
+        {
+          "cultural_tradition": "unknown",
+          "total_questions": 600,
+          "correctly_answered_questions": 313,
+          "precision": 0.6256398252184767,
+          "recall": 0.6256398252184767,
+          "f1": 0.6256398252184767,
+          "exact_match_rate": 0.5861423220973783
+        }
+      ],
+      "by_art_historical": []
+    },
+    {
+      "model_name": "google/gemini-3.1-pro-preview",
+      "precision": 0.8332707551105549,
+      "recall": 0.8216937838965375,
+      "f1": 0.8260385005065857,
+      "exact_match_rate": 0.7546933667083855,
+      "input_cost_per_million_tokens": 0,
+      "output_cost_per_million_tokens": 0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 1121319,
+          "output_tokens": 753200,
+          "total_tokens": 1874519,
+          "processing_time": 8401.0371260643
+        }
+      ],
+      "question_type": [
+        {
+          "type": "select_errors",
+          "number_of_questions": 48,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "exact_match_rate": 0.0
+        },
+        {
+          "type": "positioning",
+          "number_of_questions": 108,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 87,
+          "precision": 0.8209876543209877,
+          "recall": 0.8209876543209877,
+          "f1": 0.8209876543209877,
+          "exact_match_rate": 0.8055555555555556
+        },
+        {
+          "type": "completion_open",
+          "number_of_questions": 76,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 14,
+          "precision": 0.9333333333333333,
+          "recall": 0.9333333333333333,
+          "f1": 0.9333333333333333,
+          "exact_match_rate": 0.9333333333333333
+        },
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 361,
+          "precision": 0.9756756756756757,
+          "recall": 0.9756756756756757,
+          "f1": 0.9756756756756757,
+          "exact_match_rate": 0.9756756756756757
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 72,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 8,
+          "precision": 0.3916666666666667,
+          "recall": 0.3916666666666667,
+          "f1": 0.3916666666666667,
+          "exact_match_rate": 0.1111111111111111
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 55,
+          "precision": 0.8666666666666666,
+          "recall": 0.8666666666666666,
+          "f1": 0.8666666666666666,
+          "exact_match_rate": 0.7857142857142857
+        },
+        {
+          "type": "multiple_choice_check",
+          "number_of_questions": 116,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 109,
+          "precision": 0.976293103448276,
+          "recall": 0.8965517241379312,
+          "f1": 0.9264778325123151,
+          "exact_match_rate": 0.6724137931034483
+        }
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "total_questions": 203,
+          "correctly_answered_questions": 203,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
         },
         {
           "language": "it",
           "total_questions": 657,
-          "correctly_answered_questions": 334,
-          "precision": 0.7116710982193216,
-          "recall": 0.7124889211183627,
-          "f1": 0.7096406413665294,
-          "exact_match_rate": 0.494077834179357
+          "correctly_answered_questions": 431,
+          "precision": 0.7764821029082777,
+          "recall": 0.7609619686800897,
+          "f1": 0.7667865132630238,
+          "exact_match_rate": 0.6711409395973155
         }
       ],
       "by_disciplinary_domain": [
         {
           "disciplinary_domain": "architectural_history",
           "total_questions": 167,
-          "correctly_answered_questions": 123,
-          "precision": 0.8256813417190777,
-          "recall": 0.8267295597484278,
-          "f1": 0.8257711889787362,
-          "exact_match_rate": 0.7547169811320755
+          "correctly_answered_questions": 134,
+          "precision": 0.8397515527950311,
+          "recall": 0.8376811594202899,
+          "f1": 0.8385093167701865,
+          "exact_match_rate": 0.8260869565217391
         },
         {
           "disciplinary_domain": "art_history",
           "total_questions": 693,
-          "correctly_answered_questions": 411,
-          "precision": 0.7705736782902135,
-          "recall": 0.7710723659542557,
-          "f1": 0.7686614173228343,
-          "exact_match_rate": 0.5858267716535434
+          "correctly_answered_questions": 500,
+          "precision": 0.8316353187042843,
+          "recall": 0.817659352142111,
+          "f1": 0.8228914763397527,
+          "exact_match_rate": 0.7366771159874608
         }
       ],
       "by_epistemic_level": [
         {
           "epistemic_level": "contextual_knowledge",
           "total_questions": 313,
-          "correctly_answered_questions": 161,
-          "precision": 0.7573988735279059,
-          "recall": 0.7591312510667348,
-          "f1": 0.7545485577743648,
-          "exact_match_rate": 0.4731182795698925
+          "correctly_answered_questions": 209,
+          "precision": 0.8103942652329745,
+          "recall": 0.7823178016726401,
+          "f1": 0.7928827444956476,
+          "exact_match_rate": 0.6594982078853047
         },
         {
           "epistemic_level": "factual_identification",
           "total_questions": 504,
-          "correctly_answered_questions": 354,
-          "precision": 0.816490857946554,
-          "recall": 0.8150843881856538,
-          "f1": 0.8150341571227646,
-          "exact_match_rate": 0.7236286919831224
+          "correctly_answered_questions": 401,
+          "precision": 0.8647529575504526,
+          "recall": 0.8624913013221991,
+          "f1": 0.8633064916989764,
+          "exact_match_rate": 0.826722338204593
         },
         {
           "epistemic_level": "interpretive_reasoning",
           "total_questions": 43,
-          "correctly_answered_questions": 19,
-          "precision": 0.543089430894309,
-          "recall": 0.5593495934959349,
-          "f1": 0.5500580720092916,
-          "exact_match_rate": 0.4146341463414634
+          "correctly_answered_questions": 24,
+          "precision": 0.6211382113821139,
+          "recall": 0.6130081300813008,
+          "f1": 0.6162601626016261,
+          "exact_match_rate": 0.5609756097560976
         }
       ],
       "by_cultural_tradition": [
@@ -1513,58 +1674,293 @@
         {
           "cultural_tradition": "western",
           "total_questions": 835,
-          "correctly_answered_questions": 509,
-          "precision": 0.7745092575391663,
-          "recall": 0.7751377794290666,
-          "f1": 0.7729487893987241,
-          "exact_match_rate": 0.6072821846553966
+          "correctly_answered_questions": 609,
+          "precision": 0.8278854435831182,
+          "recall": 0.8159345391903534,
+          "f1": 0.8204195890242404,
+          "exact_match_rate": 0.7467700258397932
         }
       ],
       "by_art_historical": [
         {
           "art_historical": "authorship",
           "total_questions": 527,
-          "correctly_answered_questions": 263,
-          "precision": 0.708082178018887,
-          "recall": 0.7107193088205748,
-          "f1": 0.7072533654812134,
-          "exact_match_rate": 0.4978902953586498
+          "correctly_answered_questions": 348,
+          "precision": 0.7839260808926083,
+          "recall": 0.7708507670850768,
+          "f1": 0.7756027097031285,
+          "exact_match_rate": 0.6820083682008368
         },
         {
           "art_historical": "materials_and_techniques",
           "total_questions": 219,
-          "correctly_answered_questions": 130,
-          "precision": 0.817625313283208,
-          "recall": 0.8167481203007517,
-          "f1": 0.8145175438596494,
-          "exact_match_rate": 0.5947368421052631
+          "correctly_answered_questions": 156,
+          "precision": 0.8502617801047119,
+          "recall": 0.8345549738219894,
+          "f1": 0.8403141361256543,
+          "exact_match_rate": 0.7801047120418848
         },
         {
           "art_historical": "object_and_work_type",
           "total_questions": 357,
-          "correctly_answered_questions": 218,
-          "precision": 0.7859583896650143,
-          "recall": 0.7867470331981372,
-          "f1": 0.7850645936608084,
-          "exact_match_rate": 0.6529968454258676
+          "correctly_answered_questions": 250,
+          "precision": 0.8112668743509865,
+          "recall": 0.8068535825545171,
+          "f1": 0.8084853879246402,
+          "exact_match_rate": 0.7601246105919003
         },
         {
           "art_historical": "style_and_period",
           "total_questions": 570,
-          "correctly_answered_questions": 298,
-          "precision": 0.7341783380018676,
-          "recall": 0.7343090569561159,
-          "f1": 0.7315873015873017,
-          "exact_match_rate": 0.5098039215686274
+          "correctly_answered_questions": 375,
+          "precision": 0.7897859922178991,
+          "recall": 0.7724383916990923,
+          "f1": 0.7789327404113402,
+          "exact_match_rate": 0.6712062256809338
         },
         {
           "art_historical": "subject_matter_and_iconography",
           "total_questions": 411,
-          "correctly_answered_questions": 227,
-          "precision": 0.742167919799499,
-          "recall": 0.7472002374356946,
-          "f1": 0.7416270940509172,
-          "exact_match_rate": 0.5318559556786704
+          "correctly_answered_questions": 268,
+          "precision": 0.7825091575091576,
+          "recall": 0.7644230769230768,
+          "f1": 0.771029565672423,
+          "exact_match_rate": 0.6730769230769231
+        }
+      ]
+    },
+    {
+      "model_name": "openai/gpt-5.2-2025-12-11",
+      "precision": 0.6147540983606558,
+      "recall": 0.6184110970996219,
+      "f1": 0.6152254848976157,
+      "exact_match_rate": 0.5132408575031526,
+      "input_cost_per_million_tokens": 1.75,
+      "output_cost_per_million_tokens": 14.0,
+      "ai_calls": [
+        {
+          "description": "question_answer",
+          "input_tokens": 970317,
+          "output_tokens": 52211,
+          "total_tokens": 1022528,
+          "processing_time": 1335.692228794098
+        }
+      ],
+      "question_type": [
+        {
+          "type": "select_errors",
+          "number_of_questions": 48,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "exact_match_rate": 0.0
+        },
+        {
+          "type": "positioning",
+          "number_of_questions": 108,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 25,
+          "precision": 0.29629629629629634,
+          "recall": 0.29629629629629634,
+          "f1": 0.29629629629629634,
+          "exact_match_rate": 0.23148148148148148
+        },
+        {
+          "type": "completion_open",
+          "number_of_questions": 76,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 9,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
+        },
+        {
+          "type": "multiple_choice_radio",
+          "number_of_questions": 370,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 326,
+          "precision": 0.8810810810810811,
+          "recall": 0.8810810810810811,
+          "f1": 0.8810810810810811,
+          "exact_match_rate": 0.8810810810810811
+        },
+        {
+          "type": "true_false",
+          "number_of_questions": 72,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 9,
+          "precision": 0.4060185185185184,
+          "recall": 0.4060185185185184,
+          "f1": 0.4060185185185184,
+          "exact_match_rate": 0.125
+        },
+        {
+          "type": "completion_closed",
+          "number_of_questions": 70,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 2,
+          "precision": 0.02857142857142857,
+          "recall": 0.02857142857142857,
+          "f1": 0.02857142857142857,
+          "exact_match_rate": 0.02857142857142857
+        },
+        {
+          "type": "multiple_choice_check",
+          "number_of_questions": 116,
+          "questions_with_images": 0,
+          "correctly_answered_questions": 69,
+          "precision": 0.7695402298850575,
+          "recall": 0.7945402298850579,
+          "f1": 0.7727627257799672,
+          "exact_match_rate": 0.3103448275862069
+        }
+      ],
+      "by_language": [
+        {
+          "language": "en",
+          "total_questions": 203,
+          "correctly_answered_questions": 192,
+          "precision": 0.9458128078817734,
+          "recall": 0.9458128078817734,
+          "f1": 0.9458128078817734,
+          "exact_match_rate": 0.9458128078817734
+        },
+        {
+          "language": "it",
+          "total_questions": 657,
+          "correctly_answered_questions": 248,
+          "precision": 0.5008474576271187,
+          "recall": 0.5057627118644067,
+          "f1": 0.5014810330912026,
+          "exact_match_rate": 0.3644067796610169
+        }
+      ],
+      "by_disciplinary_domain": [
+        {
+          "disciplinary_domain": "architectural_history",
+          "total_questions": 167,
+          "correctly_answered_questions": 101,
+          "precision": 0.6721868365180468,
+          "recall": 0.6780254777070066,
+          "f1": 0.6743251440703671,
+          "exact_match_rate": 0.6050955414012739
+        },
+        {
+          "disciplinary_domain": "art_history",
+          "total_questions": 693,
+          "correctly_answered_questions": 339,
+          "precision": 0.6005765199161427,
+          "recall": 0.6036949685534594,
+          "f1": 0.6006364180892481,
+          "exact_match_rate": 0.49056603773584906
+        }
+      ],
+      "by_epistemic_level": [
+        {
+          "epistemic_level": "contextual_knowledge",
+          "total_questions": 313,
+          "correctly_answered_questions": 125,
+          "precision": 0.5391666666666667,
+          "recall": 0.5444642857142857,
+          "f1": 0.5389625850340138,
+          "exact_match_rate": 0.35714285714285715
+        },
+        {
+          "epistemic_level": "factual_identification",
+          "total_questions": 504,
+          "correctly_answered_questions": 299,
+          "precision": 0.670939265536723,
+          "recall": 0.6725282485875707,
+          "f1": 0.6712469733656174,
+          "exact_match_rate": 0.6207627118644068
+        },
+        {
+          "epistemic_level": "interpretive_reasoning",
+          "total_questions": 43,
+          "correctly_answered_questions": 16,
+          "precision": 0.48414634146341456,
+          "recall": 0.5004065040650406,
+          "f1": 0.4911149825783972,
+          "exact_match_rate": 0.34146341463414637
+        }
+      ],
+      "by_cultural_tradition": [
+        {
+          "cultural_tradition": "eastern",
+          "total_questions": 2,
+          "correctly_answered_questions": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
+        },
+        {
+          "cultural_tradition": "middle_east",
+          "total_questions": 23,
+          "correctly_answered_questions": 23,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "exact_match_rate": 1.0
+        },
+        {
+          "cultural_tradition": "western",
+          "total_questions": 835,
+          "correctly_answered_questions": 415,
+          "precision": 0.6022135416666666,
+          "recall": 0.6059895833333335,
+          "f1": 0.6027002728174601,
+          "exact_match_rate": 0.4973958333333333
+        }
+      ],
+      "by_art_historical": [
+        {
+          "art_historical": "authorship",
+          "total_questions": 527,
+          "correctly_answered_questions": 194,
+          "precision": 0.48833685694150797,
+          "recall": 0.49482029598308647,
+          "f1": 0.48951978254303846,
+          "exact_match_rate": 0.3488372093023256
+        },
+        {
+          "art_historical": "materials_and_techniques",
+          "total_questions": 219,
+          "correctly_answered_questions": 91,
+          "precision": 0.5679012345679012,
+          "recall": 0.5705467372134039,
+          "f1": 0.5676492819349963,
+          "exact_match_rate": 0.43915343915343913
+        },
+        {
+          "art_historical": "object_and_work_type",
+          "total_questions": 357,
+          "correctly_answered_questions": 166,
+          "precision": 0.5965498938428874,
+          "recall": 0.6018577494692143,
+          "f1": 0.5977782832878374,
+          "exact_match_rate": 0.49044585987261147
+        },
+        {
+          "art_historical": "style_and_period",
+          "total_questions": 570,
+          "correctly_answered_questions": 226,
+          "precision": 0.5296332678454484,
+          "recall": 0.5332023575638504,
+          "f1": 0.5294555150154364,
+          "exact_match_rate": 0.3850687622789784
+        },
+        {
+          "art_historical": "subject_matter_and_iconography",
+          "total_questions": 411,
+          "correctly_answered_questions": 168,
+          "precision": 0.5575506445672191,
+          "recall": 0.5632596685082871,
+          "f1": 0.5580833991054989,
+          "exact_match_rate": 0.39226519337016574
         }
       ]
     }

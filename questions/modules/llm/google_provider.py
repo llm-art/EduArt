@@ -1,6 +1,8 @@
 """Google Gemini LLM provider implementation with vision support."""
 
 import os
+import threading
+import time
 from typing import Optional
 from pathlib import Path
 from .base import LLMProvider
@@ -9,12 +11,19 @@ from ..core.exceptions import ProcessingError
 
 class GoogleProvider(LLMProvider):
     """Google Gemini LLM provider using LangChain."""
-    
+
+    # Class-level rate limiter: min seconds between requests (per model)
+    _rate_locks: dict = {}
+    _last_request_time: dict = {}
+    _RATE_LIMIT_LOCK = threading.Lock()
+    # 25 req/min = 2.4s interval; use 2.5s for safety margin
+    MIN_REQUEST_INTERVAL = 2.5
+
     def __init__(self, model_name: str, api_key: Optional[str] = None,
                  temperature: float = 0.0, max_tokens: int = 2048):
         """
         Initialize Google provider.
-        
+
         Args:
             model_name: Gemini model name
             api_key: API key (defaults to environment variable)
@@ -38,9 +47,9 @@ class GoogleProvider(LLMProvider):
                 model_config = {
                     'model': self.model_name,
                     'temperature': self.temperature,
-                    'google_api_key': self.api_key
+                    'google_api_key': self.api_key,
                 }
-                
+
                 # Handle different model versions
                 if 'gemini-2.5' in self.model_name:
                     # For Gemini 2.5 models, try without max_output_tokens first
@@ -81,7 +90,8 @@ class GoogleProvider(LLMProvider):
         
         try:
             self._initialize_model()
-            
+            self._wait_for_rate_limit()
+
             # Determine which images to use
             images_to_process = []
             if image_paths:
@@ -171,6 +181,27 @@ class GoogleProvider(LLMProvider):
         except Exception as e:
             raise ProcessingError(f"Google API error: {str(e)}")
     
+    # Models with low rate limits (25 req/min)
+    _RATE_LIMITED_MODELS = {"gemini-3.1-pro-preview", "gemini-3-pro-preview"}
+
+    def _wait_for_rate_limit(self):
+        """Enforce per-model rate limiting for quota-restricted models."""
+        if self.model_name not in self._RATE_LIMITED_MODELS:
+            return
+
+        model_key = self.model_name
+        with self._RATE_LIMIT_LOCK:
+            if model_key not in self._rate_locks:
+                self._rate_locks[model_key] = threading.Lock()
+                self._last_request_time[model_key] = 0.0
+
+        with self._rate_locks[model_key]:
+            now = time.monotonic()
+            elapsed = now - self._last_request_time[model_key]
+            if elapsed < self.MIN_REQUEST_INTERVAL:
+                time.sleep(self.MIN_REQUEST_INTERVAL - elapsed)
+            self._last_request_time[model_key] = time.monotonic()
+
     def _encode_image(self, image_path: str) -> str:
         """Encode image to base64 string."""
         import base64

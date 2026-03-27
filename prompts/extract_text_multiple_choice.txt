@@ -1,66 +1,45 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about a multiple_choice question, which can be either:
-- multiple_choice_radio: radio buttons where only ONE answer can be selected
-- multiple_choice_check: checkboxes where MULTIPLE answers can be selected
+This is a multiple_choice question. Determine the subtype:
+- multiple_choice_radio: radio buttons, only ONE correct answer
+- multiple_choice_check: checkboxes, MULTIPLE correct answers
 
-DETECTION LOGIC:
-- If you see text like "Risposta esatta" or "Risposta non data" next to MULTIPLE options, it's multiple_choice_check
-- If you see only ONE option marked as correct with bold letter and description, it's multiple_choice_radio
-- Default to radio if unsure
+DETECTION: if "Risposta esatta"/"Risposta non data" appears next to MULTIPLE options, it is multiple_choice_check. If only ONE option is marked correct, it is multiple_choice_radio. Default to radio if unsure.
 
-EXTRACTION REQUIREMENTS:
-- Extract question + all options with letters (A,B,C,D,E, etc)
-- choices: array with id and text
-- answers: extract all correct answers marked by the indicators above
-
-FOR MULTIPLE_CHOICE_RADIO (single choice):
-- Type should be "multiple_choice_radio"
-- answers contains ONE correct answer with its description
-- Schema:
+SCHEMA:
 {{{{
-  "type": "multiple_choice_radio",
+  "type": "multiple_choice_radio | multiple_choice_check",
   "question_title": "clean question title",
-  "question_text": "full question text",
-  "question_type:" "{{multiple_choice_check|multiple_choice_radio}}" // IF the picture has radio button is a radio, IF it has check button, it s a check
-  "choices": [
-    {{"id": "A", "text": "option A text"}},
-    {{"id": "B", "text": "option B text"}}
-  ],
-  "answers": [{{"id": "A", "description": "explanation text"}}],
-  "language": "it"
-}}}}
-
-FOR MULTIPLE_CHOICE_CHECK (multiple choice):
-- Type should be "multiple_choice_check"
-- answers contains ALL correct answers marked with "Risposta esatta" or "Risposta non data"
-- DO NOT include wrong answers marked with "Risposta sbagliata"
-- Schema:
-{{{{
-  "type": "multiple_choice_check",
-  "question_title": "clean question title",
-  "question_text": "full question text",
+  "instructions": "exercise instruction line (e.g. 'Individua le affermazioni corrette.')",
+  "question_text": "question text or introductory passage (NOT the instruction line)",
   "choices": [
     {{"id": "A", "text": "option A text"}},
     {{"id": "B", "text": "option B text"}}
   ],
   "answers": [
-    {{"id": "A", "description": "explanation text"}},
-    {{"id": "C", "description": "explanation text"}}
+    {{"id": "A", "description": "option A text"}}
   ],
   "language": "it"
 }}}}
 
-STRICT REQUIREMENTS:
-- Return ONLY the JSON object above
-- DO NOT add any other fields beyond those specified
-- DO NOT add comments or explanations
-- Extract ALL multiple choice options with their correct letters
-- Use null for missing data, not empty strings
-- You MUST preserve the original order of choices as they appear in the text, including their letters
-- For multiple_choice_check: Include ONLY answers marked "Risposta esatta" or "Risposta non data", NOT "Risposta sbagliata"
+FIELD SEPARATION:
+- "instructions": the exercise instruction line telling the student what to do (e.g. "Individua le affermazioni corrette riferite all'immagine."). Extract this SEPARATELY.
+- "question_text": the question or introductory passage below the instruction. Do NOT include the instruction line here.
 
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema above based on the type you detect. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+ANSWER EXTRACTION:
+- For radio: one answer whose id and description match the correct choice.
+- For check: include ONLY options marked "Risposta esatta" or "Risposta non data" (these are correct). EXCLUDE options marked "Risposta sbagliata".
+
+CRITICAL — "description" must be the ACTUAL CHOICE TEXT:
+  WRONG: {{"id": "D", "description": "Risposta non data."}}
+  WRONG: {{"id": "D", "description": "Risposta esatta."}}
+  CORRECT: {{"id": "D", "description": "Nel libro sono state analizzate in totale 6 opere di questo soggetto."}}
+The "description" field MUST contain the real text of the choice option, NEVER a platform feedback label.
+
+RULES:
+- Return ONLY the JSON object, no comments or markdown.
+- Preserve the original order and letters of choices.
+- Use null for missing data, not empty strings.
 
 Noisy OCR text:
 {ocr_text}

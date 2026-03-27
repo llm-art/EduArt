@@ -29,7 +29,9 @@ class LLMConfig:
             'gemini-2.5-pro',
             'gemini-2.5-flash-preview-09-2025',
             'gemini-3-pro-preview',
+            'gemini-3.1-pro-preview',
             'gemini-3-flash-preview',
+            'gemini-3.1-flash-lite-preview',
             'gemini-3-pro-image-preview',
         ],
         'anthropic': [
@@ -42,6 +44,7 @@ class LLMConfig:
             'us.anthropic.claude-opus-4-5-20251101-v1:0',
             'us.anthropic.claude-haiku-4-5-20251001-v1:0',
             'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+            'us.anthropic.claude-sonnet-4-6-20260320-v1:0',
             'us.anthropic.claude-sonnet-4-20250514-v1:0',
             'us.anthropic.claude-opus-4-20250514-v1:0',
             'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
@@ -68,11 +71,20 @@ class LLMConfig:
         ]
     }
     
+    # Per-provider experiment settings
+    # Temperature=0 for deterministic providers, temperature=1+seed for stochastic
+    PROVIDER_SETTINGS = {
+        'openai':             {'temperature': 1, 'seed': 42},
+        'google':             {'temperature': 1, 'seed': 42},
+        'anthropic':          {'temperature': 0, 'seed': None},
+        'harvard_anthropic':  {'temperature': 0, 'seed': None},
+        'harvard_openweight': {'temperature': 0, 'seed': None},
+    }
+
     # Processing settings
-    TEMPERATURE = float(os.getenv('TEMPERATURE', '0.0'))
-    MAX_TOKENS = int(os.getenv('MAX_TOKENS', '512'))
+    MAX_TOKENS = int(os.getenv('MAX_TOKENS', '1024'))
     TIMEOUT = int(os.getenv('TIMEOUT', '30'))
-    
+
     # Harvard Bedrock API settings
     HARVARD_API_VERSION = os.getenv('HARVARD_API_VERSION', 'v2')
     
@@ -95,25 +107,48 @@ def create_llm_provider(provider_type: str, model_name: str, **kwargs) -> LLMPro
     Raises:
         ConfigurationError: If provider type is invalid or not available
     """
-    # Set default parameters
+    # Determine provider settings key for Harvard models
+    if provider_type == 'harvard':
+        if model_name.startswith('us.anthropic.') or model_name.startswith('anthropic.'):
+            settings_key = 'harvard_anthropic'
+        else:
+            settings_key = 'harvard_openweight'
+    else:
+        settings_key = provider_type
+
+    provider_settings = LLMConfig.PROVIDER_SETTINGS.get(settings_key, {})
+
+    # Temperature: CLI override > kwargs > per-provider default
+    temp_override = os.getenv('TEMPERATURE_OVERRIDE')
+    if temp_override is not None:
+        default_temp = float(temp_override)
+    else:
+        default_temp = provider_settings.get('temperature', 0)
+
     config = {
-        'temperature': kwargs.get('temperature', LLMConfig.TEMPERATURE),
+        'temperature': kwargs.get('temperature', default_temp),
         'max_tokens': kwargs.get('max_tokens', LLMConfig.MAX_TOKENS),
     }
-    
+
+    # Pass seed if the provider supports it
+    seed = kwargs.get('seed', provider_settings.get('seed'))
+
     if provider_type == 'openai':
         config['timeout'] = kwargs.get('timeout', LLMConfig.TIMEOUT)
-        # Extend timeout for reasoning-heavy GPT-5 model unless caller provided a higher value
+        if seed is not None:
+            config['seed'] = seed
+        # Extend timeout for reasoning-heavy GPT-5 model
         if model_name == "gpt-5-2025-08-07" and config['timeout'] < 120:
             config['timeout'] = 120
         provider = OpenAIProvider(model_name, **config)
     elif provider_type == 'google':
+        # seed not supported by ChatGoogleGenerativeAI — omit to avoid LangChain warning
         provider = GoogleProvider(model_name, **config)
     elif provider_type == 'anthropic':
         config['timeout'] = kwargs.get('timeout', LLMConfig.TIMEOUT)
         provider = AnthropicProvider(model_name, **config)
     elif provider_type == 'harvard':
-        config['timeout'] = kwargs.get('timeout', LLMConfig.TIMEOUT)
+        config['timeout'] = kwargs.get('timeout', max(LLMConfig.TIMEOUT, 60))
         config['api_version'] = kwargs.get('api_version', LLMConfig.HARVARD_API_VERSION)
         provider = HarvardBedrockProvider(model_name, **config)
     else:
@@ -198,31 +233,25 @@ def create_providers_from_config(models_to_test: Optional[List[str]] = None) -> 
     # Final safety check: normalize any remaining models just in case
     selected_models = _normalize_model_specs(selected_models) if selected_models else []
     
-    # Initialize providers
+    # Initialize providers — accept any model name, just route by provider prefix
+    PROVIDER_PREFIXES = {
+        'openai/': 'openai',
+        'google/': 'google',
+        'anthropic/': 'anthropic',
+        'harvard/': 'harvard',
+    }
     for model_spec in selected_models:
         try:
-            if model_spec.startswith('openai/'):
-                model_name = model_spec[7:]  # Remove 'openai/' prefix
-                if model_name in LLMConfig.MODELS['openai']:
-                    provider = create_llm_provider('openai', model_name)
+            matched = False
+            for prefix, provider_type in PROVIDER_PREFIXES.items():
+                if model_spec.startswith(prefix):
+                    model_name = model_spec[len(prefix):]
+                    provider = create_llm_provider(provider_type, model_name)
                     providers.append(provider)
-            elif model_spec.startswith('google/'):
-                model_name = model_spec[7:]  # Remove 'google/' prefix
-                if model_name in LLMConfig.MODELS['google']:
-                    provider = create_llm_provider('google', model_name)
-                    providers.append(provider)
-            elif model_spec.startswith('anthropic/'):
-                model_name = model_spec[10:]  # Remove 'anthropic/' prefix
-                if model_name in LLMConfig.MODELS['anthropic']:
-                    provider = create_llm_provider('anthropic', model_name)
-                    providers.append(provider)
-            elif model_spec.startswith('harvard/'):
-                model_name = model_spec[8:]  # Remove 'harvard/' prefix
-                if model_name in LLMConfig.MODELS['harvard']:
-                    provider = create_llm_provider('harvard', model_name)
-                    providers.append(provider)
-            else:
-                print(f"Warning: Unknown model specification: {model_spec}")
+                    matched = True
+                    break
+            if not matched:
+                print(f"Warning: Unknown provider in model spec: {model_spec}")
         except Exception as e:
             print(f"Warning: Failed to initialize {model_spec}: {e}")
     

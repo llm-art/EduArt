@@ -1,0 +1,256 @@
+Analyze this image of an Italian Art History exam question. First determine the question type, then extract all structured elements into a single JSON object.
+
+STEP 1 — DETERMINE THE TYPE from the screenshot:
+
+- "true_false": statements with Vero/Falso radio buttons arranged in pairs next to each statement
+- "multiple_choice_radio": radio buttons (circles ○), only ONE correct answer
+- "multiple_choice_check": checkboxes (squares □ / ☑), MULTIPLE correct answers possible
+- "completion_closed": fill-in-the-blank text where each blank has exactly TWO clickable alternatives shown as adjacent inline bubbles (the student picks one of two)
+- "completion_open": fill-in-the-blank text where students type free-form answers into input fields (dark inline boxes with typed text)
+- "positioning": drag-and-drop exercise with a WORD BANK of draggable terms displayed ABOVE the text passage (light blue/grey rounded boxes). Students drag terms into numbered blanks [A], [B], etc. The word bank may contain DISTRACTOR terms that are not used.
+- "select_errors": a text passage containing deliberate errors. Students click on words they believe are wrong. The counter "X/6 ERRORI EVIDENZIATI" is a strong signal for this type.
+
+KEY DISTINGUISHING CLUES:
+- completion_closed vs positioning: completion_closed shows exactly 2 options PER BLANK inline in the text. Positioning shows a SEPARATE word bank area above the passage with 6+ terms.
+- completion_closed vs completion_open: completion_closed has paired clickable bubbles. completion_open has text input fields (dark boxes where students typed).
+- select_errors: look for the "TROVA ERRORE" label in the sidebar and/or the "X/6 ERRORI EVIDENZIATI" counter.
+
+STEP 2 — EXTRACT according to the type-specific schema below.
+
+=== TYPE: true_false ===
+```json
+{
+  "type": "true_false",
+  "question_title": "title from the top of the exercise",
+  "instructions": "instruction line (e.g. 'Tra le affermazioni riferite all'immagine indica quali sono vere e quali sono false.')",
+  "question_text": "introductory passage below the instruction, if any; null if none",
+  "choices": [
+    {"id": "A", "text": "Statement A text"},
+    {"id": "B", "text": "Statement B text"}
+  ],
+  "answers": [
+    {"id": "A", "text": "True"},
+    {"id": "B", "text": "False"}
+  ],
+  "language": "it"
+}
+```
+ANSWER RULES for true_false:
+- Each statement has a Vero and a Falso button. The student selected one.
+- Button background colours indicate correctness:
+  - GREEN background (✓) = student was RIGHT → correct answer = what the student selected.
+  - RED background (✗) = student was WRONG → correct answer = the OPPOSITE of what the student selected.
+  - NO background / unselected = not answered by the student.
+- Cross-check with the "Esercizio sbagliato" feedback at the bottom:
+  - "Risposta sbagliata" confirms the student was wrong on that item.
+  - "Risposta esatta" confirms the student was right.
+- Output exactly "True" or "False" in English. NEVER "Vero" or "Falso".
+- LOGIC: If student selected "Vero" with RED background → correct = "False". If student selected "Falso" with RED background → correct = "True". If student selected "Vero" with GREEN background → correct = "True". If student selected "Falso" with GREEN background → correct = "False".
+
+=== TYPE: multiple_choice_radio ===
+```json
+{
+  "type": "multiple_choice_radio",
+  "question_title": "title",
+  "instructions": "instruction line",
+  "question_text": "question text or introductory passage; null if none",
+  "choices": [
+    {"id": "A", "text": "option A text"},
+    {"id": "B", "text": "option B text"}
+  ],
+  "answers": [
+    {"id": "D", "description": "the actual text of the correct option"}
+  ],
+  "language": "it"
+}
+```
+ANSWER RULES for multiple_choice_radio:
+- Exactly ONE correct answer.
+- The correct option is shown with a GREEN circle (✓) or identified in the "Esercizio sbagliato" section as "La risposta esatta è: X".
+- The student's wrong selection has a RED circle (✗).
+- If the exercise is marked "Esercizio esatto" (all correct), the student's selected option IS the correct answer.
+- "description" MUST be the actual choice text, NEVER a platform label.
+
+=== TYPE: multiple_choice_check ===
+```json
+{
+  "type": "multiple_choice_check",
+  "question_title": "title",
+  "instructions": "instruction line",
+  "question_text": "question text or introductory passage; null if none",
+  "choices": [
+    {"id": "A", "text": "option A text"},
+    {"id": "B", "text": "option B text"}
+  ],
+  "answers": [
+    {"id": "A", "description": "option A text"},
+    {"id": "C", "description": "option C text"}
+  ],
+  "language": "it"
+}
+```
+ANSWER RULES for multiple_choice_check:
+- MULTIPLE correct answers possible.
+- In the exercise area, correct options have a BLUE/GREEN checkbox (☑). Wrong selections have a RED checkbox (☒).
+- In the "Esercizio sbagliato" feedback section:
+  - "Risposta non data" with a GREEN checkbox (☑) = this option IS correct but the student did NOT select it. INCLUDE it in answers.
+  - "Risposta sbagliata" with a RED checkbox (☒) = the student selected this but it is WRONG. EXCLUDE it from answers.
+  - "Risposta esatta" with a GREEN checkbox (☑) = the student selected this and it is CORRECT. INCLUDE it in answers.
+- Options NOT appearing in the feedback section AND not checked = not correct (exclude).
+- Options checked with GREEN in the main area but not in feedback = correct (include).
+- "description" MUST be the actual choice text, NEVER a platform label.
+
+=== TYPE: completion_closed ===
+```json
+{
+  "type": "completion_closed",
+  "question_title": "title",
+  "instructions": "instruction line",
+  "question_text": "full text passage with [A], [B], [C] placeholder markers where blanks appear",
+  "choices": [
+    {"id": "A", "options": ["option 1", "option 2"]},
+    {"id": "B", "options": ["option 1", "option 2"]}
+  ],
+  "answers": [
+    {"id": "A", "description": "correct option text"},
+    {"id": "B", "description": "correct option text"}
+  ],
+  "language": "it"
+}
+```
+ANSWER RULES for completion_closed:
+- Each blank has exactly TWO clickable alternatives shown as adjacent inline bubbles in the text.
+- The selected option's background colour indicates correctness: GREEN = correct, RED = wrong.
+- If the student's choice has GREEN background → that IS the correct answer.
+- If the student's choice has RED background → the OTHER option is correct.
+- Cross-check with "Esercizio sbagliato" feedback if present.
+- In question_text, replace each blank with [A], [B], etc. — do NOT insert the actual answers.
+
+=== TYPE: completion_open ===
+```json
+{
+  "type": "completion_open",
+  "question_title": "title",
+  "instructions": "instruction line",
+  "question_text": "full text passage with [A], [B], [C] placeholder markers where blanks appear",
+  "choices": null,
+  "answers": [
+    {"id": "A", "description": "correct term"},
+    {"id": "B", "description": "correct term"}
+  ],
+  "language": "it"
+}
+```
+ANSWER RULES for completion_open:
+- choices is always null (students typed free-form answers).
+- Blanks appear as dark inline boxes containing the student's typed text.
+- Extract correct answers from the "Esercizio sbagliato" feedback section:
+  - "Risposta non data" → the student's typed answer shown in the box IS correct. Use it.
+  - "Risposta sbagliata" + "La risposta corretta è: {term}" or "La risposta esatta è: {term}" → use the corrected term shown.
+- If no feedback section exists (exercise fully correct), use the terms shown in the inline boxes.
+- In question_text, replace each blank with [A], [B], etc. — do NOT insert the actual answers.
+
+=== TYPE: positioning ===
+```json
+{
+  "type": "positioning",
+  "question_title": "title",
+  "instructions": "instruction line",
+  "question_text": "full text passage with [A], [B], [C] placeholder markers where blanks appear",
+  "choices": [
+    "draggable term 1",
+    "draggable term 2",
+    "distractor term"
+  ],
+  "answers": [
+    {"id": "A", "description": "correct term for blank A"},
+    {"id": "B", "description": "correct term for blank B"}
+  ],
+  "language": "it"
+}
+```
+ANSWER RULES for positioning:
+- choices: flat array of ALL terms from the word bank (the rounded boxes displayed above the text passage), INCLUDING unused distractor terms.
+- Each term in choices appears exactly once, even if it could fit multiple blanks.
+- Determine correct answers from the "Esercizio sbagliato" feedback section:
+  - GREEN circle (✓) + "Risposta corretta" or "Risposta non data" → the term placed in that blank IS correct. Use it.
+  - RED circle (✗) + "Risposta sbagliata" + "La risposta corretta è: {term}" / "La risposta esatta è: {term}" → use the corrected term.
+- In question_text, replace each blank with [A], [B], etc. — do NOT insert the actual answers.
+
+=== TYPE: select_errors ===
+```json
+{
+  "type": "select_errors",
+  "question_title": "title",
+  "instructions": "instruction line",
+  "question_text": "the ORIGINAL text passage WITH errors (from the TOP section of the exercise)",
+  "choices": null,
+  "answers": [
+    {"error": "wrong word in original text", "correct": "correct replacement word"},
+    {"error": "wrong word in original text", "correct": "correct replacement word"}
+  ],
+  "language": "it"
+}
+```
+ANSWER RULES for select_errors:
+- choices is always null.
+- The TOP section shows the text WITH errors — this becomes question_text. Copy it verbatim.
+- The BOTTOM section ("La risposta esatta è:") shows the CORRECTED text. Underlined words in the corrected text are the corrections.
+- Compare top and bottom texts word by word. For each underlined word in the bottom text, find the corresponding wrong word in the top text.
+- Only include pairs where the error word and the correct word are DIFFERENT.
+- The number of error pairs should match the total error count shown (e.g. "6 ERRORI").
+
+=== HANDLING "Esercizio esatto" (fully correct exercise) ===
+If the feedback section says "Esercizio esatto" instead of "Esercizio sbagliato", it means the student answered everything correctly. In this case:
+- For multiple_choice_radio: the selected option is correct.
+- For multiple_choice_check: all checked options are correct.
+- For true_false: all selected Vero/Falso values are correct.
+- For other types: the student's placed/typed answers are all correct.
+
+=== ITALIC AND SPECIAL FORMATTING ===
+- Some choice texts or passage texts contain italic words (book/artwork titles like *Camera degli sposi*, *Consegna delle chiavi a San Pietro*, *Ecce homo*, *San Sebastiano*). Preserve these using *asterisks* around the italic text.
+- Preserve all diacritics and special characters exactly (è, é, à, ò, ù, etc.).
+
+=== TEXT SPACING AND WORD BOUNDARIES ===
+- The HTML source often has missing or incorrect spaces, especially around italic tags, inline elements, and span boundaries. Words may appear merged (e.g. "DitticoBentivoglio" instead of "Dittico Bentivoglio", "SanSebastiano" instead of "San Sebastiano").
+- ALWAYS use the screenshot image as the authoritative source for spacing and word boundaries. If the screenshot clearly shows two separate words with a space, output them with a space, regardless of what the HTML shows.
+- This applies to ALL text fields: question_text, choices, answers, instructions, and question_title.
+
+=== HANDLING IMAGES IN THE EXERCISE ===
+- Many exercises show a painting/artwork image alongside the question. Do NOT describe or reference the image in any field.
+- If the question text explicitly refers to "l'immagine" or "l'opera rappresentata", keep that reference as-is in question_text or instructions.
+
+=== ANSWER COUNT VALIDATION ===
+- true_false: answers array MUST have exactly the same number of entries as choices.
+- multiple_choice_radio: answers array MUST have exactly 1 entry.
+- multiple_choice_check: answers array must have ≥ 1 entry. Cross-check: count how many options have GREEN checkboxes in the main area + how many appear as "Risposta non data" (correct but unselected) in the feedback. Their sum = total correct answers.
+- completion_closed / completion_open / positioning: answers array MUST have one entry per blank ([A], [B], [C], etc.).
+- select_errors: answers array should match the total error count displayed (e.g. if "6 ERRORI" then 6 pairs).
+
+=== SIDEBAR METADATA (ignore) ===
+- The left sidebar shows "SCELTA MULTIPLA", "VERO O FALSO", "COMPLETAMENTO CHIUSO", "COMPLETAMENTO APERTO", "POSIZIONAMENTO", "TROVA ERRORE". These labels CONFIRM the type but use the visual structure as the primary signal, not the sidebar label alone (OCR may garble it).
+- Ignore fields like "Difficoltà", "Esercizio (ID)", and "PROVA IN CORSO".
+
+=== COMPLETION TYPES: question_text RECONSTRUCTION ===
+- For completion_closed, completion_open, and positioning: reconstruct the FULL text passage from the exercise area.
+- Replace each blank with its marker: [A], [B], [C], [D], [E], [F], [G] in order of appearance.
+- CRITICAL: The question_text must contain ONLY the passage skeleton with [X] markers. It must NEVER contain:
+  - The student's selected answers (e.g. "1480", "Bacci", "Sacro Cuore")
+  - The option values or alternative terms
+  - Duplicate markers like [E] [E] appearing twice for the same blank
+- Each marker must appear EXACTLY ONCE per blank.
+- PRESERVE all original punctuation from the passage, including quotation marks, commas, periods, and parentheses exactly as they appear in the screenshot. If the text has quotes around a blank (e.g. the original shows "[E]"), keep them: "[E]".
+- Include all surrounding text exactly as shown in the screenshot, preserving punctuation and line flow.
+- EXAMPLE of CORRECT question_text: "Nel [A] Piero della Francesca fu incaricato dalla famiglia [B] di portare a termine gli affreschi della cappella di famiglia nella Chiesa di [C] di [D] . Il tema rappresentato erano le \"[E]\", tratte dalla \"[F]\" di Jacopo da Varagine."
+- EXAMPLE of WRONG question_text: "Nel 1480 Piero della Francesca fu incaricato dalla famiglia Bacci di portare a termine..." (answers leaked into text)
+
+=== GLOBAL RULES ===
+- "question_title": the exercise title shown at the very top in bold (e.g. "La pittura rinascimentale", "La Camera degli Sposi", "I dipinti di Antonello da Messina").
+- "instructions": the exercise-specific instruction line that appears in the MAIN CONTENT AREA, above the passage or choices. This tells the student exactly what to do for THIS exercise. Examples: "Scegli l'affermazione corretta che individua l'autore dell'opera rappresentata.", "In quale edificio si trova questo importante affresco?", "Individua le affermazioni corrette riferite all'immagine.", "Ricostruisci il periodo scegliendo i termini corretti tra quelli proposti.", "Completa la descrizione inserendo i termini che ritieni corretti.", "Tra le affermazioni riferite all'immagine indica quali sono vere e quali sono false.". If NO exercise-specific instruction appears in the main area, fall back to the sidebar "Cosa devi fare:" text.
+- "question_text": the body text/passage BELOW the instruction in the main content area. This is the actual content the student works with: a text passage with blanks, a text with errors, or null if the exercise only has an image with options and no additional text passage. Do NOT repeat the instruction line here.
+- Return ONLY the JSON object. No markdown fences, no comments, no explanation.
+- Use null for missing/absent data, not empty strings.
+- Do NOT include platform feedback labels ("Risposta esatta", "Risposta sbagliata", "Risposta non data") in any output field.
+- All text content should preserve Italian characters (accented letters, etc.) exactly as shown.
+HTML text:
+{html_text}

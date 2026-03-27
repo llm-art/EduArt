@@ -1,172 +1,26 @@
 {
-  "creation_datetime": "2026-02-21 18:33:01",
-  "processing_time_seconds": 6196.144065,
-  "version": 1.8000000000000005,
+  "creation_datetime": "2026-03-24 18:55:15",
+  "processing_time_seconds": 3.871264,
+  "version": 2.9000000000000012,
   "source_count": 63,
-  "question_count": 880,
-  "questions_with_images": 440,
+  "question_count": 871,
+  "questions_with_images": 436,
   "questions_by_type": {
     "multiple_choice_radio": 370,
-    "multiple_choice_check": 116,
-    "true_false": 85,
-    "completion_closed": 72,
-    "select_errors": 53,
+    "multiple_choice_check": 117,
+    "true_false": 83,
+    "completion_closed": 69,
+    "select_errors": 49,
     "positioning": 108,
-    "completion_open": 76
+    "completion_open": 75
   },
   "categorization": {
-    "art_historical": {
-      "subject_matter_and_iconography": 430,
-      "style_and_period": 570,
-      "materials_and_techniques": 219,
-      "object_and_work_type": 358,
-      "authorship": 527
-    },
-    "cultural_tradition": {
-      "western": 855,
-      "middle_east": 23,
-      "eastern": 2
-    },
-    "disciplinary_domain": {
-      "art_history": 713,
-      "architectural_history": 167
-    },
-    "epistemic_level": {
-      "factual_identification": 524,
-      "contextual_knowledge": 313,
-      "interpretive_reasoning": 43
-    },
     "language": {
       "en": 203,
-      "it": 677
+      "it": 668
     }
   },
   "categorization_by_type": {
-    "art_historical": {
-      "subject_matter_and_iconography": {
-        "multiple_choice_radio": 121,
-        "multiple_choice_check": 88,
-        "true_false": 56,
-        "completion_closed": 47,
-        "select_errors": 38,
-        "positioning": 29,
-        "completion_open": 51
-      },
-      "style_and_period": {
-        "multiple_choice_radio": 150,
-        "multiple_choice_check": 100,
-        "true_false": 63,
-        "completion_closed": 57,
-        "select_errors": 45,
-        "positioning": 85,
-        "completion_open": 70
-      },
-      "materials_and_techniques": {
-        "multiple_choice_radio": 61,
-        "completion_closed": 14,
-        "positioning": 47,
-        "completion_open": 30,
-        "true_false": 25,
-        "multiple_choice_check": 38,
-        "select_errors": 4
-      },
-      "object_and_work_type": {
-        "multiple_choice_radio": 123,
-        "true_false": 30,
-        "completion_closed": 31,
-        "multiple_choice_check": 48,
-        "positioning": 60,
-        "completion_open": 46,
-        "select_errors": 20
-      },
-      "authorship": {
-        "multiple_choice_radio": 119,
-        "multiple_choice_check": 94,
-        "true_false": 60,
-        "select_errors": 43,
-        "completion_closed": 53,
-        "positioning": 99,
-        "completion_open": 59
-      }
-    },
-    "cultural_tradition": {
-      "western": {
-        "multiple_choice_radio": 345,
-        "multiple_choice_check": 116,
-        "true_false": 85,
-        "completion_closed": 72,
-        "select_errors": 53,
-        "positioning": 108,
-        "completion_open": 76
-      },
-      "middle_east": {
-        "multiple_choice_radio": 23,
-        "completion_closed": 0,
-        "completion_open": 0,
-        "multiple_choice_check": 0,
-        "positioning": 0,
-        "select_errors": 0,
-        "true_false": 0
-      },
-      "eastern": {
-        "multiple_choice_radio": 2,
-        "completion_closed": 0,
-        "completion_open": 0,
-        "multiple_choice_check": 0,
-        "positioning": 0,
-        "select_errors": 0,
-        "true_false": 0
-      }
-    },
-    "disciplinary_domain": {
-      "art_history": {
-        "multiple_choice_radio": 282,
-        "multiple_choice_check": 102,
-        "true_false": 76,
-        "completion_closed": 63,
-        "select_errors": 40,
-        "positioning": 87,
-        "completion_open": 63
-      },
-      "architectural_history": {
-        "multiple_choice_radio": 88,
-        "positioning": 21,
-        "select_errors": 13,
-        "completion_open": 13,
-        "multiple_choice_check": 14,
-        "completion_closed": 9,
-        "true_false": 9
-      }
-    },
-    "epistemic_level": {
-      "factual_identification": {
-        "multiple_choice_radio": 280,
-        "multiple_choice_check": 25,
-        "true_false": 44,
-        "completion_closed": 39,
-        "positioning": 75,
-        "select_errors": 22,
-        "completion_open": 39
-      },
-      "contextual_knowledge": {
-        "multiple_choice_radio": 75,
-        "multiple_choice_check": 82,
-        "true_false": 38,
-        "completion_closed": 32,
-        "completion_open": 35,
-        "positioning": 33,
-        "select_errors": 18
-      },
-      "interpretive_reasoning": {
-        "multiple_choice_radio": 15,
-        "select_errors": 13,
-        "multiple_choice_check": 9,
-        "true_false": 3,
-        "completion_open": 2,
-        "completion_closed": 1,
-        "positioning": 0
-      }
-    },
     "language": {
       "en": {
         "multiple_choice_radio": 203,
@@ -179,12 +33,12 @@
       },
       "it": {
         "multiple_choice_radio": 167,
-        "multiple_choice_check": 116,
-        "true_false": 85,
-        "completion_closed": 72,
-        "select_errors": 53,
+        "multiple_choice_check": 117,
+        "true_false": 83,
+        "completion_closed": 69,
+        "select_errors": 49,
         "positioning": 108,
-        "completion_open": 76
+        "completion_open": 75
       }
     }
   },
@@ -194,20 +48,20 @@
       "without_image": 117
     },
     "multiple_choice_check": {
-      "with_image": 92,
+      "with_image": 93,
       "without_image": 24
     },
     "true_false": {
-      "with_image": 37,
-      "without_image": 48
+      "with_image": 36,
+      "without_image": 47
     },
     "completion_closed": {
-      "with_image": 23,
-      "without_image": 49
+      "with_image": 21,
+      "without_image": 48
     },
     "select_errors": {
-      "with_image": 16,
-      "without_image": 37
+      "with_image": 14,
+      "without_image": 35
     },
     "positioning": {
       "with_image": 9,
@@ -215,7 +69,7 @@
     },
     "completion_open": {
       "with_image": 10,
-      "without_image": 66
+      "without_image": 65
     }
   },
   "sources": [
@@ -283,23 +137,6 @@
     "myzanichelli/8",
     "myzanichelli/9"
   ],
-  "ai_calls": [
-    {
-      "description": "question categorization",
-      "model_name": "Googleprovider unknown",
-      "input_tokens": 253694,
-      "output_tokens": 913449,
-      "total_tokens": 1167143,
-      "processing_time": 6191.709471940994
-    },
-    {
-      "description": "text extraction",
-      "model_name": "Google gemini-3-flash-preview",
-      "input_tokens": 6452944,
-      "output_tokens": 178362,
-      "total_tokens": 6631306,
-      "processing_time": 8011.722135782242
-    }
-  ],
-  "last_updated": "2026-02-21 20:16:18"
+  "ai_calls": [],
+  "last_updated": "2026-03-24 18:55:19"
 }

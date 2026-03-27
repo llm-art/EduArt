@@ -1,49 +1,42 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image contains a "POSIZIONAMENTO" (Positioning) exercise where students must drag individual terms from a list to fill blanks in a text passage.
+This is a positioning (drag-and-drop) exercise where students drag terms from a list to fill blanks in a text passage.
 
-# EXTRACTION REQUIREMENTS:
- - Extract question title
- - Extract question text with spaces where the choices should go marked as [A], [B], etc. (add only the letters in brackets)
- - Extract all individual draggable terms, the choices, from the left side
- - Extract the correct answers for each letter
-
-$ MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+SCHEMA:
 {{{{
   "type": "positioning",
   "question_title": "clean question title",
-  "question_text": "text passage with letters (LETTERS MUST BE IN BRACKETS [A], [B], etc.) where terms should be placed",
+  "instructions": "exercise instruction line (e.g. 'Ricostruisci il testo scegliendo i termini corretti.')",
+  "question_text": "text passage with [A], [B], [C] etc. marking where terms go",
   "choices": [
-    "individual term 1",
-    "individual term 2",
-    "individual term 3"a,
-    ...
+    "draggable term 1",
+    "draggable term 2",
+    "draggable term 3"
   ],
   "answers": [
     {{"id": "A", "description": "correct term for A"}},
-    {{"id": "B", "description": "correct term for B"}},
-    ...
+    {{"id": "B", "description": "correct term for B"}}
   ],
   "language": "it"
 }}}}
 
-# VISUAL IDENTIFICATION GUIDE:
- - Choices are individual draggable terms in the left side. Enclosed in a light blue box. 
- - The text on the right containes highlighted terms that have a letter e.g., A, B etc with a background and a word at its right. These terms have a colored border.
+FIELD SEPARATION:
+- "instructions": the exercise instruction line (e.g. "Completa il periodo con i sei termini mancanti scegliendo tra i dodici proposti."). Extract this SEPARATELY.
+- "question_text": ONLY the passage with [A], [B], [C] markers. Do NOT include the instruction line. Do NOT substitute the markers with answer values — keep [A], [B] etc. exactly as-is.
 
-# EXTRACTION PROCESS:
-1. Extract the question title from the header
-2. Extract the text passage from the right side, preserving the structure and blank positions
-3. Extract ALL individual terms from the left side (circular buttons, boxes, or list items)
-4. If feedback is shown, identify which terms are correct for which blank positions
-5. Look for "Esercizio sbagliato" sections that may show correct answers
+ANSWER EXTRACTION:
+- Blanks in the text MUST be marked as [A], [B], [C] etc.
+- choices: ALL draggable terms from the left-side list (light blue boxes).
+- answers: the correct term for each blank, identified from the feedback section or from colored borders (green/grey = correct placement).
+- Look for the "Esercizio sbagliato" feedback section for correct answers.
 
-# STRICT REQUIREMENTS:
-- Return ONLY the JSON object above - no explanations, no extra text
-- Each letter in the passage corresponds to exactly one place where a terms should be inserted
-- Report the text and all the choices
+RULES:
+- Return ONLY the JSON object, no comments or markdown.
+- Each letter corresponds to exactly one blank in the passage.
+- Preserve [A], [B], [C] markers in question_text — do NOT replace them with terms.
+- Use null for missing data, not empty strings.
 
-Text:
+Noisy OCR text:
 {ocr_text}
 
 HTML text:

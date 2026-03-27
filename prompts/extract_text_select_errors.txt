@@ -1,111 +1,39 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image contains a "TROVA ERRORE" (Find Error) or "ERRORI EVIDENZIATI" (Highlighted Errors) exercise where students must identify errors in a text passage.
+This is a select_errors exercise where students identify errors in a text passage.
 
-EXTRACTION REQUIREMENTS:
-- Extract the main question text (the passage with potential errors)
-- Identify errors and their corrections if shown
-- Extract any feedback or correct answers provided
-
-MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+SCHEMA:
 {{{{
   "type": "select_errors",
   "question_title": "clean question title",
-  "question_text": "main text passage with errors (from the top section)",
+  "instructions": "exercise instruction line (e.g. 'Nel testo sono stati inseriti degli errori. Individuali facendo clic sulle parole che ritieni sbagliate.')",
+  "question_text": "main text passage with errors (the body paragraph ONLY, not the instruction)",
   "choices": null,
   "answers": [
-    {{
-      "correct": "correct word/phrase",
-      "error": "wrong word/phrase"
-    }},
-    {{
-      "correct": "another correct word/phrase",
-      "error": "another wrong word/phrase"
-    }}
+    {{"correct": "correct word/phrase", "error": "wrong word/phrase"}},
+    {{"correct": "correct word/phrase", "error": "wrong word/phrase"}}
   ],
   "language": "it"
 }}}}
 
-STRICT REQUIREMENTS:
-- Return ONLY the JSON object above
-- DO NOT add any other fields beyond those specified
-- DO NOT add comments or explanations
-- Use null for missing data, not empty strings
-- Extract the main text passage with errors from the TOP section
-- **CRITICAL**: The answers array MUST contain objects with "correct" and "error" pairs
-- **CRITICAL**: ONLY create pairs where the error word is DIFFERENT from the correct word
-- DO NOT create pairs where error == correct (those are not actual errors!)
-- You MUST identify EVERY error-correction pair by comparing top and bottom sections
-- Set choices to null for this question type
+FIELD SEPARATION:
+- "instructions": the exercise instruction line (e.g. "Nel testo sono stati inseriti degli errori. Individuali facendo clic sulle parole che ritieni sbagliate."). Extract this SEPARATELY.
+- "question_text": ONLY the body paragraph containing the text with errors. Do NOT include the instruction sentence.
 
-VISUAL IDENTIFICATION GUIDE:
-- Look for "TROVA ERRORE" or "ERRORI EVIDENZIATI" indicators
-- **TOP SECTION**: Contains the original text with errors (this goes in question_text)
-- **BOTTOM SECTION**: Look for the "Esercizio sbagliato" (Wrong Exercise) feedback section with red border
-  * This section contains the corrected text with underlined/highlighted corrections
-  * The underlined words in the bottom section are the CORRECT versions
-- **ERROR-CORRECTION IDENTIFICATION**:
-  * Find underlined/highlighted words in the BOTTOM section (these are corrections)
-  * For each underlined word in the bottom, find the corresponding different word in the TOP section
-  * The TOP section contains the WRONG words (errors)
-  * The BOTTOM section underlined words are the CORRECT words (corrections)
-  * **CRITICAL**: Handle line breaks carefully - names like "Piero della Francesca" may span multiple lines but should be treated as single entities
-  * **CRITICAL**: When comparing, look for positional correspondence, not just word matching
-- **SYSTEMATIC COMPARISON**:
-  * Identify each underlined word/phrase in the bottom correction section
-  * For each underlined correction, find its position in the text flow
-  * Locate the corresponding position in the top text to find what was wrong
-  * Create pairs: {{"correct": "underlined word from bottom", "error": "corresponding word from top"}}
-  * **IMPORTANT**: Names and phrases that span line breaks should be treated as complete units
+ANSWER EXTRACTION:
+- The TOP section contains the original text WITH errors (this is question_text — the body paragraph only).
+- The BOTTOM section ("Esercizio sbagliato" with red border) contains the corrected text.
+- Underlined/highlighted words in the bottom section are the CORRECT versions.
+- For each underlined correction in the bottom, find the corresponding word at the same position in the top text — that is the error.
+- Create a pair: {{"correct": "underlined bottom word", "error": "corresponding top word"}}.
+- ONLY create pairs where the error and correct words are DIFFERENT.
+- Handle multi-word names spanning line breaks as single units (e.g., "Piero della Francesca").
 
-EXTRACTION PROCESS:
-1. Extract the main question title from the header
-2. **EXTRACT TOP TEXT**: Extract the primary text passage with errors (this is the question_text)
-3. **FIND THE CORRECTION SECTION**: Look for "Esercizio sbagliato" section with red border
-4. **IDENTIFY CORRECTIONS FIRST**:
-   - Scan the BOTTOM correction section for ALL underlined/highlighted words
-   - These underlined words are the CORRECT versions
-   - Note their position in the text flow (beginning, middle, end of sentences)
-5. **FIND CORRESPONDING ERRORS**:
-   - For each underlined correction found in step 4:
-     * Locate the same position in the TOP text
-     * The word at that position in the TOP text is the "error"
-     * Create pair: {{"correct": "underlined_bottom_word", "error": "corresponding_top_word"}}
-6. **HANDLE COMPLEX CASES**:
-   - **Line breaks**: Names like "Piero della Francesca" or "Federico da Montepulciano" may be split across lines
-   - **Positional matching**: Use sentence structure and word position, not just word similarity
-   - **Complete phrases**: Treat multi-word names and phrases as single units
-7. **COMPREHENSIVE SCANNING**:
-   - Ensure every underlined word in the correction section has a corresponding error pair
-   - Pay special attention to artist names, place names, dates
-   - **CRITICAL**: Do not miss any underlined corrections
-8. Set choices to null
-
-EXAMPLES FROM IMAGES:
-
-Example 1 - Finding underlined corrections:
-Bottom correction text has "Roberti" underlined at position where top text has "Cossa"
-Result: {{"correct": "Roberti", "error": "Cossa"}}
-
-Example 2 - Complex name handling:
-Bottom text has "Piero della Francesca" underlined (may span lines)
-Top text at same position has "Federico da Montepulciano"
-Result: {{"correct": "Piero della Francesca", "error": "Federico da Montepulciano"}}
-
-Example 3 - Multiple corrections:
-Bottom has underlined: "bolognese", "Ginevra", "tendaggio", "Montefeltro"
-Find corresponding positions in top text for each
-Results: Multiple error-correction pairs based on positional correspondence
-
-Result format:
-choices: null
-answers: [
-  {{"correct": "Roberti", "error": "Cossa"}},
-  {{"correct": "Piero della Francesca", "error": "Federico da Montepulciano"}},
-  {{"correct": "bolognese", "error": "romano"}}
-]  ← ALL error-correction pairs from underlined words in bottom section
-
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+RULES:
+- Return ONLY the JSON object, no comments or markdown.
+- choices is always null for this type.
+- Do not create pairs where error == correct.
+- Use null for missing data, not empty strings.
 
 Noisy OCR text:
 {ocr_text}

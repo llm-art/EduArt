@@ -11,22 +11,25 @@ class OpenAIProvider(LLMProvider):
     """OpenAI LLM provider using LangChain with vision support."""
     
     def __init__(self, model_name: str, api_key: Optional[str] = None,
-                 temperature: float = 0.0, max_tokens: int = 512, timeout: int = 30):
+                 temperature: float = 0.0, max_tokens: int = 1024, timeout: int = 30,
+                 seed: Optional[int] = None):
         """
         Initialize OpenAI provider.
-        
+
         Args:
             model_name: OpenAI model name
             api_key: API key (defaults to environment variable)
             temperature: Sampling temperature
             max_tokens: Maximum tokens to generate
             timeout: Request timeout in seconds
+            seed: Random seed for reproducibility
         """
         super().__init__(model_name)
         self.api_key = api_key or os.getenv('OPENAI_API_KEY')
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
+        self.seed = seed
         self._model = None
     
     def _initialize_model(self):
@@ -48,7 +51,11 @@ class OpenAIProvider(LLMProvider):
                 # o1 and o3 models only accept temperature=1 (default)
                 if not any(model_prefix in self.model_name.lower() for model_prefix in ['o1', 'o3']):
                     model_params['temperature'] = self.temperature
-                
+
+                # Add seed for reproducibility
+                if self.seed is not None:
+                    model_params['model_kwargs'] = {'seed': self.seed}
+
                 self._model = ChatOpenAI(**model_params)
                 self._human_message = HumanMessage
             except ImportError as e:

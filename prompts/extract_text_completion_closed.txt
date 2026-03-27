@@ -1,49 +1,42 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image contains a “COMPLETAMENTO CHIUSO” (closed completion) exercise where students must select the correct choice from pairs of options to fill blanks in a text passage.
+This is a completion_closed exercise where students select the correct option from pairs of choices to fill blanks in a text passage.
 
-# EXTRACTION REQUIREMENTS:
- - Extract question title
- - Extract question text with blanks marked as [A], [B], etc.
- - Extract pairs of choices for highlighted choices in the text
- - Extract the correct answers for each choice
-
-# MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+SCHEMA:
 {{{{
   "type": "completion_closed",
   "question_title": "clean question title",
-  "question_text": "full question text with [A], [B], etc. placeholders",
+  "instructions": "exercise instruction line (e.g. 'Ricostruisci il periodo scegliendo i termini corretti.')",
+  "question_text": "text passage with [A], [B], [C] etc. marking where choices go",
   "choices": [
-    {{"id": "A", "options": ["first choice text", "second choice text"]}},
-    {{"id": "B", "options": ["first choice text", "second choice text"]}},
-    {{"id": "C", "options": ["first choice text", "second choice text"]}},
-    ...
+    {{"id": "A", "options": ["first option", "second option"]}},
+    {{"id": "B", "options": ["first option", "second option"]}}
   ],
   "answers": [
-    {{"id": "A", "description": "correct choice text"}},
-    {{"id": "B", "description": "correct choice text"}},
-    {{"id": "C", "description": "correct choice text"}},
-    ...
+    {{"id": "A", "description": "correct option text"}},
+    {{"id": "B", "description": "correct option text"}}
   ],
   "language": "it"
 }}}}
 
-# VISUAL IDENTIFICATION GUIDE:
-- Each choice have a letter (e.g., A, B, C, etc) and two options:
-  1. One is highglighted and may have one out of three border colors
-  2. One is dimmed 
-- Border color and highlight indicate correctness:
-  - Red = incorrect: the dimmed option is the correct choice
-  - Green/Grey = correct: the highlighted option is the correct choice
-- Choices may be divided by new lines, be sure to detect that the choices are close in the text, but new lines my happen (so sequential in the text)
-- To double check the correct answer, use the answers below "Esercizio sbagliato", green/grey means correct answer for the choice, red means that the correct answer is the other option
+FIELD SEPARATION:
+- "instructions": the exercise instruction line (e.g. "Ricostruisci il periodo riferito al dipinto rappresentato scegliendo i termini corretti tra quelli proposti."). Extract this SEPARATELY.
+- "question_text": ONLY the fill-in-the-blank passage with [A], [B], [C] markers. Do NOT include the instruction line. Do NOT substitute the markers with answer values — keep [A], [B] etc. exactly as-is.
 
-# STRICT RULES:
-- Return ONLY the JSON object above - no explanations, no extra text
-- Each letter in the passage corresponds to exactly one pair of choices
-- Report choices and all letters
-- Each element in "choices" has two options only
-- Each element in "answers" lists the correct option only
+ANSWER EXTRACTION:
+- Each choice has a letter and exactly two options.
+- Determine the correct option using visual indicators:
+  - Red border/highlight = incorrect selection; the dimmed option is correct.
+  - Green/grey border = correct selection; the highlighted option is correct.
+- Cross-check with the "Esercizio sbagliato" feedback section if present.
+- Choices may span multiple lines; detect them by proximity in the text.
+
+RULES:
+- Return ONLY the JSON object, no comments or markdown.
+- Each element in choices has exactly two options.
+- Each element in answers lists the correct option only.
+- Preserve [A], [B], [C] markers in question_text — do NOT replace them with terms.
+- Use null for missing data, not empty strings.
 
 HTML text:
 {html_text}

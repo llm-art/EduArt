@@ -1,57 +1,42 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image contains a "COMPLETAMENTO APERTO" (Open Completion) exercise where students must write the correct terms to fill labeled blanks in a text passage.
+This is a completion_open exercise where students write the correct terms to fill labeled blanks in a text passage.
 
-EXTRACTION REQUIREMENTS:
-- Extract the text passage with blanks marked with letters (A, B, C, etc.)
-- Extract correct answers if shown in feedback sections
-
-MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+SCHEMA:
 {{{{
   "type": "completion_open",
   "question_title": "clean question title",
-  "question_text": "text passage with letters (e.g., [A], [B], [C]) placeholders where students write answers",
+  "instructions": "exercise instruction line (e.g. 'Completa il periodo con i termini mancanti.')",
+  "question_text": "text passage with [A], [B], [C] etc. marking where students write answers",
   "choices": null,
   "answers": [
-    "correct term foe A",
-    "correct term for  B",
-    "correct term for  C",
-    ...
+    {{"id": "A", "description": "correct term for A"}},
+    {{"id": "B", "description": "correct term for B"}}
   ],
   "language": "it"
 }}}}
 
-STRICT REQUIREMENTS:
-- Return ONLY the JSON object above
-- DO NOT add any other fields beyond those specified
-- DO NOT add comments or explanations
-- Extract correct answers from "Esercizio sbagliato" feedback section
-- The answers array contains the correct terms in order (A, B, C, D, E, F, G, etc.)
-- Set choices to null for this question type
+FIELD SEPARATION:
+- "instructions": the exercise instruction line (e.g. "Completa il periodo con i sei termini mancanti."). Extract this SEPARATELY.
+- "question_text": ONLY the passage with [A], [B], [C] markers. Do NOT include the instruction line. Do NOT substitute the markers with answer values — keep [A], [B] etc. exactly as-is.
 
-VISUAL IDENTIFICATION GUIDE:
-- **Main text**: Contains passage with labeled blanks (A, B, C, D, E, F, G, etc.)
-- **Blanks**: Appear as letters in boxes or highlighted areas within the text
-- **Instructions**: Usually "Completa la descrizione inserendo i termini che ritieni corretti"
-- **Feedback section**: Look for "Esercizio sbagliato" section with red border containing correct answers
-- **Answer format**: Individual terms that students must write (not select from choices)
+ANSWER EXTRACTION:
+- Blanks in the text MUST be marked as [A], [B], [C] etc.
+- choices is always null for this type (students write freely, no options given).
+- Extract correct answers from the "Esercizio sbagliato" feedback section:
+  - "Risposta non data": extract the term shown next to the letter.
+  - "Risposta sbagliata": extract the correct term from "La risposta esatta e:".
+- Each answer MUST be an object with "id" (the letter) and "description" (the correct term).
 
-EXTRACTION PROCESS:
-1. Extract the question title from the header
-2. Extract the main text passage,
-3. **FIND THE FEEDBACK SECTION**: Look for "Esercizio sbagliato" section with red border
-4. **EXTRACT CORRECT ANSWERS**: In the feedback section, find each labeled blank (A, B, C, etc.) and extract the correct answer:
-   - For "Risposta non data" (not answered): extract the term shown next to the letter
-   - For "Risposta sbagliata" (wrong answer): extract the correct term from "La risposta esatta è:"
-   - Extract answers in alphabetical order (A, B, C, D, E, F, G, etc.)
-5. Create the answers array with all correct terms in sequential order
+CRITICAL — answers must be structured objects, NOT flat strings:
+  WRONG: ["Correggio", "prospettiche", "scenografico"]
+  CORRECT: [{{"id": "A", "description": "Correggio"}}, {{"id": "B", "description": "prospettiche"}}, {{"id": "C", "description": "scenografico"}}]
 
-BLANK IDENTIFICATION:
-- Look for letters in boxes in the feedback section: A, B, C, D, E, F, G, etc.
-- Each shows either "Risposta non data" or "Risposta sbagliata" with correct answer
-- Extract the correct term for each blank from the feedback section in alphabetical order
-
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+RULES:
+- Return ONLY the JSON object, no comments or markdown.
+- Return answers in alphabetical order by id.
+- Preserve [A], [B], [C] markers in question_text — do NOT replace them with terms.
+- Use null for missing data, not empty strings.
 
 Noisy OCR text:
 {ocr_text}

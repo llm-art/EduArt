@@ -51,6 +51,10 @@ def find_json_files_in_structured(structured_path, question_types):
 
     # Find all JSON files in this json/ directory
     for json_file in json_dir.glob("*.json"):
+      # Skip per-model extraction files (e.g. 1.google_gemini-2.5-pro.json)
+      # Only process canonical ground truth files with numeric stems
+      if not json_file.stem.isdigit():
+        continue
       # Check if this JSON file contains questions of the desired type
       try:
         with open(json_file, 'r', encoding='utf-8') as f:

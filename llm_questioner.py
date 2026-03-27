@@ -2,23 +2,20 @@
 """
 LLM Questioner Script - Modular Version
 
-This script uses the modular architecture to query multiple LLMs with Italian art history questions
-from the dataset.
+Queries multiple LLMs with Italian art history questions from the dataset.
 
 Features:
-- Modular architecture with reusable components
-- Support for OpenAI, Google Gemini, Anthropic Claude, and Harvard Bedrock models
-- Configurable question filtering by range and type
-- Retry logic with exponential backoff for API calls
-- Results stored in answers/ folder with metadata
+- Dual prompt conditions: answer-with-motivation (primary) and answer-only (baseline)
+- Per-provider temperature/seed settings for reproducibility
+- Parallel workers for faster processing
+- k-run reproducibility checks on a stratified subsample
+- Results stored in answers/{prompt_condition}/{model_name}/
 
 Usage:
-    python llm_questioner.py --start 1 --end 10 --models google/gemini-2.5-flash-lite
-    python llm_questioner.py --models harvard/us.anthropic.claude-opus-4-5-20251101-v1:0
-    python llm_questioner.py --models model1 --models model2 --models model3
-    python llm_questioner.py --types multiple_choice,true_false
-    python llm_questioner.py --output my_results.csv
-    python llm_questioner.py --api-version v2 --models harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0
+    python llm_questioner.py --models google/gemini-2.5-flash-lite
+    python llm_questioner.py --models model1 --models model2 --workers 4
+    python llm_questioner.py --prompt-condition answer-only --start 1 --end 10
+    python llm_questioner.py --k-runs 3 --models google/gemini-2.5-flash
 """
 
 import click
@@ -29,7 +26,6 @@ import sys
 # Add questions directory to path for shared modules
 sys.path.insert(0, str(Path(__file__).parent / "questions"))
 
-# Import modular components
 from modules.questioner import LLMQuestioner
 from modules.core.exceptions import ConfigurationError, ProcessingError
 
@@ -40,109 +36,109 @@ from modules.core.exceptions import ConfigurationError, ProcessingError
 @click.option('--types', help='Comma-separated list of question types to test')
 @click.option('--models', multiple=True, help='Model to test (can be specified multiple times)')
 @click.option('--output', default='llm_evaluation_results.csv', help='Output CSV file')
-@click.option('--api-version', default='v2', help='Harvard Bedrock API version (v1 or v2, default: v2)')
+@click.option('--api-version', default='v2', help='Harvard Bedrock API version (v1 or v2)')
 @click.option('--force', is_flag=True, default=False, help='Force reprocessing of existing results')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
-def main(start, end, types, models, output, api_version, force, verbose):
-    """LLM Questioner for Italian Art History - Modular Version."""
-    
-    if verbose:
-        print("LLM Questioner for Italian Art History - Modular Version")
-        print("=" * 60)
-    
-    # Set Harvard API version in environment for factory to use
+@click.option('--prompt-condition',
+              type=click.Choice(['default', 'motivation', 'both']),
+              default='both',
+              help='Prompt condition to run (default: both)')
+@click.option('--workers', type=int, default=1,
+              help='Number of parallel workers (default: 1)')
+@click.option('--k-runs', type=int, default=1,
+              help='Number of independent runs for reproducibility subsample (default: 1)')
+@click.option('--temperature', type=float, default=None,
+              help='Override temperature for all providers (e.g., 0.0)')
+def main(start, end, types, models, output, api_version, force, verbose,
+         prompt_condition, workers, k_runs, temperature):
+    """LLM Questioner for Italian Art History."""
+
+    # Set Harvard API version
     os.environ['HARVARD_API_VERSION'] = api_version
-    
+
     # Parse question types filter
     question_types = None
     if types:
         question_types = [t.strip() for t in types.split(',')]
-        if verbose:
-            print(f"Question types filter: {question_types}")
-    
-    # Parse models filter
-    models_to_test = None
-    if models:
-        models_to_test = list(models)  # models is now a tuple from multiple=True
-        if verbose:
-            print(f"Models to test: {models_to_test}")
-            print(f"Harvard API version: {api_version}")
-    
+
+    # Parse models
+    models_to_test = list(models) if models else None
+
+    # Resolve prompt conditions
+    if prompt_condition == 'both':
+        conditions = ['default', 'motivation']
+    else:
+        conditions = [prompt_condition]
+
     try:
-        # Initialize questioner
-        if verbose:
-            print("\nInitializing LLM Questioner...")
-        
-        # Set base and prompts directories
-        base_dir = Path(__file__).parent  # datasets directory
-        prompts_dir = base_dir / "prompts"  # datasets/prompts
-        
-        questioner = LLMQuestioner(models_to_test=models_to_test, base_dir=base_dir, prompts_dir=prompts_dir)
-        
-        if verbose:
-            questioner.print_status()
-        else:
-            provider_info = questioner.get_provider_info()
-            print(f"Initialized {len(provider_info)} LLM providers")
-            for info in provider_info:
-                print(f"  - {info['model_name']}")
-        
-        # Process questions
-        if verbose:
-            print(f"\nProcessing questions...")
-            if start is not None or end is not None:
-                print(f"Question range: {start or 'start'} to {end or 'end'}")
-        
+        base_dir = Path(__file__).parent
+        prompts_dir = base_dir / "prompts"
+
+        # Override temperature for all providers if specified
+        if temperature is not None:
+            os.environ['TEMPERATURE_OVERRIDE'] = str(temperature)
+        elif 'TEMPERATURE_OVERRIDE' in os.environ:
+            del os.environ['TEMPERATURE_OVERRIDE']
+
+        questioner = LLMQuestioner(
+            models_to_test=models_to_test,
+            base_dir=base_dir,
+            prompts_dir=prompts_dir,
+        )
+
+        provider_info = questioner.get_provider_info()
+        print(f"Initialized {len(provider_info)} LLM providers")
+        for info in provider_info:
+            print(f"  - {info['model_name']} (temp={info.get('temperature', '?')})")
+        print(f"Prompt conditions: {conditions}")
+        if workers > 1:
+            print(f"Workers: {workers}")
+        if k_runs > 1:
+            print(f"Reproducibility k-runs: {k_runs}")
+
         results = questioner.process_questions(
             start=start,
             end=end,
             question_types=question_types,
             output_file=output,
-            force=force
+            force=force,
+            prompt_conditions=conditions,
+            workers=workers,
+            k_runs=k_runs,
         )
-        
+
         # Print final summary
         print(f"\n{'='*60}")
         print("PROCESSING COMPLETE")
         print(f"{'='*60}")
         print(f"Total operations: {results['total_operations']}")
-        print(f"Successful operations: {results['successful_operations']}")
-        print(f"Failed operations: {results['failed_operations']}")
-        print(f"Skipped operations: {results.get('skipped_operations', 0)}")
+        print(f"Successful: {results['successful_operations']}")
+        print(f"Failed: {results['failed_operations']}")
+        print(f"Skipped: {results.get('skipped_operations', 0)}")
         print(f"Success rate: {results['success_rate']:.1f}%")
-        print(f"Questions processed: {results['questions_processed']}")
-        print(f"Models tested: {results['models_tested']}")
-        print(f"Results saved to: {results['answers_folder']}")
-        
-        if results.get('skipped_operations', 0) > 0:
-            print(f"\nNote: {results['skipped_operations']} operations were skipped (results already exist)")
-            print(f"Use --force to reprocess existing results")
-        
-        print(f"\nProcessing complete!")
-        
+        print(f"Questions: {results['questions_processed']}")
+        print(f"Models: {results['models_tested']}")
+        for cond, folder in results.get('answers_folders', {}).items():
+            print(f"  {cond}: {folder}")
+
     except ConfigurationError as e:
         print(f"Configuration error: {e}")
         if verbose:
-            print("\nTroubleshooting tips:")
-            print("- Check that API keys are set in the root .env file")
-            print("- Verify that the dataset directory exists and contains question files")
-            print("- Ensure required dependencies are installed")
+            import traceback
+            traceback.print_exc()
         return 1
-    
+
     except ProcessingError as e:
         print(f"Processing error: {e}")
         if verbose:
-            print("\nThis may be due to:")
-            print("- Network connectivity issues")
-            print("- API rate limiting")
-            print("- Invalid question file formats")
+            import traceback
+            traceback.print_exc()
         return 1
-    
+
     except Exception as e:
         print(f"Unexpected error: {e}")
         if verbose:
             import traceback
-            print("\nFull traceback:")
             traceback.print_exc()
         return 1
 

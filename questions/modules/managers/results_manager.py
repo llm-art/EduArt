@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import shutil
+import threading
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from pathlib import Path
@@ -120,86 +121,69 @@ MODEL_COSTS = {
 class ResultsManager:
     """Manager for storing and exporting evaluation results."""
     
-    def __init__(self, results_dir: Optional[str] = None, question_mode: str = 'text', answers_base_dir: Optional[Path] = None):
+    def __init__(self, results_dir: Optional[str] = None, question_mode: str = 'text',
+                 answers_base_dir: Optional[Path] = None, prompt_condition: Optional[str] = None):
         """
         Initialize results manager.
-        
+
         Args:
             results_dir: Directory to store results (not used, kept for compatibility)
-            question_mode: Question mode - 'text' or 'screenshot' (kept for compatibility, but no longer creates subdirectories)
-            answers_base_dir: Base directory for answers folder. Should be passed from calling script.
-                            Defaults to None for backward compatibility (uses project root).
+            question_mode: Question mode - 'text' or 'screenshot' (kept for compatibility)
+            answers_base_dir: Base directory for answers folder.
+            prompt_condition: Prompt condition name (e.g., 'answer-with-motivation', 'answer-only').
+                            When set, results go into answers/{prompt_condition}/.
         """
-        # Don't create results directory - we only use answers directory
         self.results: List[Dict[str, Any]] = []
         self.question_mode = question_mode
-        
+        self.prompt_condition = prompt_condition
+
         # Determine answers directory location
         if answers_base_dir is None:
-            # Backward compatibility: default to project root
             questions_dir = Path(__file__).parent.parent.parent
-            project_root = questions_dir.parent  # Go up one level from questions/ to project root
+            project_root = questions_dir.parent
             answers_base = project_root / 'answers'
         else:
             answers_base = Path(answers_base_dir) / 'answers'
-        
-        # Create answers directory directly without mode-specific or data subdirectories
+
+        # answers_base is the root answers/ dir; condition subfolder goes inside each model dir
         self.answers_dir = answers_base
         self.answers_dir.mkdir(parents=True, exist_ok=True)
-        self.answers_data_dir = self.answers_dir  # Model folders go directly in answers/
-        
+        self.answers_data_dir = self.answers_dir
+
         # Track AI calls for metadata and processed models
         self.ai_calls: List[Dict[str, Any]] = []
         self.processed_models: set = set()
-        
+
         # Track existing results loaded from previous runs
         self.existing_results: List[Dict[str, Any]] = []
+
+        # Thread safety
+        self._write_lock = threading.Lock()
     
-    def _prepare_model_folder(self, model_name: str, force: bool = False):
-        """
-        Prepare model-specific folder. Only removes if force=True.
-        
-        Args:
-            model_name: Name of the model
-            force: If True, remove existing folder and recreate
-        """
-        # Create safe folder name from model name
+    def _get_model_condition_dir(self, model_name: str) -> Path:
+        """Return answers/{model}/{condition}/ path."""
         safe_model_name = model_name.replace('/', '_').replace('\\', '_')
-        model_dir = self.answers_data_dir / safe_model_name
-        
-        # Only remove and recreate folder once per session if force is True
-        if model_name not in self.processed_models:
+        if self.prompt_condition:
+            return self.answers_data_dir / safe_model_name / self.prompt_condition
+        return self.answers_data_dir / safe_model_name
+
+    def _prepare_model_folder(self, model_name: str, force: bool = False):
+        """Prepare model/condition folder. Only removes if force=True."""
+        model_dir = self._get_model_condition_dir(model_name)
+
+        folder_key = f"{model_name}_{self.prompt_condition or ''}"
+        if folder_key not in self.processed_models:
             if force and model_dir.exists():
-                # Remove existing model folder if force is enabled
                 shutil.rmtree(model_dir)
-                print(f"Removed existing results for model: {model_name}")
-            
-            # Create model folder (will not fail if already exists)
             model_dir.mkdir(parents=True, exist_ok=True)
-            self.processed_models.add(model_name)
-            
-            if not force and model_dir.exists():
-                print(f"Using existing folder for model: {model_name}")
-            else:
-                print(f"Created fresh folder for model: {model_name}")
-        
+            self.processed_models.add(folder_key)
+
         return model_dir
     
     def result_exists(self, question_id: str, model_name: str) -> bool:
-        """
-        Check if a result already exists for a question/model combination.
-        
-        Args:
-            question_id: Question identifier
-            model_name: Name of the model
-            
-        Returns:
-            True if result exists, False otherwise
-        """
-        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
-        model_dir = self.answers_data_dir / safe_model_name
-        json_filepath = model_dir / f"{question_id}.json"
-        return json_filepath.exists()
+        """Check if a result already exists for a question/model/condition."""
+        model_dir = self._get_model_condition_dir(model_name)
+        return (model_dir / f"{question_id}.json").exists()
     
     def load_existing_result(self, question_id: str, model_name: str) -> Optional[Dict[str, Any]]:
         """
@@ -212,13 +196,12 @@ class ResultsManager:
         Returns:
             Result dictionary or None if not found
         """
-        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
-        model_dir = self.answers_data_dir / safe_model_name
+        model_dir = self._get_model_condition_dir(model_name)
         json_filepath = model_dir / f"{question_id}.json"
-        
+
         if not json_filepath.exists():
             return None
-        
+
         try:
             with open(json_filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -320,25 +303,26 @@ class ResultsManager:
             'motivation': evaluation.get('motivation', '')
         }
         
-        self.results.append(result)
-        
-        # Prepare model-specific folder (don't force remove)
-        model_dir = self._prepare_model_folder(model_name, force=False)
-        
-        # Track AI call for metadata
-        ai_call = {
-            'description': 'question answering',
-            'model_name': model_name,
-            'input_tokens': input_tokens,
-            'output_tokens': output_tokens,
-            'total_tokens': input_tokens + output_tokens,
-            'processing_time': processing_time,
-            'timestamp': datetime.now().isoformat()
-        }
-        self.ai_calls.append(ai_call)
-        
-        # Save individual question result as JSON in model-specific folder
-        self._save_individual_result(question_id, result, question_data, model_dir, force=force)
+        with self._write_lock:
+            self.results.append(result)
+
+            # Prepare model-specific folder (don't force remove)
+            model_dir = self._prepare_model_folder(model_name, force=False)
+
+            # Track AI call for metadata
+            ai_call = {
+                'description': 'question answering',
+                'model_name': model_name,
+                'input_tokens': input_tokens,
+                'output_tokens': output_tokens,
+                'total_tokens': input_tokens + output_tokens,
+                'processing_time': processing_time,
+                'timestamp': datetime.now().isoformat()
+            }
+            self.ai_calls.append(ai_call)
+
+            # Save individual question result as JSON in model-specific folder
+            self._save_individual_result(question_id, result, question_data, model_dir, force=force)
     
     def _save_individual_result(self, question_id: str, result: Dict[str, Any], question_data: Optional[Dict[str, Any]] = None, model_dir: Optional[Path] = None, force: bool = False):
         """
@@ -354,8 +338,7 @@ class ResultsManager:
         try:
             # Use model-specific directory
             if model_dir is None:
-                safe_model_name = result['model_name'].replace('/', '_').replace('\\', '_')
-                model_dir = self.answers_data_dir / safe_model_name
+                model_dir = self._get_model_condition_dir(result['model_name'])
             
             json_filepath = model_dir / f"{question_id}.json"
             
@@ -426,7 +409,7 @@ class ResultsManager:
             with open(json_filepath, 'w', encoding='utf-8') as f:
                 json.dump(individual_result, f, indent=2, ensure_ascii=False)
             
-            print(f"Individual result saved to {json_filepath} for question {question_id}")
+            # Suppressed for tqdm-based progress tracking
             
         except Exception as e:
             print(f"Warning: Failed to save individual result for question {question_id}: {e}")
@@ -820,10 +803,9 @@ class ResultsManager:
             question_id = result['question_id']
             if question_id not in processed_questions:
                 # Try to load the individual JSON file to get question data
-                safe_model_name = result['model_name'].replace('/', '_').replace('\\', '_')
-                model_dir = self.answers_data_dir / safe_model_name
+                model_dir = self._get_model_condition_dir(result['model_name'])
                 json_filepath = model_dir / f"{question_id}.json"
-                
+
                 if json_filepath.exists():
                     try:
                         with open(json_filepath, 'r', encoding='utf-8') as f:
@@ -892,10 +874,9 @@ class ResultsManager:
                 for r in type_results:
                     question_id = r['question_id']
                     if question_id not in type_processed_questions:
-                        safe_model_name = model_name.replace('/', '_').replace('\\', '_')
-                        model_dir = self.answers_data_dir / safe_model_name
+                        model_dir = self._get_model_condition_dir(model_name)
                         json_filepath = model_dir / f"{question_id}.json"
-                        
+
                         if json_filepath.exists():
                             try:
                                 with open(json_filepath, 'r', encoding='utf-8') as f:

@@ -20,16 +20,19 @@ from ..config import Config
 class QuestionProcessor:
     """Main orchestrator for question processing using OCR and vision models."""
     
-    def __init__(self, config: ProcessorConfig, base_dir: Optional[Path] = None, prompts_dir: Optional[Path] = None):
+    def __init__(self, config: ProcessorConfig, base_dir: Optional[Path] = None,
+                 prompts_dir: Optional[Path] = None, model_label: Optional[str] = None):
         """
         Initialize question processor.
-        
+
         Args:
             config: Processing configuration
             base_dir: Base directory for data operations (defaults to myzanichelli)
             prompts_dir: Directory containing prompt templates (defaults to project prompts)
+            model_label: If set, output files are named {q}.{model_label}.json instead of {q}.json
         """
         self.config = config
+        self.model_label = model_label
         
         # Initialize services
         self.ocr_service = OCRService()
@@ -344,7 +347,11 @@ class QuestionProcessor:
 
     def _save_question_data(self, question_data: QuestionData) -> None:
         """Save question data to JSON file."""
-        output_file = self.output_path / f"{question_data.exercise}/json/{question_data.question}.json"
+        if self.model_label:
+            filename = f"{question_data.question}.{self.model_label}.json"
+        else:
+            filename = f"{question_data.question}.json"
+        output_file = self.output_path / f"{question_data.exercise}/json/{filename}"
         output_file.parent.mkdir(parents=True, exist_ok=True)
         
         # Convert to dictionary for JSON serialization

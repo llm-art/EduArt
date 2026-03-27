@@ -1,38 +1,53 @@
 Analyze this image of an Art History exam question and extract all structured elements.
 
-This image and OCR text are about a true/false question, a question with true/false options.
+This is a true_false question where each statement must be judged True or False.
 
-EXTRACTION REQUIREMENTS:
-- Extract the options with letters (A,B,C,D,E, etc)
-- choices: array with id and text
-- answers: array with the correct options. For each statement, there will be one correct answer that can be either True of False.
-  - Add also, in the notes, if the answer is correct or wrong, e.g., "note": "Risposta esatta." or "note": "Risposta sbagliata."
-
-MANDATORY JSON SCHEMA - RETURN EXACTLY THIS STRUCTURE:
+SCHEMA:
 {{{{
   "type": "true_false",
   "question_title": "clean question title",
-  "question_text": "full question text",
+  "instructions": "exercise instruction line (e.g. 'Indica se le seguenti affermazioni sono vere o false.')",
+  "question_text": "full question text (the introductory passage, NOT the instruction line)",
   "choices": [
     {{"id": "A", "text": "Statement A text"}},
     {{"id": "B", "text": "Statement B text"}}
   ],
   "answers": [
-    {{"id": "A", "text": "True", "note": "Risposta esatta."}},
-    {{"id": "B", "text": "False", "note": "Risposta sbagliata."}}
+    {{"id": "A", "text": "True"}},
+    {{"id": "B", "text": "False"}}
   ],
   "language": "it"
 }}}}
 
-STRICT REQUIREMENTS:
-- Return ONLY the JSON object above
-- DO NOT add any other fields beyond those specified
-- DO NOT add comments or explanations
-- Extract ALL options with their correct letters
-- Use null for missing data, not empty strings
-- do not use true or false as choices
+FIELD SEPARATION:
+- "instructions": the exercise instruction line (e.g. "Indica se le seguenti affermazioni sono vere o false."). This is the directive telling the student what to do.
+- "question_text": the introductory passage or context BELOW the instruction, if any. Do NOT include the instruction line here.
 
-CRITICAL: You MUST return ONLY valid JSON with EXACTLY the fields specified in the schema below. DO NOT add any additional fields, comments, explanations, or text outside the JSON.
+ANSWER EXTRACTION — STEP BY STEP:
+For EACH statement, follow these steps IN ORDER:
+1. Read the student's selected value (True/False or Vero/Falso).
+2. Read the feedback note ("Risposta esatta" or "Risposta sbagliata").
+3. Apply the rule:
+   - If "Risposta esatta" → the student was RIGHT → the correct answer equals the student's selection.
+   - If "Risposta sbagliata" → the student was WRONG → the correct answer is the OPPOSITE of the student's selection.
+4. Output the result in English: exactly "True" or "False". NEVER output "Vero" or "Falso".
+
+WORKED EXAMPLE:
+  Student selected: Vero (True), Note: "Risposta sbagliata"
+  → Student was WRONG → correct answer = OPPOSITE of True → output: "False"
+
+  Student selected: Falso (False), Note: "Risposta sbagliata"
+  → Student was WRONG → correct answer = OPPOSITE of False → output: "True"
+
+  Student selected: Vero (True), Note: "Risposta esatta"
+  → Student was RIGHT → correct answer = True → output: "True"
+
+RULES:
+- Return ONLY the JSON object, no comments or markdown.
+- Extract ALL statements with their correct letters.
+- The "text" field must be exactly "True" or "False" in English, nothing else.
+- Do NOT include any platform labels ("Risposta esatta", "Risposta sbagliata") in the output.
+- Use null for missing data, not empty strings.
 
 Noisy OCR text:
 {ocr_text}

@@ -182,7 +182,13 @@ class AnswerEvaluator:
                     cleaned_response.append(answer)
             
             evaluation["llm_answer"] = {"Answers": cleaned_response}
-            
+
+            # Extract top-level motivation field (from answer-with-motivation condition)
+            motivation = response_data.get('motivation', '')
+            evaluation['motivation'] = motivation
+            evaluation['motivation_quality'] = None  # placeholder for future scoring
+            evaluation['motivation_word_count'] = len(motivation.split()) if motivation else 0
+
             return evaluation
             
         except json.JSONDecodeError as e:

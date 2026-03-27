@@ -39,6 +39,8 @@ class PromptManager:
             'extract_text_completion_open': 'extract_text_completion_open.txt',
             'extract_text_completion_closed': 'extract_text_completion_closed.txt',
             'extract_text_true_false': 'extract_text_true_false.txt',
+            'extract_text': 'extract_text.txt',
+
             'answer_question': 'answer_question.txt'
         }
         

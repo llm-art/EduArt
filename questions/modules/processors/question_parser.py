@@ -274,7 +274,7 @@ class QuestionParser:
         Returns:
             True if valid, False otherwise
         """
-        required_fields = ['type', 'question_text']
+        required_fields = ['type']
         return all(question_data.get(field) for field in required_fields)
     
     def find_screenshot_files(self) -> List[str]:
