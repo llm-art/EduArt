@@ -21,6 +21,15 @@ _RATE_LIMITED_MODELS = {
     'us.mistral.pixtral-large-2502-v1:0': 5.0,
 }
 
+# Models that use V1 legacy endpoint (us.* cross-region + old non-prefixed models)
+_V1_LEGACY_MODELS = {
+    'anthropic.claude-3-5-sonnet-20241022-v2:0',
+    'anthropic.claude-3-5-haiku-20241022-v1:0',
+    'anthropic.claude-3-opus-20240229-v1:0',
+    'meta.llama3-3-70b-instruct-v1:0',
+    'meta.llama3-1-405b-instruct-v1:0',
+}
+
 
 class HarvardBedrockProvider(LLMProvider):
     """Harvard AIS Bedrock LLM provider using REST API with vision support."""
@@ -104,20 +113,22 @@ class HarvardBedrockProvider(LLMProvider):
                 images_to_process = [image_path]
             
             # Determine which API format to use based on model
-            # Anthropic models with us. prefix use v2 format
-            # Mistral and Llama models use v1 format regardless of api_version setting
-            is_anthropic_v2 = self.model_name.startswith('us.anthropic.')
-            
-            # Build the request payload and URL based on model type
-            if is_anthropic_v2:
+            # 1. us.anthropic.* → V2 Anthropic Messages API
+            # 2. us.meta.*, us.mistral.* + legacy non-prefixed → V1 InvokeModel
+            # 3. amazon.nova-* → V2 invoke with Nova-specific format
+            # 4. Everything else (deepseek, qwen, gemma, etc.) → V2 invoke with messages format
+            if self.model_name.startswith('us.anthropic.'):
                 payload = self._build_v2_payload(prompt, system_prompt, images_to_process)
-                # V2 uses model-specific URL: /v2/model/{modelId}/invoke
                 url = f"{self.base_url}/model/{self.model_name}/invoke"
-            else:
-                # V1 format for Mistral, Llama, and legacy models
+            elif self.model_name.startswith('us.') or self.model_name in _V1_LEGACY_MODELS:
                 payload = self._build_v1_payload(prompt, system_prompt, images_to_process)
-                # V1 uses simple base URL
-                url = self.API_BASE_URLS['v1']  # Always use v1 endpoint for these models
+                url = self.API_BASE_URLS['v1']
+            elif self.model_name.startswith('amazon.nova'):
+                payload = self._build_nova_payload(prompt, system_prompt, images_to_process)
+                url = f"{self.API_BASE_URLS['v2']}/model/{self.model_name}/invoke"
+            else:
+                payload = self._build_messages_payload(prompt, system_prompt, images_to_process)
+                url = f"{self.API_BASE_URLS['v2']}/model/{self.model_name}/invoke"
             
             # Rate limit for throttled models (e.g. Pixtral)
             self._wait_for_rate_limit()
@@ -319,9 +330,96 @@ class HarvardBedrockProvider(LLMProvider):
         
         return payload
     
+    def _build_messages_payload(self, prompt: str, system_prompt: Optional[str],
+                                images: list) -> dict:
+        """Build payload using OpenAI-compatible messages format for V2 invoke
+        (DeepSeek, Qwen, Gemma, Mistral, Moonshot, NVIDIA, etc.)."""
+        messages = []
+
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        # Build user message content
+        if images:
+            content = []
+            for img_path in images:
+                img_ext = Path(img_path).suffix.lower()
+                if img_ext in ['.jpg', '.jpeg']:
+                    media_type = 'image/jpeg'
+                elif img_ext == '.png':
+                    media_type = 'image/png'
+                elif img_ext == '.gif':
+                    media_type = 'image/gif'
+                elif img_ext == '.webp':
+                    media_type = 'image/webp'
+                else:
+                    media_type = 'image/png'
+                content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{media_type};base64,{self._encode_image(img_path)}"
+                    }
+                })
+            content.append({"type": "text", "text": prompt})
+            messages.append({"role": "user", "content": content})
+        else:
+            messages.append({"role": "user", "content": prompt})
+
+        payload = {
+            "messages": messages,
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+        }
+        return payload
+
+    def _build_nova_payload(self, prompt: str, system_prompt: Optional[str],
+                            images: list) -> dict:
+        """Build payload for Amazon Nova models (Bedrock InvokeModel format)."""
+        content = []
+
+        if images:
+            for img_path in images:
+                img_ext = Path(img_path).suffix.lower().lstrip('.')
+                if img_ext in ('jpg', 'jpeg'):
+                    fmt = 'jpeg'
+                elif img_ext in ('png', 'gif', 'webp'):
+                    fmt = img_ext
+                else:
+                    fmt = 'png'
+                content.append({
+                    "image": {
+                        "format": fmt,
+                        "source": {"bytes": self._encode_image(img_path)}
+                    }
+                })
+
+        content.append({"text": prompt})
+
+        payload = {
+            "messages": [{"role": "user", "content": content}],
+            "inferenceConfig": {
+                "max_new_tokens": self.max_tokens,
+                "temperature": self.temperature,
+            }
+        }
+
+        if system_prompt:
+            payload["system"] = [{"text": system_prompt}]
+
+        return payload
+
     def _extract_response_text(self, response: dict) -> str:
         """Extract text from API response."""
         try:
+            # Amazon Nova format - output.message.content
+            if 'output' in response and isinstance(response['output'], dict):
+                msg = response['output'].get('message', {})
+                nova_content = msg.get('content', [])
+                if isinstance(nova_content, list):
+                    for item in nova_content:
+                        if isinstance(item, dict) and 'text' in item:
+                            return item['text'].strip()
+
             # OpenAI-like format (Mistral/Pixtral) - choices array
             if 'choices' in response and isinstance(response['choices'], list) and len(response['choices']) > 0:
                 choice = response['choices'][0]
@@ -444,12 +542,18 @@ class HarvardBedrockProvider(LLMProvider):
                     # Try Anthropic format first
                     input_toks = usage.get('input_tokens', 0)
                     output_toks = usage.get('output_tokens', 0)
-                    
+
                     # Fall back to OpenAI/Mistral format if Anthropic format returns 0
                     if input_toks == 0:
                         input_toks = usage.get('prompt_tokens', 0)
                     if output_toks == 0:
                         output_toks = usage.get('completion_tokens', 0)
+
+                    # Fall back to Amazon Nova format
+                    if input_toks == 0:
+                        input_toks = usage.get('inputTokens', 0)
+                    if output_toks == 0:
+                        output_toks = usage.get('outputTokens', 0)
                     
                     if input_toks > 0 or output_toks > 0:
                         token_metadata['input_tokens'] = input_toks

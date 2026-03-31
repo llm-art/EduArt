@@ -62,6 +62,16 @@ class LLMConfig:
             'us.meta.llama3-1-405b-instruct-v1:0',
             # V2 models - Mistral
             'us.mistral.pixtral-large-2502-v1:0',
+            # V2 models - DeepSeek
+            'deepseek.v3.2',
+            # V2 models - Qwen
+            'qwen.qwen3-vl-235b-a22b',
+            'qwen.qwen3-next-80b-a3b',
+            # V2 models - Other Vision Language Models
+            'google.gemma-3-27b-it',
+            'nvidia.nemotron-nano-12b-v2',
+            'mistral.mistral-large-3-675b-instruct',
+            'moonshotai.kimi-k2.5',
             # V1 models (legacy, without us. prefix)
             'anthropic.claude-3-5-sonnet-20241022-v2:0',
             'anthropic.claude-3-5-haiku-20241022-v1:0',
