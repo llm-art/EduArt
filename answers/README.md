@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Generated: 2026-03-27 15:01
+Generated: 2026-03-31 12:05
 
 ## Metrics Overview
 
@@ -8,30 +8,32 @@ Each question type uses a specific metric depending on the task:
 
 - **Single-choice questions** → Exact Match (binary, cleanest metric).
 - **Multi-choice and error detection** → F1 score (balances precision and recall).
-- **True/False** → evaluated per statement, e.g., one item has 4 to 6 statements.
+- **True/False** → evaluated per statement (not per item) to avoid bias from longer questions.
 - **Positioning and completion tasks** → accuracy per element/blank.
-- **Open-text completion** exact matching.
+- **Open-text completion** is stricter (exact matching), so results should be interpreted with caution.
 
 ## Leaderboard (Macro-Averaged Score)
 
 | Rank | Model | Macro Avg | MCQ Exact Match | N Evaluated |
 |------|-------|-----------|-----------------|-------------|
-| 1 | `google_gemini-3.1-pro-preview` | **83.8%** | 98.8% | 375 |
+| 1 | `google_gemini-3.1-pro-preview` | **82.8%** | 95.7% | 871 |
 | 2 | `google_gemini-3-flash-preview` | **75.4%** | 96.8% | 871 |
 | 3 | `harvard_us.anthropic.claude-opus-4-6-v1` | **67.3%** | 94.6% | 871 |
-| 4 | `harvard_us.anthropic.claude-sonnet-4-6` | **64.8%** | 94.3% | 871 |
-| 5 | `google_gemini-3.1-flash-lite-preview` | **62.8%** | 92.4% | 871 |
-| 6 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | **53.1%** | 84.0% | 871 |
-| 7 | `harvard_us.mistral.pixtral-large-2502-v1:0` | **29.1%** | 28.6% | 871 |
-| 8 | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | **12.5%** | 17.0% | 871 |
+| 4 | `harvard_qwen.qwen3-vl-235b-a22b` | **65.6%** | 91.1% | 464 |
+| 5 | `harvard_us.anthropic.claude-sonnet-4-6` | **64.8%** | 94.3% | 871 |
+| 6 | `google_gemini-3.1-flash-lite-preview` | **62.8%** | 92.4% | 871 |
+| 7 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | **53.1%** | 84.0% | 871 |
+| 8 | `harvard_us.mistral.pixtral-large-2502-v1:0` | **29.1%** | 28.6% | 871 |
+| 9 | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | **12.5%** | 17.0% | 871 |
 
 ## Results by Question Type
 
 | Model | MCQ Radio (Exact Match) | MCQ Check (F1) | True/False (Stmt Accuracy) | Positioning (Element Accuracy) | Completion (Closed) (Blank Accuracy) | Completion (Open) (Blank Accuracy) | Select Errors (F1) |
 |-------|------|------|------|------|------|------|------|
-| `google_gemini-3.1-pro-preview` | 98.8% (n=241) | 85.9% (n=29) | 64.2% (n=25) | 77.8% (n=27) | 94.1% (n=17) | 80.4% (n=26) | 85.6% (n=10) |
+| `google_gemini-3.1-pro-preview` | 95.7% (n=370) | 89.7% (n=117) | 66.3% (n=83) | 84.0% (n=108) | 92.0% (n=69) | 73.4% (n=75) | 78.8% (n=49) |
 | `google_gemini-3-flash-preview` | 96.8% (n=370) | 86.9% (n=117) | 58.9% (n=83) | 73.0% (n=108) | 80.3% (n=69) | 68.2% (n=75) | 63.5% (n=49) |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 94.6% (n=370) | 60.9% (n=117) | 82.5% (n=83) | 85.6% (n=108) | 85.9% (n=69) | 23.9% (n=75) | 37.5% (n=49) |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 91.1% (n=258) | 75.2% (n=52) | 69.8% (n=34) | 80.4% (n=47) | 68.7% (n=24) | 64.7% (n=33) | 9.4% (n=16) |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 94.3% (n=370) | 85.2% (n=117) | 77.5% (n=83) | 77.3% (n=108) | 47.6% (n=69) | 65.8% (n=75) | 6.2% (n=49) |
 | `google_gemini-3.1-flash-lite-preview` | 92.4% (n=370) | 79.1% (n=117) | 76.1% (n=83) | 70.0% (n=108) | 47.2% (n=69) | 63.3% (n=75) | 11.3% (n=49) |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 84.0% (n=370) | 75.7% (n=117) | 73.2% (n=83) | 43.0% (n=108) | 26.1% (n=69) | 62.5% (n=75) | 7.5% (n=49) |
@@ -44,9 +46,10 @@ Each question type uses a specific metric depending on the task:
 
 | Model | Mean | 95% CI | N |
 |-------|------|--------|---|
-| `google_gemini-3.1-pro-preview` | 98.8% | [96.4%, 99.6%] | 241 |
+| `google_gemini-3.1-pro-preview` | 95.7% | [93.1%, 97.3%] | 370 |
 | `google_gemini-3-flash-preview` | 96.8% | [94.4%, 98.1%] | 370 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 94.6% | [91.8%, 96.5%] | 370 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 91.1% | [87.0%, 94.0%] | 258 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 94.3% | [91.5%, 96.3%] | 370 |
 | `google_gemini-3.1-flash-lite-preview` | 92.4% | [89.3%, 94.7%] | 370 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 84.0% | [80.0%, 87.4%] | 370 |
@@ -57,9 +60,10 @@ Each question type uses a specific metric depending on the task:
 
 | Model | Mean | 95% CI | N |
 |-------|------|--------|---|
-| `google_gemini-3.1-pro-preview` | 85.9% | [69.1%, 94.3%] | 29 |
+| `google_gemini-3.1-pro-preview` | 89.7% | [82.9%, 94.0%] | 117 |
 | `google_gemini-3-flash-preview` | 86.9% | [79.5%, 91.8%] | 117 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 60.9% | [51.9%, 69.3%] | 117 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 75.2% | [62.0%, 84.9%] | 52 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 85.2% | [77.7%, 90.5%] | 117 |
 | `google_gemini-3.1-flash-lite-preview` | 79.1% | [70.9%, 85.5%] | 117 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 75.7% | [67.2%, 82.6%] | 117 |
@@ -70,9 +74,10 @@ Each question type uses a specific metric depending on the task:
 
 | Model | Mean | 95% CI | N |
 |-------|------|--------|---|
-| `google_gemini-3.1-pro-preview` | 64.2% | [44.7%, 79.9%] | 25 |
+| `google_gemini-3.1-pro-preview` | 66.3% | [55.7%, 75.6%] | 83 |
 | `google_gemini-3-flash-preview` | 58.9% | [48.2%, 68.9%] | 83 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 82.5% | [72.9%, 89.2%] | 83 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 69.8% | [53.1%, 82.6%] | 34 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 77.5% | [67.4%, 85.1%] | 83 |
 | `google_gemini-3.1-flash-lite-preview` | 76.1% | [65.9%, 84.0%] | 83 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 73.2% | [62.8%, 81.6%] | 83 |
@@ -83,9 +88,10 @@ Each question type uses a specific metric depending on the task:
 
 | Model | Mean | 95% CI | N |
 |-------|------|--------|---|
-| `google_gemini-3.1-pro-preview` | 77.8% | [59.2%, 89.4%] | 27 |
+| `google_gemini-3.1-pro-preview` | 84.0% | [75.9%, 89.7%] | 108 |
 | `google_gemini-3-flash-preview` | 73.0% | [63.9%, 80.5%] | 108 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 85.6% | [77.7%, 91.0%] | 108 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 80.4% | [66.9%, 89.2%] | 47 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 77.3% | [68.5%, 84.2%] | 108 |
 | `google_gemini-3.1-flash-lite-preview` | 70.0% | [60.8%, 77.9%] | 108 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 43.0% | [34.0%, 52.4%] | 108 |
@@ -96,9 +102,10 @@ Each question type uses a specific metric depending on the task:
 
 | Model | Mean | 95% CI | N |
 |-------|------|--------|---|
-| `google_gemini-3.1-pro-preview` | 94.1% | [73.0%, 99.0%] | 17 |
+| `google_gemini-3.1-pro-preview` | 92.0% | [83.2%, 96.4%] | 69 |
 | `google_gemini-3-flash-preview` | 80.3% | [69.4%, 87.9%] | 69 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 85.9% | [75.8%, 92.2%] | 69 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 68.7% | [48.7%, 83.5%] | 24 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 47.6% | [36.2%, 59.2%] | 69 |
 | `google_gemini-3.1-flash-lite-preview` | 47.2% | [35.9%, 58.8%] | 69 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 26.1% | [17.2%, 37.5%] | 69 |
@@ -109,9 +116,10 @@ Each question type uses a specific metric depending on the task:
 
 | Model | Mean | 95% CI | N |
 |-------|------|--------|---|
-| `google_gemini-3.1-pro-preview` | 80.4% | [61.8%, 91.3%] | 26 |
+| `google_gemini-3.1-pro-preview` | 73.4% | [62.4%, 82.1%] | 75 |
 | `google_gemini-3-flash-preview` | 68.2% | [57.0%, 77.6%] | 75 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 23.9% | [15.7%, 34.7%] | 75 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 64.7% | [47.7%, 78.7%] | 33 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 65.8% | [54.5%, 75.5%] | 75 |
 | `google_gemini-3.1-flash-lite-preview` | 63.3% | [51.9%, 73.3%] | 75 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 62.5% | [51.2%, 72.6%] | 75 |
@@ -122,9 +130,10 @@ Each question type uses a specific metric depending on the task:
 
 | Model | Mean | 95% CI | N |
 |-------|------|--------|---|
-| `google_gemini-3.1-pro-preview` | 85.6% | [54.8%, 96.7%] | 10 |
+| `google_gemini-3.1-pro-preview` | 78.8% | [65.5%, 87.9%] | 49 |
 | `google_gemini-3-flash-preview` | 63.5% | [49.5%, 75.6%] | 49 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 37.5% | [25.4%, 51.5%] | 49 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 9.4% | [2.2%, 32.3%] | 16 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 6.2% | [2.1%, 16.6%] | 49 |
 | `google_gemini-3.1-flash-lite-preview` | 11.3% | [5.1%, 23.1%] | 49 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 7.5% | [2.9%, 18.4%] | 49 |
@@ -141,7 +150,8 @@ Paired comparison on questions answered under both conditions. The motivation co
 |-------|----------|---------|------------|------|--------|---------|----------|------|----------|
 | `google_gemini-3-flash-preview` | 871 | 83.2% | 73.3% | -10.0pp | [-12.3, -7.7]pp | 0.000 \* | 48 | 670 | 153 |
 | `google_gemini-3.1-flash-lite-preview` | 871 | 75.6% | 62.8% | -12.8pp | [-15.1, -10.5]pp | 0.000 \* | 44 | 629 | 198 |
-| `google_gemini-3.1-pro-preview` | 375 | 92.1% | 92.1% | -0.0pp | [-1.1, +1.1]pp | 0.994 | 11 | 355 | 9 |
+| `google_gemini-3.1-pro-preview` | 871 | 87.5% | 86.1% | -1.3pp | [-2.5, -0.2]pp | 0.025 \* | 35 | 770 | 66 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 456 | 81.4% | 79.6% | -1.8pp | [-3.3, -0.4]pp | 0.014 \* | 14 | 401 | 41 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 871 | 66.0% | 66.7% | +0.7pp | [-0.8, +2.1]pp | 0.368 | 60 | 749 | 62 |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 77.8% | 79.4% | +1.6pp | [-0.0, +3.2]pp | 0.053 | 67 | 759 | 45 |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 78.3% | 80.9% | +2.6pp | [+1.0, +4.2]pp | 0.001 \* | 61 | 763 | 47 |
@@ -166,13 +176,20 @@ Paired comparison on questions answered under both conditions. The motivation co
 | `google_gemini-3.1-flash-lite-preview` | Positioning | 108 | 70.0% | 47.3% | -22.7pp |
 | `google_gemini-3.1-flash-lite-preview` | Select Errors | 49 | 11.3% | 9.2% | -2.0pp |
 | `google_gemini-3.1-flash-lite-preview` | True/False | 83 | 76.1% | 62.0% | -14.1pp |
-| `google_gemini-3.1-pro-preview` | Completion (Closed) | 17 | 94.1% | 94.1% | +0.0pp |
-| `google_gemini-3.1-pro-preview` | Completion (Open) | 26 | 80.4% | 79.1% | -1.3pp |
-| `google_gemini-3.1-pro-preview` | MCQ Check | 29 | 85.9% | 84.8% | -1.1pp |
-| `google_gemini-3.1-pro-preview` | MCQ Radio | 241 | 98.8% | 98.8% | +0.0pp |
-| `google_gemini-3.1-pro-preview` | Positioning | 27 | 77.8% | 81.5% | +3.7pp |
-| `google_gemini-3.1-pro-preview` | Select Errors | 10 | 85.6% | 85.9% | +0.3pp |
-| `google_gemini-3.1-pro-preview` | True/False | 25 | 64.2% | 62.6% | -1.6pp |
+| `google_gemini-3.1-pro-preview` | Completion (Closed) | 69 | 92.0% | 87.8% | -4.2pp |
+| `google_gemini-3.1-pro-preview` | Completion (Open) | 75 | 73.4% | 73.6% | +0.2pp |
+| `google_gemini-3.1-pro-preview` | MCQ Check | 117 | 89.7% | 87.9% | -1.8pp |
+| `google_gemini-3.1-pro-preview` | MCQ Radio | 370 | 95.7% | 96.0% | +0.3pp |
+| `google_gemini-3.1-pro-preview` | Positioning | 108 | 84.0% | 80.2% | -3.7pp |
+| `google_gemini-3.1-pro-preview` | Select Errors | 49 | 78.8% | 77.1% | -1.7pp |
+| `google_gemini-3.1-pro-preview` | True/False | 83 | 66.3% | 62.7% | -3.6pp |
+| `harvard_qwen.qwen3-vl-235b-a22b` | Completion (Closed) | 24 | 68.7% | 74.1% | +5.5pp |
+| `harvard_qwen.qwen3-vl-235b-a22b` | Completion (Open) | 31 | 63.6% | 62.3% | -1.3pp |
+| `harvard_qwen.qwen3-vl-235b-a22b` | MCQ Check | 52 | 75.2% | 68.6% | -6.6pp |
+| `harvard_qwen.qwen3-vl-235b-a22b` | MCQ Radio | 255 | 92.2% | 91.8% | -0.4pp |
+| `harvard_qwen.qwen3-vl-235b-a22b` | Positioning | 45 | 81.1% | 79.3% | -1.7pp |
+| `harvard_qwen.qwen3-vl-235b-a22b` | Select Errors | 16 | 9.4% | 10.4% | +0.9pp |
+| `harvard_qwen.qwen3-vl-235b-a22b` | True/False | 33 | 69.5% | 56.7% | -12.9pp |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | Completion (Closed) | 69 | 26.1% | 23.7% | -2.4pp |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | Completion (Open) | 75 | 62.5% | 61.9% | -0.6pp |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | MCQ Check | 117 | 75.7% | 76.5% | +0.9pp |
@@ -213,60 +230,62 @@ Paired comparison on questions answered under both conditions. The motivation co
 
 ## Item Analysis (CTT & IRT)
 
-Analysis across **16 examinees** (model × condition) and **871 items**.
+Analysis across **18 examinees** (model × condition) and **871 items**.
 
 ### Classical Test Theory (CTT)
 
 | Statistic | Mean | SD | Min | Max |
 |-----------|------|----|-----|-----|
-| Item Difficulty (p) | 0.607 | 0.219 | 0.000 | 1.000 |
-| Discrimination (r_pb) | 0.652 | 0.234 | -0.203 | 0.974 |
+| Item Difficulty (p) | 0.635 | 0.212 | 0.000 | 1.000 |
+| Discrimination (r_pb) | 0.656 | 0.232 | -0.181 | 0.972 |
 
 **Item Difficulty Distribution**
 
 | Category | p Range | Count |
 |----------|---------|-------|
-| Very Easy | ≥ 0.90 | 34 |
-| Easy | 0.70 – 0.89 | 360 |
-| Medium | 0.30 – 0.69 | 385 |
-| Hard | 0.10 – 0.29 | 70 |
-| Very Hard | < 0.10 | 22 |
+| Very Easy | ≥ 0.90 | 33 |
+| Easy | 0.70 – 0.89 | 379 |
+| Medium | 0.30 – 0.69 | 384 |
+| Hard | 0.10 – 0.29 | 59 |
+| Very Hard | < 0.10 | 16 |
 
 **Item Discrimination Distribution**
 
 | Category | r_pb Range | Count |
 |----------|------------|-------|
-| Good | ≥ 0.30 | 777 |
-| Fair | 0.10 – 0.29 | 55 |
-| Poor | < 0.10 | 11 |
+| Good | ≥ 0.30 | 779 |
+| Fair | 0.10 – 0.29 | 56 |
+| Poor | < 0.10 | 10 |
 
 ### Item Response Theory — Rasch Model (1PL)
 
-- Converged: Yes (21 iterations)
+- Converged: Yes (22 iterations)
 - Person Separation Reliability: 0.996
-- Estimable items: 843 / 871 (28 items with zero variance excluded)
+- Estimable items: 845 / 871 (26 items with zero variance excluded)
 - Item difficulty (b) range: [-6.00, 6.00]
 
 **Examinee Ability Estimates (θ)**
 
 | Model / Condition | θ |
 |-------------------|---|
-| `google_gemini-3.1-pro-preview/default` | +2.044 |
-| `google_gemini-3.1-pro-preview/motivation` | +2.043 |
-| `google_gemini-3-flash-preview/default` | +1.482 |
-| `harvard_us.anthropic.claude-sonnet-4-6/motivation` | +1.246 |
-| `harvard_us.anthropic.claude-opus-4-6-v1/motivation` | +1.114 |
-| `harvard_us.anthropic.claude-sonnet-4-6/default` | +1.013 |
-| `harvard_us.anthropic.claude-opus-4-6-v1/default` | +0.974 |
-| `google_gemini-3.1-flash-lite-preview/default` | +0.796 |
-| `google_gemini-3-flash-preview/motivation` | +0.611 |
-| `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0/motivation` | +0.145 |
-| `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0/default` | +0.102 |
-| `google_gemini-3.1-flash-lite-preview/motivation` | -0.107 |
-| `harvard_us.mistral.pixtral-large-2502-v1:0/default` | -2.101 |
-| `harvard_us.mistral.pixtral-large-2502-v1:0/motivation` | -2.229 |
-| `harvard_us.meta.llama4-maverick-17b-instruct-v1:0/default` | -3.468 |
-| `harvard_us.meta.llama4-maverick-17b-instruct-v1:0/motivation` | -3.666 |
+| `google_gemini-3.1-pro-preview/default` | +1.889 |
+| `google_gemini-3.1-pro-preview/motivation` | +1.723 |
+| `google_gemini-3-flash-preview/default` | +1.408 |
+| `harvard_us.anthropic.claude-sonnet-4-6/motivation` | +1.177 |
+| `harvard_us.anthropic.claude-opus-4-6-v1/motivation` | +1.047 |
+| `harvard_us.anthropic.claude-sonnet-4-6/default` | +0.948 |
+| `harvard_us.anthropic.claude-opus-4-6-v1/default` | +0.909 |
+| `harvard_qwen.qwen3-vl-235b-a22b/default` | +0.757 |
+| `google_gemini-3.1-flash-lite-preview/default` | +0.734 |
+| `harvard_qwen.qwen3-vl-235b-a22b/motivation` | +0.617 |
+| `google_gemini-3-flash-preview/motivation` | +0.550 |
+| `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0/motivation` | +0.087 |
+| `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0/default` | +0.044 |
+| `google_gemini-3.1-flash-lite-preview/motivation` | -0.165 |
+| `harvard_us.mistral.pixtral-large-2502-v1:0/default` | -2.166 |
+| `harvard_us.mistral.pixtral-large-2502-v1:0/motivation` | -2.295 |
+| `harvard_us.meta.llama4-maverick-17b-instruct-v1:0/default` | -3.534 |
+| `harvard_us.meta.llama4-maverick-17b-instruct-v1:0/motivation` | -3.731 |
 
 **10 Hardest Items** (lowest p-value)
 
@@ -276,12 +295,12 @@ Analysis across **16 examinees** (model × condition) and **871 items**.
 | 0350 | completion_closed | 0.000 | — | 6.00 |
 | 0376 | positioning | 0.000 | — | 6.00 |
 | 0560 | positioning | 0.000 | — | 6.00 |
-| 0575 | select_errors | 0.000 | — | 6.00 |
 | 0678 | multiple_choice_radio | 0.000 | — | 6.00 |
 | 0679 | multiple_choice_radio | 0.000 | — | 6.00 |
 | 0681 | multiple_choice_radio | 0.000 | — | 6.00 |
 | 0689 | multiple_choice_radio | 0.000 | — | 6.00 |
 | 0811 | select_errors | 0.000 | — | 6.00 |
+| 0835 | completion_closed | 0.000 | — | 6.00 |
 
 **10 Easiest Items** (highest p-value)
 
@@ -302,16 +321,16 @@ Analysis across **16 examinees** (model × condition) and **871 items**.
 
 | Question | Type | p | r_pb | b (Rasch) |
 |----------|------|---|------|-----------|
-| 0712 | multiple_choice_check | 0.665 | 0.974 | -1.17 |
-| 0603 | multiple_choice_check | 0.758 | 0.970 | -2.02 |
-| 0290 | multiple_choice_check | 0.720 | 0.965 | -1.33 |
-| 0528 | multiple_choice_check | 0.704 | 0.963 | -1.51 |
-| 0593 | multiple_choice_check | 0.700 | 0.962 | -1.47 |
-| 0642 | true_false | 0.829 | 0.959 | -2.78 |
-| 0862 | multiple_choice_check | 0.476 | 0.959 | 0.11 |
-| 0396 | multiple_choice_radio | 0.714 | 0.959 | -1.60 |
-| 0421 | multiple_choice_check | 0.714 | 0.959 | -1.60 |
-| 0441 | multiple_choice_radio | 0.714 | 0.959 | -1.60 |
+| 0712 | multiple_choice_check | 0.707 | 0.972 | -1.29 |
+| 0603 | multiple_choice_check | 0.788 | 0.963 | -2.11 |
+| 0528 | multiple_choice_check | 0.741 | 0.957 | -1.61 |
+| 0593 | multiple_choice_check | 0.738 | 0.956 | -1.57 |
+| 0001 | multiple_choice_radio | 0.778 | 0.952 | -1.80 |
+| 0003 | multiple_choice_radio | 0.778 | 0.952 | -1.80 |
+| 0004 | multiple_choice_radio | 0.778 | 0.952 | -1.80 |
+| 0007 | multiple_choice_radio | 0.778 | 0.952 | -1.80 |
+| 0008 | multiple_choice_radio | 0.778 | 0.952 | -1.80 |
+| 0024 | multiple_choice_radio | 0.778 | 0.952 | -1.80 |
 
 > **Note**: Rasch (1PL) via JMLE. With N≤10 examinees, estimates have high uncertainty. Items with zero variance across examinees are non-estimable.
 
@@ -322,23 +341,31 @@ Pairwise test of whether two models differ significantly on the same items (bina
 | Model A | Model B | N | A✓B✗ | A✗B✓ | χ² | p-value | Favours |
 |---------|---------|---|------|------|----|---------|---------| 
 | `google_gemini-3-flash-preview` | `google_gemini-3.1-flash-lite-preview` | 871 | 123 | 59 | 21.81 | 0.0000 \* | google_gemini-3-flash-preview |
-| `google_gemini-3-flash-preview` | `google_gemini-3.1-pro-preview` | 375 | 5 | 20 | 7.84 | 0.0051 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3-flash-preview` | `google_gemini-3.1-pro-preview` | 871 | 20 | 63 | 21.25 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3-flash-preview` | `harvard_qwen.qwen3-vl-235b-a22b` | 464 | 49 | 26 | 6.45 | 0.0111 \* | google_gemini-3-flash-preview |
 | `google_gemini-3-flash-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 871 | 189 | 38 | 99.12 | 0.0000 \* | google_gemini-3-flash-preview |
 | `google_gemini-3-flash-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 116 | 66 | 13.19 | 0.0003 \* | google_gemini-3-flash-preview |
 | `google_gemini-3-flash-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 99 | 64 | 7.09 | 0.0077 \* | google_gemini-3-flash-preview |
 | `google_gemini-3-flash-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 633 | 3 | 622.08 | 0.0000 \* | google_gemini-3-flash-preview |
 | `google_gemini-3-flash-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 871 | 488 | 26 | 413.46 | 0.0000 \* | google_gemini-3-flash-preview |
-| `google_gemini-3.1-flash-lite-preview` | `google_gemini-3.1-pro-preview` | 375 | 11 | 32 | 9.30 | 0.0023 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-flash-lite-preview` | `google_gemini-3.1-pro-preview` | 871 | 29 | 136 | 68.10 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-flash-lite-preview` | `harvard_qwen.qwen3-vl-235b-a22b` | 464 | 37 | 24 | 2.36 | 0.1244 | google_gemini-3.1-flash-lite-preview |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 871 | 134 | 47 | 40.86 | 0.0000 \* | google_gemini-3.1-flash-lite-preview |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 100 | 114 | 0.79 | 0.3742 | harvard_us.anthropic.claude-opus-4-6-v1 |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 50 | 79 | 6.08 | 0.0137 \* | harvard_us.anthropic.claude-sonnet-4-6 |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 569 | 3 | 558.09 | 0.0000 \* | google_gemini-3.1-flash-lite-preview |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 871 | 434 | 36 | 335.34 | 0.0000 \* | google_gemini-3.1-flash-lite-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 375 | 70 | 7 | 49.92 | 0.0000 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 375 | 35 | 7 | 17.36 | 0.0000 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 375 | 29 | 10 | 8.31 | 0.0039 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 375 | 301 | 0 | 299.00 | 0.0000 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 375 | 234 | 2 | 226.11 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_qwen.qwen3-vl-235b-a22b` | 464 | 57 | 13 | 26.41 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 871 | 216 | 22 | 156.51 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 123 | 30 | 55.32 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 111 | 33 | 41.17 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 674 | 1 | 669.01 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 871 | 513 | 8 | 487.55 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 464 | 60 | 13 | 28.99 | 0.0000 \* | harvard_qwen.qwen3-vl-235b-a22b |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.anthropic.claude-opus-4-6-v1` | 464 | 39 | 42 | 0.05 | 0.8241 | harvard_us.anthropic.claude-opus-4-6-v1 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.anthropic.claude-sonnet-4-6` | 464 | 20 | 37 | 4.49 | 0.0341 \* | harvard_us.anthropic.claude-sonnet-4-6 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 464 | 331 | 2 | 323.08 | 0.0000 \* | harvard_qwen.qwen3-vl-235b-a22b |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 464 | 252 | 8 | 227.11 | 0.0000 \* | harvard_qwen.qwen3-vl-235b-a22b |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 81 | 182 | 38.02 | 0.0000 \* | harvard_us.anthropic.claude-opus-4-6-v1 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 32 | 148 | 73.47 | 0.0000 \* | harvard_us.anthropic.claude-sonnet-4-6 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 486 | 7 | 463.46 | 0.0000 \* | harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0 |
@@ -359,23 +386,31 @@ Pairwise test of whether two models differ significantly on the same items (bina
 | Model A | Model B | N | A✓B✗ | A✗B✓ | χ² | p-value | Favours |
 |---------|---------|---|------|------|----|---------|---------| 
 | `google_gemini-3-flash-preview` | `google_gemini-3.1-flash-lite-preview` | 871 | 151 | 58 | 40.50 | 0.0000 \* | google_gemini-3-flash-preview |
-| `google_gemini-3-flash-preview` | `google_gemini-3.1-pro-preview` | 375 | 2 | 33 | 25.71 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3-flash-preview` | `google_gemini-3.1-pro-preview` | 871 | 14 | 133 | 94.72 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3-flash-preview` | `harvard_qwen.qwen3-vl-235b-a22b` | 465 | 46 | 54 | 0.49 | 0.4839 | harvard_qwen.qwen3-vl-235b-a22b |
 | `google_gemini-3-flash-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 871 | 142 | 91 | 10.73 | 0.0011 \* | google_gemini-3-flash-preview |
 | `google_gemini-3-flash-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 80 | 131 | 11.85 | 0.0006 \* | harvard_us.anthropic.claude-opus-4-6-v1 |
 | `google_gemini-3-flash-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 65 | 145 | 29.72 | 0.0000 \* | harvard_us.anthropic.claude-sonnet-4-6 |
 | `google_gemini-3-flash-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 562 | 0 | 560.00 | 0.0000 \* | google_gemini-3-flash-preview |
 | `google_gemini-3-flash-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 871 | 459 | 60 | 305.21 | 0.0000 \* | google_gemini-3-flash-preview |
-| `google_gemini-3.1-flash-lite-preview` | `google_gemini-3.1-pro-preview` | 375 | 8 | 62 | 40.13 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-flash-lite-preview` | `google_gemini-3.1-pro-preview` | 871 | 22 | 234 | 173.91 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-flash-lite-preview` | `harvard_qwen.qwen3-vl-235b-a22b` | 465 | 26 | 70 | 19.26 | 0.0000 \* | harvard_qwen.qwen3-vl-235b-a22b |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 871 | 85 | 127 | 7.93 | 0.0049 \* | harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0 |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 53 | 197 | 81.80 | 0.0000 \* | harvard_us.anthropic.claude-opus-4-6-v1 |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 31 | 204 | 125.89 | 0.0000 \* | harvard_us.anthropic.claude-sonnet-4-6 |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 472 | 3 | 461.10 | 0.0000 \* | google_gemini-3.1-flash-lite-preview |
 | `google_gemini-3.1-flash-lite-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 871 | 380 | 74 | 204.90 | 0.0000 \* | google_gemini-3.1-flash-lite-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 375 | 68 | 5 | 52.66 | 0.0000 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 375 | 29 | 10 | 8.31 | 0.0039 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 375 | 22 | 9 | 4.65 | 0.0311 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 375 | 308 | 0 | 306.00 | 0.0000 \* | google_gemini-3.1-pro-preview |
-| `google_gemini-3.1-pro-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 375 | 267 | 3 | 256.18 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_qwen.qwen3-vl-235b-a22b` | 465 | 56 | 13 | 25.57 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 871 | 201 | 31 | 123.11 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 109 | 41 | 29.93 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 86 | 47 | 10.86 | 0.0010 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 682 | 1 | 677.01 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `google_gemini-3.1-pro-preview` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 871 | 537 | 19 | 480.74 | 0.0000 \* | google_gemini-3.1-pro-preview |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 465 | 54 | 12 | 25.47 | 0.0000 \* | harvard_qwen.qwen3-vl-235b-a22b |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.anthropic.claude-opus-4-6-v1` | 465 | 25 | 46 | 5.63 | 0.0176 \* | harvard_us.anthropic.claude-opus-4-6-v1 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.anthropic.claude-sonnet-4-6` | 465 | 15 | 42 | 11.86 | 0.0006 \* | harvard_us.anthropic.claude-sonnet-4-6 |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 465 | 336 | 0 | 334.00 | 0.0000 \* | harvard_qwen.qwen3-vl-235b-a22b |
+| `harvard_qwen.qwen3-vl-235b-a22b` | `harvard_us.mistral.pixtral-large-2502-v1:0` | 465 | 279 | 9 | 251.25 | 0.0000 \* | harvard_qwen.qwen3-vl-235b-a22b |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | `harvard_us.anthropic.claude-opus-4-6-v1` | 871 | 71 | 173 | 41.81 | 0.0000 \* | harvard_us.anthropic.claude-opus-4-6-v1 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | `harvard_us.anthropic.claude-sonnet-4-6` | 871 | 35 | 166 | 84.08 | 0.0000 \* | harvard_us.anthropic.claude-sonnet-4-6 |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | `harvard_us.meta.llama4-maverick-17b-instruct-v1:0` | 871 | 516 | 5 | 499.23 | 0.0000 \* | harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0 |
@@ -395,7 +430,8 @@ Pairwise test of whether two models differ significantly on the same items (bina
 |-------|------|------|
 | `google_gemini-3-flash-preview` | 99.0% (n=203) | 78.5% (n=668) |
 | `google_gemini-3.1-flash-lite-preview` | 97.5% (n=203) | 69.0% (n=668) |
-| `google_gemini-3.1-pro-preview` | 100.0% (n=203) | 82.8% (n=172) |
+| `google_gemini-3.1-pro-preview` | 100.0% (n=203) | 83.7% (n=668) |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 94.5% (n=202) | 70.2% (n=262) |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 88.2% (n=203) | 59.3% (n=668) |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 97.5% (n=203) | 71.8% (n=668) |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 98.5% (n=203) | 72.1% (n=668) |
@@ -410,7 +446,8 @@ Pairwise test of whether two models differ significantly on the same items (bina
 |-------|------|------|
 | `google_gemini-3-flash-preview` | 75.0% (n=435) | 91.5% (n=436) |
 | `google_gemini-3.1-flash-lite-preview` | 65.6% (n=435) | 85.7% (n=436) |
-| `google_gemini-3.1-pro-preview` | 80.9% (n=115) | 97.1% (n=260) |
+| `google_gemini-3.1-pro-preview` | 82.1% (n=435) | 92.8% (n=436) |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 70.8% (n=157) | 85.9% (n=307) |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 58.0% (n=435) | 74.1% (n=436) |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 73.0% (n=435) | 82.7% (n=436) |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 69.0% (n=435) | 87.5% (n=436) |
@@ -425,7 +462,8 @@ Pairwise test of whether two models differ significantly on the same items (bina
 |-------|------|------|
 | `google_gemini-3-flash-preview` | 99.5% (n=203) | 65.3% (n=668) |
 | `google_gemini-3.1-flash-lite-preview` | 98.0% (n=203) | 52.1% (n=668) |
-| `google_gemini-3.1-pro-preview` | 100.0% (n=203) | 82.8% (n=172) |
+| `google_gemini-3.1-pro-preview` | 100.0% (n=203) | 81.9% (n=668) |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 95.1% (n=203) | 66.7% (n=262) |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 88.7% (n=203) | 60.0% (n=668) |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 99.0% (n=203) | 73.5% (n=668) |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 98.0% (n=203) | 75.6% (n=668) |
@@ -440,7 +478,8 @@ Pairwise test of whether two models differ significantly on the same items (bina
 |-------|------|------|
 | `google_gemini-3-flash-preview` | 60.4% (n=435) | 86.1% (n=436) |
 | `google_gemini-3.1-flash-lite-preview` | 54.7% (n=435) | 71.0% (n=436) |
-| `google_gemini-3.1-pro-preview` | 81.1% (n=115) | 97.0% (n=260) |
+| `google_gemini-3.1-pro-preview` | 80.2% (n=435) | 92.0% (n=436) |
+| `harvard_qwen.qwen3-vl-235b-a22b` | 69.7% (n=156) | 83.8% (n=309) |
 | `harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0` | 59.0% (n=435) | 74.3% (n=436) |
 | `harvard_us.anthropic.claude-opus-4-6-v1` | 74.0% (n=435) | 84.8% (n=436) |
 | `harvard_us.anthropic.claude-sonnet-4-6` | 71.0% (n=435) | 90.7% (n=436) |
@@ -451,61 +490,63 @@ Pairwise test of whether two models differ significantly on the same items (bina
 
 ## Logistic Regression (`default`)
 
-P(correct) ~ question_type + has_image + language + model (n=6,472, threshold=0.5)
+P(correct) ~ question_type + has_image + language + model (n=7,432, threshold=0.5)
 
 Reference categories: type=`multiple_choice_radio`, has_image=False, language=`en`, model=`google_gemini-3-flash-preview`
 
 | Predictor | β | SE | z | p | OR | 95% CI |
 |-----------|---|----|----|---|----|---------| 
-| intercept | 3.153 | 0.163 | 19.39 | 0.0000 \* | 23.398 | [17.01, 32.18] |
-| type:completion_closed | -1.464 | 0.134 | -10.92 | 0.0000 \* | 0.231 | [0.18, 0.30] |
-| type:completion_open | -1.114 | 0.133 | -8.35 | 0.0000 \* | 0.328 | [0.25, 0.43] |
-| type:multiple_choice_check | 0.084 | 0.132 | 0.64 | 0.5238 | 1.088 | [0.84, 1.41] |
-| type:positioning | -0.878 | 0.123 | -7.16 | 0.0000 \* | 0.415 | [0.33, 0.53] |
-| type:select_errors | -2.722 | 0.158 | -17.21 | 0.0000 \* | 0.066 | [0.05, 0.09] |
-| type:true_false | 0.342 | 0.143 | 2.38 | 0.0171 \* | 1.407 | [1.06, 1.86] |
-| has_image:True | -0.288 | 0.091 | -3.16 | 0.0016 \* | 0.750 | [0.63, 0.90] |
-| language:it | -0.545 | 0.127 | -4.30 | 0.0000 \* | 0.580 | [0.45, 0.74] |
-| model:google_gemini-3.1-flash-lite-preview | -0.622 | 0.141 | -4.40 | 0.0000 \* | 0.537 | [0.41, 0.71] |
-| model:google_gemini-3.1-pro-preview | 0.894 | 0.280 | 3.20 | 0.0014 \* | 2.446 | [1.41, 4.23] |
-| model:harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0 | -1.246 | 0.135 | -9.22 | 0.0000 \* | 0.288 | [0.22, 0.38] |
-| model:harvard_us.anthropic.claude-opus-4-6-v1 | -0.503 | 0.143 | -3.51 | 0.0004 \* | 0.605 | [0.46, 0.80] |
-| model:harvard_us.anthropic.claude-sonnet-4-6 | -0.366 | 0.145 | -2.52 | 0.0118 \* | 0.694 | [0.52, 0.92] |
-| model:harvard_us.meta.llama4-maverick-17b-instruct-v1:0 | -4.115 | 0.150 | -27.47 | 0.0000 \* | 0.016 | [0.01, 0.02] |
-| model:harvard_us.mistral.pixtral-large-2502-v1:0 | -2.948 | 0.135 | -21.86 | 0.0000 \* | 0.052 | [0.04, 0.07] |
+| intercept | 3.191 | 0.157 | 20.30 | 0.0000 \* | 24.319 | [17.87, 33.09] |
+| type:completion_closed | -1.297 | 0.126 | -10.28 | 0.0000 \* | 0.273 | [0.21, 0.35] |
+| type:completion_open | -0.991 | 0.126 | -7.86 | 0.0000 \* | 0.371 | [0.29, 0.48] |
+| type:multiple_choice_check | 0.208 | 0.126 | 1.66 | 0.0977 | 1.232 | [0.96, 1.58] |
+| type:positioning | -0.790 | 0.116 | -6.81 | 0.0000 \* | 0.454 | [0.36, 0.57] |
+| type:select_errors | -2.557 | 0.144 | -17.78 | 0.0000 \* | 0.077 | [0.06, 0.10] |
+| type:true_false | 0.190 | 0.134 | 1.42 | 0.1562 | 1.210 | [0.93, 1.57] |
+| has_image:True | -0.315 | 0.086 | -3.68 | 0.0002 \* | 0.730 | [0.62, 0.86] |
+| language:it | -0.670 | 0.120 | -5.57 | 0.0000 \* | 0.512 | [0.40, 0.65] |
+| model:google_gemini-3.1-flash-lite-preview | -0.613 | 0.140 | -4.37 | 0.0000 \* | 0.542 | [0.41, 0.71] |
+| model:google_gemini-3.1-pro-preview | 0.598 | 0.170 | 3.53 | 0.0004 \* | 1.817 | [1.30, 2.53] |
+| model:harvard_qwen.qwen3-vl-235b-a22b | -0.397 | 0.176 | -2.25 | 0.0243 \* | 0.672 | [0.48, 0.95] |
+| model:harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0 | -1.227 | 0.134 | -9.16 | 0.0000 \* | 0.293 | [0.23, 0.38] |
+| model:harvard_us.anthropic.claude-opus-4-6-v1 | -0.495 | 0.142 | -3.49 | 0.0005 \* | 0.609 | [0.46, 0.81] |
+| model:harvard_us.anthropic.claude-sonnet-4-6 | -0.361 | 0.144 | -2.50 | 0.0124 \* | 0.697 | [0.53, 0.93] |
+| model:harvard_us.meta.llama4-maverick-17b-instruct-v1:0 | -4.074 | 0.148 | -27.46 | 0.0000 \* | 0.017 | [0.01, 0.02] |
+| model:harvard_us.mistral.pixtral-large-2502-v1:0 | -2.911 | 0.133 | -21.83 | 0.0000 \* | 0.054 | [0.04, 0.07] |
 
 > OR > 1 means higher odds of correct answer vs reference. \* = p < 0.05.
 
 ## Logistic Regression (`motivation`)
 
-P(correct) ~ question_type + has_image + language + model (n=6,472, threshold=0.5)
+P(correct) ~ question_type + has_image + language + model (n=7,433, threshold=0.5)
 
 Reference categories: type=`multiple_choice_radio`, has_image=False, language=`en`, model=`google_gemini-3-flash-preview`
 
 | Predictor | β | SE | z | p | OR | 95% CI |
 |-----------|---|----|----|---|----|---------| 
-| intercept | 2.353 | 0.145 | 16.22 | 0.0000 \* | 10.515 | [7.91, 13.97] |
-| type:completion_closed | -1.572 | 0.133 | -11.85 | 0.0000 \* | 0.208 | [0.16, 0.27] |
-| type:completion_open | -1.076 | 0.131 | -8.19 | 0.0000 \* | 0.341 | [0.26, 0.44] |
-| type:multiple_choice_check | -0.417 | 0.126 | -3.32 | 0.0009 \* | 0.659 | [0.52, 0.84] |
-| type:positioning | -1.063 | 0.119 | -8.91 | 0.0000 \* | 0.345 | [0.27, 0.44] |
-| type:select_errors | -2.817 | 0.163 | -17.34 | 0.0000 \* | 0.060 | [0.04, 0.08] |
-| type:true_false | 0.212 | 0.139 | 1.53 | 0.1257 | 1.237 | [0.94, 1.62] |
-| has_image:True | -0.166 | 0.089 | -1.87 | 0.0620 | 0.847 | [0.71, 1.01] |
-| language:it | -0.485 | 0.124 | -3.90 | 0.0001 \* | 0.616 | [0.48, 0.79] |
-| model:google_gemini-3.1-flash-lite-preview | -0.619 | 0.117 | -5.31 | 0.0000 \* | 0.539 | [0.43, 0.68] |
-| model:google_gemini-3.1-pro-preview | 1.613 | 0.266 | 6.06 | 0.0000 \* | 5.016 | [2.98, 8.45] |
-| model:harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0 | -0.357 | 0.119 | -3.01 | 0.0027 \* | 0.700 | [0.55, 0.88] |
-| model:harvard_us.anthropic.claude-opus-4-6-v1 | 0.424 | 0.130 | 3.27 | 0.0011 \* | 1.529 | [1.19, 1.97] |
-| model:harvard_us.anthropic.claude-sonnet-4-6 | 0.716 | 0.136 | 5.25 | 0.0000 \* | 2.047 | [1.57, 2.67] |
-| model:harvard_us.meta.llama4-maverick-17b-instruct-v1:0 | -3.542 | 0.140 | -25.38 | 0.0000 \* | 0.029 | [0.02, 0.04] |
-| model:harvard_us.mistral.pixtral-large-2502-v1:0 | -2.297 | 0.118 | -19.43 | 0.0000 \* | 0.101 | [0.08, 0.13] |
+| intercept | 2.432 | 0.140 | 17.43 | 0.0000 \* | 11.386 | [8.66, 14.97] |
+| type:completion_closed | -1.415 | 0.124 | -11.39 | 0.0000 \* | 0.243 | [0.19, 0.31] |
+| type:completion_open | -0.987 | 0.124 | -7.95 | 0.0000 \* | 0.373 | [0.29, 0.48] |
+| type:multiple_choice_check | -0.257 | 0.120 | -2.15 | 0.0319 \* | 0.774 | [0.61, 0.98] |
+| type:positioning | -1.003 | 0.113 | -8.89 | 0.0000 \* | 0.367 | [0.29, 0.46] |
+| type:select_errors | -2.634 | 0.145 | -18.11 | 0.0000 \* | 0.072 | [0.05, 0.10] |
+| type:true_false | -0.021 | 0.129 | -0.16 | 0.8713 | 0.979 | [0.76, 1.26] |
+| has_image:True | -0.223 | 0.083 | -2.67 | 0.0075 \* | 0.800 | [0.68, 0.94] |
+| language:it | -0.619 | 0.118 | -5.24 | 0.0000 \* | 0.538 | [0.43, 0.68] |
+| model:google_gemini-3.1-flash-lite-preview | -0.608 | 0.116 | -5.27 | 0.0000 \* | 0.544 | [0.43, 0.68] |
+| model:google_gemini-3.1-pro-preview | 1.192 | 0.149 | 7.97 | 0.0000 \* | 3.295 | [2.46, 4.42] |
+| model:harvard_qwen.qwen3-vl-235b-a22b | 0.320 | 0.161 | 1.98 | 0.0474 \* | 1.376 | [1.00, 1.89] |
+| model:harvard_us.anthropic.claude-haiku-4-5-20251001-v1:0 | -0.350 | 0.118 | -2.98 | 0.0029 \* | 0.704 | [0.56, 0.89] |
+| model:harvard_us.anthropic.claude-opus-4-6-v1 | 0.417 | 0.129 | 3.24 | 0.0012 \* | 1.518 | [1.18, 1.95] |
+| model:harvard_us.anthropic.claude-sonnet-4-6 | 0.704 | 0.135 | 5.21 | 0.0000 \* | 2.022 | [1.55, 2.64] |
+| model:harvard_us.meta.llama4-maverick-17b-instruct-v1:0 | -3.508 | 0.139 | -25.33 | 0.0000 \* | 0.030 | [0.02, 0.04] |
+| model:harvard_us.mistral.pixtral-large-2502-v1:0 | -2.267 | 0.117 | -19.38 | 0.0000 \* | 0.104 | [0.08, 0.13] |
 
 > OR > 1 means higher odds of correct answer vs reference. \* = p < 0.05.
 
 ## Hardest Items (p = 0)
 
-**12** items scored 0 across all models and conditions. **10** additional items scored p < 0.10.
+**10** items scored 0 across all models and conditions. **6** additional items scored p < 0.10.
 
 **4 flagged for review** (MCQ radio with p=0 — possible data or extraction errors):
 
@@ -520,13 +561,13 @@ Reference categories: type=`multiple_choice_radio`, has_image=False, language=`e
 
 | Type | N | Mean r_pb | Median | Good (≥.30) | Fair (.10–.29) | Poor (<.10) |
 |------|---|-----------|--------|-------------|----------------|-------------|
-| completion_closed | 67 | 0.549 | 0.585 | 59 | 8 | 0 |
-| completion_open | 75 | 0.624 | 0.651 | 71 | 3 | 1 |
-| multiple_choice_check | 117 | 0.660 | 0.690 | 111 | 5 | 1 |
-| multiple_choice_radio | 354 | 0.763 | 0.827 | 344 | 8 | 2 |
-| positioning | 105 | 0.603 | 0.624 | 93 | 11 | 1 |
-| select_errors | 46 | 0.450 | 0.470 | 44 | 1 | 1 |
-| true_false | 79 | 0.444 | 0.448 | 55 | 19 | 5 |
+| completion_closed | 67 | 0.583 | 0.584 | 63 | 4 | 0 |
+| completion_open | 75 | 0.641 | 0.673 | 72 | 3 | 0 |
+| multiple_choice_check | 117 | 0.674 | 0.686 | 114 | 2 | 1 |
+| multiple_choice_radio | 354 | 0.761 | 0.822 | 344 | 8 | 2 |
+| positioning | 105 | 0.614 | 0.631 | 95 | 9 | 1 |
+| select_errors | 48 | 0.497 | 0.513 | 47 | 1 | 0 |
+| true_false | 79 | 0.383 | 0.345 | 44 | 29 | 6 |
 
 > Higher mean r_pb indicates better discrimination between strong and weak examinees. MCQ check tends to produce more continuous scores, inflating correlation.
 
