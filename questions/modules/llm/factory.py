@@ -16,12 +16,12 @@ class LLMConfig:
     # Model configurations
     MODELS = {
         'openai': [
-          "gpt-4.1-2025-04-14",
-          "gpt-5-2025-08-07",
           "gpt-5.2-2025-12-11",
-          "gpt-5.2-pro-2025-12-11",
-          "gpt-5-mini-2025-08-07",
-          "gpt-5-nano-2025-08-07",
+          "gpt-5.1-2025-11-13",
+          "gpt-5",
+          "gpt-5-mini",
+          "gpt-5-nano",
+          "gpt-5-chat-latest",
         ],
         'google': [
             'gemini-2.5-flash-lite',
@@ -84,7 +84,7 @@ class LLMConfig:
     # Per-provider experiment settings
     # Temperature=0 for deterministic providers, temperature=1+seed for stochastic
     PROVIDER_SETTINGS = {
-        'openai':             {'temperature': 1, 'seed': 42},
+        'openai':             {'temperature': 1, 'seed': 42},  # via Harvard gateway
         'google':             {'temperature': 1, 'seed': 42},
         'anthropic':          {'temperature': 0, 'seed': None},
         'harvard_anthropic':  {'temperature': 0, 'seed': None},
@@ -147,8 +147,8 @@ def create_llm_provider(provider_type: str, model_name: str, **kwargs) -> LLMPro
         config['timeout'] = kwargs.get('timeout', LLMConfig.TIMEOUT)
         if seed is not None:
             config['seed'] = seed
-        # Extend timeout for reasoning-heavy GPT-5 model
-        if model_name == "gpt-5-2025-08-07" and config['timeout'] < 120:
+        # Extend timeout for GPT-5 family models
+        if model_name.startswith('gpt-5') and config['timeout'] < 120:
             config['timeout'] = 120
         provider = OpenAIProvider(model_name, **config)
     elif provider_type == 'google':
@@ -231,7 +231,7 @@ def create_providers_from_config(models_to_test: Optional[List[str]] = None) -> 
     else:
         selected_models = []
         # Add all available models based on API keys
-        if os.getenv('OPENAI_API_KEY'):
+        if os.getenv('HARVARD_API_KEY'):
             selected_models.extend([f"openai/{m}" for m in LLMConfig.MODELS['openai']])
         if os.getenv('GOOGLE_API_KEY'):
             selected_models.extend([f"google/{m}" for m in LLMConfig.MODELS['google']])
