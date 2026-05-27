@@ -16,6 +16,7 @@ class LLMConfig:
     # Model configurations
     MODELS = {
         'openai': [
+          "gpt-5.5-2026-04-23",
           "gpt-5.2-2025-12-11",
           "gpt-5.1-2025-11-13",
           "gpt-5",
@@ -26,6 +27,7 @@ class LLMConfig:
         'google': [
             'gemini-2.5-flash-lite',
             'gemini-2.5-flash',
+            'gemini-3.5-flash',
             'gemini-2.5-pro',
             'gemini-2.5-flash-preview-09-2025',
             'gemini-3-pro-preview',
@@ -41,6 +43,7 @@ class LLMConfig:
         ],
         'harvard': [
             # V2 models (with us. prefix) - Anthropic Claude
+            'us.anthropic.claude-opus-4-7',
             'us.anthropic.claude-opus-4-5-20251101-v1:0',
             'us.anthropic.claude-haiku-4-5-20251001-v1:0',
             'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
