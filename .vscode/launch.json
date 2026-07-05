@@ -23,10 +23,11 @@
       "program": "${workspaceFolder}/questions/myzanichelli/2_question_preprocessor.py",
       "console": "integratedTerminal",
       "args": [
-        "--exercise", "1",
+        "-a",
+        //"--exercise", "1",
         //"--max-question", "1"
         //"--force-ocr",
-        //"--verbose"
+        "--verbose"
       ]
     },
     {
@@ -104,43 +105,53 @@
       "args": []
     },
     {
-      "name": "Dataset bundler",
+      "name": " [FINAL] - [1] Dataset bundler",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/dataset_bundler.py",
       "console": "integratedTerminal",
-      "args": []
+      "args": [
+        "--question-type", "completion_closed",
+        "--question-type", "completion_open",
+        "--question-type", "multiple_choice_check",
+        "--question-type", "multiple_choice_radio",
+        "--question-type", "positioning",
+        "--question-type", "true_false",
+        "--question-type", "select_errors",
+        "--categorization-model", "google/gemini-3-flash-preview"
+      ]
     },
     {
-      "name": "LLM Questioner",
+      "name": "[FINAL] - [2] LLM Questioner",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/llm_questioner.py",
       "console": "integratedTerminal",
       "args": [
-        "--start", "1",
-        "--end", "10",
+        "--end", "250",
 
         "--force",
+        // Google models
+        //"--models", "google/gemini-3-pro-preview",
+        "--models", "google/gemini-3.1-pro-preview"
 
         // OpenAI models
-        "--models", "openai/gpt-4.1-2025-04-14",
+        //"--models", "openai/gpt-4.1-2025-04-14",
         //"--models", "openai/gpt-5-2025-08-07",
-        "--models", "openai/gpt-5-mini-2025-08-07",
-        "--models", "openai/gpt-5-nano-2025-08-07",
+        //"--models", "openai/gpt-5-mini-2025-08-07",
+        //"--models", "openai/gpt-5-nano-2025-08-07",
         //"--models", "openai/gpt-5.2-2025-12-11",
         //"--models", "openai/gpt-5.2-pro-2025-12-11",
         
-        // Anthropics
+        // Anthropic models
         //"--models", "harvard/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         //"--models", "harvard/us.mistral.pixtral-large-2502-v1:0",
 
         //"--verbose",
-        //"--question-mode", "text"
       ]
     },
     {
-      "name": "website viewer",
+      "name": "[FINAL] - [3] website viewer",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/website/answer_viewer.py",

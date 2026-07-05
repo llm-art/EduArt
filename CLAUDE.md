@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Purpose
 
-This repo builds and evaluates an art-history question-answering benchmark. It contains 880 questions (677 Italian from MyZanichelli textbook exercises, 203 English from AP Art History exams) across 7 question types, plus a multi-provider LLM evaluation pipeline. See [methodology.md](methodology.md) for the authoritative description of dataset construction, prompting strategy, and evaluation metrics.
+This repo builds and evaluates an art-history question-answering benchmark. It contains 871 questions (668 Italian from MyZanichelli textbook exercises, 203 English from AP Art History exams) across 7 question types, plus a multi-provider LLM evaluation pipeline.
 
 ## Pipeline Architecture
 
@@ -17,14 +17,14 @@ The project is organized as a 4-stage pipeline. Each stage has a top-level entry
    Each screenshot is submitted to Gemini with prompts in [prompts/extract_*.txt](prompts/) to produce the canonical schema (`type`, `question_text`, `choices`, `answers`, `has_image`, `image`, `language`, `question_title`). Output: `questions/myzanichelli/structured/{exercise}/json/{question}.json`. AP Art History items are parsed from PDFs into the same schema.
 
 3. **Bundling → unified dataset** ([dataset_bundler.py](dataset_bundler.py))
-   Aggregates all structured records into [dataset/](dataset/): `data/{id}.txt` (model-ready prompt), `metadata/{id}.json` (full record + categorisation), `imgs/{id}.{ext}` (optimised image). IDs are zero-padded `0001`–`0880` in source order. Categorisation (3 axes — art-historical ontology, cultural/disciplinary context, epistemic level) is added by Gemini calls.
+   Aggregates all structured records into [dataset/](dataset/): `data/{id}.txt` (model-ready prompt), `metadata/{id}.json` (full record + categorisation), `imgs/{id}.{ext}` (optimised image). IDs are zero-padded `0001`–`0871` in source order. Categorisation (3 axes — art-historical ontology, cultural/disciplinary context, epistemic level) is added by Gemini calls.
 
 4. **Evaluation → per-model scores** ([llm_questioner.py](llm_questioner.py) → [answer_evaluator.py](answer_evaluator.py))
    `llm_questioner.py` queries one or more models on every question; `answer_evaluator.py` then scores the saved responses against ground truth and writes [answers/README.md](answers/README.md) and [answers/metadata.json](answers/metadata.json).
 
 ## Evaluation System Internals
 
-- **Provider abstraction**: [questions/modules/llm/](questions/modules/llm/) — `base.py` defines the interface; `factory.py` instantiates providers from `provider/model` strings. Backends: `anthropic`, `openai`, `google`, `harvard` (AWS Bedrock via Harvard HUIT gateway). Models to test come from the `MODELS_TO_TEST` env var (comma-separated).
+- **Provider abstraction**: [questions/modules/llm/](questions/modules/llm/) — `base.py` defines the interface; `factory.py` instantiates providers from `provider/model` strings. Backends: `anthropic`, `openai`, `google`, `harvard` (AWS Bedrock via an institutional gateway). Models to test come from the `MODELS_TO_TEST` env var (comma-separated).
 - **Two prompt conditions**: `default` (answer-only) and `motivation` (chain-of-thought). Results are stored in `answers/{model_name}/{condition}/`. The motivation condition is a paired counterfactual — both run on the same questions to enable paired comparison (see "Cross-Condition Comparison" in answers/README.md).
 - **System prompt**: [prompts/system_prompt.txt](prompts/system_prompt.txt) — frames the model as an art-history scholar, mandates strict JSON output (begins with `{`, no markdown). All queries use `temperature=0.0`.
 - **Per-type metrics** ([questions/modules/evaluators/level1_evaluators.py](questions/modules/evaluators/level1_evaluators.py)):
@@ -74,12 +74,12 @@ python eduart_figures.py
 
 - `.env` (template in [.env.example](.env.example)) drives both extraction and evaluation. Key vars:
   - `MODEL_TYPE` (`gemini`|`qwen`), `GEMINI_MODEL_NAME`, `GOOGLE_API_KEY` — extraction.
-  - `MODELS_TO_TEST`, `HARVARD_API_KEY`, `HARVARD_API_VERSION`, `HARVARD_OPENAI_TIER`, `ANTHROPIC_API_KEY` — evaluation. **OpenAI models are routed through the Harvard gateway**, not the OpenAI API directly — there is no separate `OPENAI_API_KEY`.
+  - `MODELS_TO_TEST`, `HARVARD_API_KEY`, `HARVARD_API_VERSION`, `HARVARD_OPENAI_TIER`, `ANTHROPIC_API_KEY` — evaluation. **OpenAI models are routed through this institutional gateway**, not the OpenAI API directly — there is no separate `OPENAI_API_KEY`.
 - Zanichelli scraping config: `questions/myzanichelli/config.json` (template adjacent).
 
 ## Conventions Worth Knowing
 
-- **Question IDs are immutable, zero-padded, 4 digits** (`0001`–`0880`) and assigned by `dataset_bundler.py` in source order. Downstream tools key off this ID.
+- **Question IDs are immutable, zero-padded, 4 digits** (`0001`–`0871`) and assigned by `dataset_bundler.py` in source order. Downstream tools key off this ID.
 - **Answer storage layout**: `answers/{provider}_{model_id_with_dots_intact}/{condition}/{qid}.json`. Provider prefix uses `_` not `/` (e.g., `google_gemini-3.1-pro-preview`, `harvard_us.anthropic.claude-opus-4-6-v1`).
 - **Ground-truth caveat**: Zanichelli answers come from a vision-LLM extraction and have a measured error rate. Validation protocol (stratified manual sample + cross-model re-extraction) is documented in §3 of [methodology.md](methodology.md). When debugging "wrong" model answers, check the original screenshot before assuming the model failed.
 - **`questions/modules/`** is shared by stages 2–4 — it's on `sys.path` via `sys.path.insert(0, .../questions)` in the entry-point scripts, and imported as `from modules.X import Y`. Don't move it.
