@@ -271,4 +271,4 @@ If you use EduArt in your research, please cite:
 
 **Code** is released under the MIT License.
 
-**Dataset**: The English subset is derived from publicly available AP Art History exams (College Board, 2013–2024). The Italian subset is extracted from MyZanichelli copyrighted materials and is made available for **non-commercial research use only**. To obtain the full dataset or for licensing questions, please contact the authors.
+**Dataset**: The English subset is derived from publicly available AP Art History exams (College Board, 2013–2024). The Italian subset is extracted from MyZanichelli copyrighted materials and is made available for **non-commercial research use only**.
